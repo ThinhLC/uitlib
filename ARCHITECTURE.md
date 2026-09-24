@@ -90,7 +90,7 @@ flowchart LR
 | US2 | `us2_policy_triggers`, `us2_policy_procedures`, `us2_card_procedures` |
 | US3 | `us3_loan_item_triggers`, `us3_fine_triggers`, `us3_checkout`, `us3_return_lost`, `us3_renew` |
 | US4 | `us4_money_triggers`, `us4_record_payment`, `us4_reports`, `us4_adjustments` |
-| Fix | `null_safe_check_fixes` |
+| Fixes | `null_safe_check_fixes`, `integrity_error_keys` |
 
 **drizzle-kit patch.** In drizzle-kit 1.0.0-rc.4 the MySQL diff ignores a *changed* CHECK
 expression (upstream issues #4602, #5730). `patches/drizzle-kit@1.0.0-rc.4.patch` makes
@@ -715,7 +715,9 @@ sequenceDiagram
             CP->>CP: sleep 50–200 ms random, retry
         else sqlState 45000
             CP-->>App: throw DbRuleError(key, detail)
-        else other error (1062, 3819, …) or last attempt
+        else errno 1062
+            CP-->>App: throw DbRuleError(DUPLICATE, unique index name)
+        else other error (3819, …) or last attempt
             CP-->>App: rethrow original error
         else success
             CP-->>App: rows and out
@@ -728,7 +730,7 @@ sequenceDiagram
 - `p_now DATETIME(3)` (UTC) drives every business time. Procedures never use `NOW()` to make a decision.
 - Global lock order: reader type → reader → card → book → copy → policy → loan → loan item → reservation → fine. Rows of one kind are locked in ascending id.
 - Retries cover only 1213 and 1205, with up to 3 attempts in total. Business rejections are never retried.
-- The message format `KEY: detail` becomes `DbRuleError.key` and `.detail`. Other errors (duplicate key 1062, CHECK violation 3819) pass through unchanged.
+- The message format `KEY: detail` becomes `DbRuleError.key` and `.detail`. A duplicate key (1062) becomes `DbRuleError` with key `DUPLICATE` and the unique index name as detail (e.g. `library_cards_active_reader_uq`). Other errors pass through unchanged.
 - The app account (`DB_USER`) has SELECT on everything and write access only to catalog and people tables. It has EXECUTE only on public `fn_*`/`sp_*` routines, not the internal `sp__*` helpers.
 
 ### 2. Register a copy and change copy status
@@ -755,7 +757,7 @@ sequenceDiagram
         SP-->>CP: NOT_FOUND → ROLLBACK
     else found
         SP->>DB: INSERT book_copies (status = in_repair if damaged, else available)
-        Note over DB: UNIQUE(barcode) gives 1062. [Ext] hook: sp__promote_queue
+        Note over DB: UNIQUE(barcode) gives 1062, reported as DUPLICATE. [Ext] hook: sp__promote_queue
         SP->>DB: COMMIT
         SP-->>CP: OUT p_copy_id
     end
@@ -767,9 +769,11 @@ sequenceDiagram
     SP->>DB: START TRANSACTION
     SP->>DB: plain read of copy.book_id (decides lock order)
     SP->>DB: SELECT books FOR UPDATE
-    SP->>DB: SELECT book_copies.status FOR UPDATE
+    SP->>DB: SELECT book_copies status, condition FOR UPDATE
     alt status is on_loan or on_hold
         SP-->>CP: INVALID_TRANSITION (use circulation procedures) → ROLLBACK
+    else target available while the new condition is still damaged
+        SP-->>CP: INVALID_TRANSITION (update the condition) → ROLLBACK
     else maintenance allowed
         SP->>DB: UPDATE book_copies SET condition, status (one statement)
         DB->>TRG: trg_book_copies_bu
@@ -788,7 +792,7 @@ sequenceDiagram
 
 - The trigger allows only these status changes: `available → on_loan | on_hold | in_repair | retired`, `on_loan → available | on_hold | in_repair | lost`, `on_hold → available | on_loan`, `in_repair → available | on_hold | retired` and `lost → available | on_hold | in_repair | retired`. `retired` is terminal.
 - `COPY_STATE` (I-1): a copy can become `on_loan` only when it has an open loan item, and can stop being `on_loan` only when it has none.
-- The CHECK `book_copies_damaged_not_lendable_ck` (I-7) blocks marking a still-damaged copy as available. A repair must set `condition` to `good` or `worn` in the same call.
+- A still-damaged copy cannot be made available: the procedure rejects it with `INVALID_TRANSITION`, and the CHECK `book_copies_damaged_not_lendable_ck` (I-7, errno 3819) backs this up for raw SQL. A repair must set `condition` to `good` or `worn` in the same call.
 - Error keys: `FORBIDDEN`, `VALIDATION`, `NOT_FOUND`, `INVALID_TRANSITION`, `COPY_STATE`.
 
 ### 3. Create and close a policy version
@@ -870,7 +874,8 @@ sequenceDiagram
         SP->>DB: INSERT library_cards (status active, issued_at = now)
         alt reader already has an active card, or number taken
             DB-->>SP: errno 1062 (UNIQUE active_reader_id / card_number)
-            SP-->>CP: ROLLBACK, RESIGNAL 1062 (not a DbRuleError)
+            SP-->>CP: ROLLBACK, RESIGNAL 1062
+            Note over CP: mapped to DbRuleError DUPLICATE (detail = index name)
         else ok
             SP->>DB: COMMIT
             SP-->>CP: OUT p_card_id
@@ -895,7 +900,7 @@ sequenceDiagram
 - A card is valid at an instant when `status='active'` and `expires_at` is later than that instant (FR-008). Checkout re-checks validity with `FOR SHARE`.
 - R-08a: `UNIQUE(card_number)`. R-08b: `CHECK(expires_at > issued_at)`. R-08c: at most one active card per reader, enforced by the generated-column unique index (tested in CT-8).
 - Allowed status changes are `active → expired | lost | revoked`, and all three targets are terminal.
-- Error keys: `FORBIDDEN`, `VALIDATION`, `NOT_FOUND`, `INVALID_TRANSITION`, and raw errno 1062 for duplicates.
+- Error keys: `FORBIDDEN`, `VALIDATION`, `NOT_FOUND`, `INVALID_TRANSITION`, and `DUPLICATE` (1062 mapped by `callProcedure`).
 
 ### 5. Checkout
 
@@ -1129,7 +1134,7 @@ sequenceDiagram
 
 ### 9. Record a payment
 
-`sp_record_payment` is the only way to write payments and allocations (FR-016a), because the app account has no INSERT on either table. Each call carries a request key. Repeating a key returns the existing payment and writes nothing. The payment must be allocated in full to the reader's own fines, and the procedure re-checks that the stored allocations add up to the amount before `COMMIT`.
+`sp_record_payment` is the only way to write payments and allocations (FR-016a), because the app account has no INSERT on either table. Each call carries a request key. Repeating a key with the same reader, amount and allocations returns the existing payment and writes nothing; the same key with a different payload is rejected with `IDEMPOTENCY_CONFLICT`. The payment must be allocated in full to the reader's own fines, and the procedure re-checks that the stored allocations add up to the amount before `COMMIT`.
 
 ```mermaid
 sequenceDiagram
@@ -1146,7 +1151,12 @@ sequenceDiagram
     CP->>SP: CALL (fine.collect, request_key required)
     SP->>DB: SELECT fine_payments WHERE request_key (plain read)
     alt key already used
-        SP-->>CP: OUT payment_id, replayed = TRUE (no writes)
+        SP->>SP: sp__check_replay (same reader, amount, allocations?)
+        alt payload differs
+            SP-->>CP: IDEMPOTENCY_CONFLICT
+        else same payload
+            SP-->>CP: OUT payment_id, replayed = TRUE (no writes)
+        end
     else new key
         Note over SP: amount above 0, method cash or bank_transfer, allocations non-empty, distinct fines, each above 0, else VALIDATION
         SP->>SP: tmp_allocations from JSON_TABLE
@@ -1170,7 +1180,8 @@ sequenceDiagram
         alt concurrent call with same key committed first
             DB-->>SP: errno 1062
             SP->>DB: ROLLBACK, re-read by key
-            SP-->>CP: OUT existing payment_id, replayed = TRUE
+            SP->>SP: sp__check_replay
+            SP-->>CP: OUT existing payment_id, replayed = TRUE, or IDEMPOTENCY_CONFLICT
         else inserted
             SP->>DB: INSERT fine_payment_allocations
             DB->>TRG: trg_fine_payment_allocations_bi
@@ -1189,7 +1200,7 @@ sequenceDiagram
 - Payment locks rows in this order: reader → the reader's fines (S, for the debt sum) → listed fines `FOR UPDATE OF f` in ascending id → their adjustment and allocation sums (S).
 - Rules: Σ allocations = amount (FR-016), each allocation is above 0, no allocation exceeds the fine's remaining balance, and the payment never exceeds the reader's outstanding debt. The app account can always keep these rules. Privileged accounts can bypass them, so `v_inv_payment_allocation` (I-6) checks afterwards.
 - Payments and allocations are append-only: the `trg_fine_payment*_bu/bd` triggers raise `APPEND_ONLY`.
-- Error keys: `FORBIDDEN`, `VALIDATION`, `NOT_FOUND`, `PAYMENT_EXCEEDS_DEBT`, `ALLOCATION_MISMATCH`, `APPEND_ONLY`.
+- Error keys: `FORBIDDEN`, `VALIDATION`, `NOT_FOUND`, `IDEMPOTENCY_CONFLICT`, `PAYMENT_EXCEEDS_DEBT`, `ALLOCATION_MISMATCH`, `APPEND_ONLY`.
 
 ### 10. Adjust a fine
 

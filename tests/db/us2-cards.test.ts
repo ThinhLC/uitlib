@@ -34,7 +34,8 @@ describe('US2 readers and cards (T038)', () => {
     const staff = await account(['librarian']);
     const r = await reader();
     const { out } = await issue(staff, r, 'C001');
-    await expectErrno(issue(staff, r, 'C002'), 1062);
+    const dup = await expectRule(issue(staff, r, 'C002'), 'DUPLICATE');
+    expect(dup.message).toContain('library_cards_active_reader_uq');
     await call('sp_set_card_status', [staff, NOW, (out as any).p_card_id, 'revoked']);
     await issue(staff, r, 'C003');
     const [n] = await ownerQuery(`SELECT COUNT(*) n FROM library_cards WHERE reader_id = ? AND status = 'active'`, [r]);
@@ -50,10 +51,11 @@ describe('US2 readers and cards (T038)', () => {
        VALUES (?, 'C009', ?, ?, 'active', ?)`, [r, NOW, NOW, NOW]), 3819);
   });
 
-  it('US2-9 R-08a: a duplicate card number is rejected (1062)', async () => {
+  it('US2-9 R-08a: a duplicate card number is rejected (DUPLICATE from 1062)', async () => {
     const staff = await account(['librarian']);
     await issue(staff, await reader(), 'C001');
-    await expectErrno(issue(staff, await reader(), 'C001'), 1062);
+    const dup = await expectRule(issue(staff, await reader(), 'C001'), 'DUPLICATE');
+    expect(dup.message).toContain('library_cards_number_uq');
   });
 
   it('FR-008: card status moves only from active; FORBIDDEN without card.manage', async () => {

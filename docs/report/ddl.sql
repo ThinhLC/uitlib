@@ -1231,6 +1231,7 @@ BEGIN
   DECLARE v_book BIGINT;
   DECLARE v_locked BIGINT;
   DECLARE v_status VARCHAR(16);
+  DECLARE v_condition VARCHAR(16);
   DECLARE v_msg VARCHAR(128);
   DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN ROLLBACK; RESIGNAL; END;
 
@@ -1253,10 +1254,14 @@ BEGIN
     SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'NOT_FOUND: copy';
   END IF;
   SELECT id INTO v_locked FROM books WHERE id = v_book FOR UPDATE;
-  SELECT circulation_status INTO v_status FROM book_copies WHERE id = p_copy_id FOR UPDATE;
+  SELECT circulation_status, physical_condition INTO v_status, v_condition FROM book_copies WHERE id = p_copy_id FOR UPDATE;
   IF v_status IN ('on_loan', 'on_hold') THEN
     SET v_msg = CONCAT('INVALID_TRANSITION: copy is ', v_status, '; use the circulation procedures');
     SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_msg;
+  END IF;
+  -- A damaged copy is never lendable (FR-006a): the condition must be updated in the same call.
+  IF p_target_status = 'available' AND COALESCE(p_condition, v_condition) = 'damaged' THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'INVALID_TRANSITION: a damaged copy cannot be made available; update its condition';
   END IF;
 
   -- One statement, so the CHECK and the lifecycle trigger see the final row.
@@ -1844,6 +1849,7 @@ BEGIN
     END IF;
     SET p_replayed = TRUE;
     DROP TEMPORARY TABLE IF EXISTS tmp_allocations;
+    CALL sp__check_replay(p_payment_id, p_reader_id, p_amount_vnd, p_allocations);
   END;
   DECLARE EXIT HANDLER FOR SQLEXCEPTION
   BEGIN
@@ -1860,9 +1866,11 @@ BEGIN
     SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'VALIDATION: request_key is required';
   END IF;
 
-  -- 1. Replay: the same request key returns the existing payment, with no writes (R-16e).
+  -- 1. Replay: the same request key and payload returns the existing payment, with no writes (R-16e);
+  --    the same key with a different payload is IDEMPOTENCY_CONFLICT.
   SELECT id INTO v_existing FROM fine_payments WHERE request_key = p_request_key;
   IF v_existing IS NOT NULL THEN
+    CALL sp__check_replay(v_existing, p_reader_id, p_amount_vnd, p_allocations);
     SET p_payment_id = v_existing, p_replayed = TRUE;
   ELSE
     IF p_amount_vnd IS NULL OR p_amount_vnd <= 0 THEN
@@ -2366,6 +2374,50 @@ BEGIN
     END IF;
     INSERT INTO fines (loan_item_id, fine_type, default_amount_vnd, assessed_amount_vnd, reason, assessed_at, assessed_by_user_id)
     VALUES (p_loan_item_id, 'lost', COALESCE(v_cost, 0), v_lost, IF(v_blank, NULL, p_reason), p_now, p_actor_user_id);
+  END IF;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp__check_replay` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'IGNORE_SPACE,ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` PROCEDURE `sp__check_replay`(
+  IN p_payment_id BIGINT,
+  IN p_reader_id BIGINT,
+  IN p_amount_vnd BIGINT,
+  IN p_allocations JSON)
+    COMMENT 'Internal: a replayed request key must carry the same reader, amount and allocations'
+BEGIN
+  DECLARE v_reader BIGINT;
+  DECLARE v_amount BIGINT;
+  DECLARE v_stored INT DEFAULT 0;
+  DECLARE v_matched INT DEFAULT 0;
+  DECLARE v_distinct INT DEFAULT 0;
+
+  SELECT reader_id, amount_vnd INTO v_reader, v_amount FROM fine_payments WHERE id = p_payment_id;
+  IF NOT (v_reader <=> p_reader_id) OR NOT (v_amount <=> p_amount_vnd)
+     OR p_allocations IS NULL OR JSON_TYPE(p_allocations) <> 'ARRAY' THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'IDEMPOTENCY_CONFLICT: request key already used for a different payment';
+  END IF;
+  SELECT COUNT(*) INTO v_stored FROM fine_payment_allocations WHERE payment_id = p_payment_id;
+  SELECT COUNT(*), COUNT(DISTINCT j.fine_id) INTO v_matched, v_distinct
+    FROM JSON_TABLE(p_allocations, '$[*]' COLUMNS (
+           fine_id BIGINT PATH '$.fine_id' NULL ON EMPTY,
+           amount_vnd BIGINT PATH '$.amount_vnd' NULL ON EMPTY)) AS j
+    JOIN fine_payment_allocations a
+      ON a.payment_id = p_payment_id AND a.fine_id = j.fine_id AND a.amount_vnd = j.amount_vnd;
+  IF v_matched <> v_stored OR v_distinct <> v_stored OR JSON_LENGTH(p_allocations) <> v_stored THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'IDEMPOTENCY_CONFLICT: request key already used for a different payment';
   END IF;
 END ;;
 DELIMITER ;

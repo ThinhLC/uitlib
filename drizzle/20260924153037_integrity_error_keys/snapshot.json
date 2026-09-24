@@ -1,0 +1,4310 @@
+{
+  "id": "197c18a2-6eed-4667-9edf-4851cf61a26c",
+  "prevIds": [
+    "e5551982-273f-474d-b81f-1f9c7d42b049"
+  ],
+  "version": "6",
+  "dialect": "mysql",
+  "ddl": [
+    {
+      "name": "authors",
+      "entityType": "tables"
+    },
+    {
+      "name": "book_authors",
+      "entityType": "tables"
+    },
+    {
+      "name": "book_categories",
+      "entityType": "tables"
+    },
+    {
+      "name": "book_copies",
+      "entityType": "tables"
+    },
+    {
+      "name": "book_external_refs",
+      "entityType": "tables"
+    },
+    {
+      "name": "book_identifiers",
+      "entityType": "tables"
+    },
+    {
+      "name": "books",
+      "entityType": "tables"
+    },
+    {
+      "name": "categories",
+      "entityType": "tables"
+    },
+    {
+      "name": "material_types",
+      "entityType": "tables"
+    },
+    {
+      "name": "publishers",
+      "entityType": "tables"
+    },
+    {
+      "name": "loan_items",
+      "entityType": "tables"
+    },
+    {
+      "name": "loan_renewals",
+      "entityType": "tables"
+    },
+    {
+      "name": "loans",
+      "entityType": "tables"
+    },
+    {
+      "name": "reservations",
+      "entityType": "tables"
+    },
+    {
+      "name": "fine_adjustments",
+      "entityType": "tables"
+    },
+    {
+      "name": "fine_payment_allocations",
+      "entityType": "tables"
+    },
+    {
+      "name": "fine_payments",
+      "entityType": "tables"
+    },
+    {
+      "name": "fines",
+      "entityType": "tables"
+    },
+    {
+      "name": "app_users",
+      "entityType": "tables"
+    },
+    {
+      "name": "library_cards",
+      "entityType": "tables"
+    },
+    {
+      "name": "permissions",
+      "entityType": "tables"
+    },
+    {
+      "name": "reader_types",
+      "entityType": "tables"
+    },
+    {
+      "name": "readers",
+      "entityType": "tables"
+    },
+    {
+      "name": "role_permissions",
+      "entityType": "tables"
+    },
+    {
+      "name": "roles",
+      "entityType": "tables"
+    },
+    {
+      "name": "user_roles",
+      "entityType": "tables"
+    },
+    {
+      "name": "loan_policies",
+      "entityType": "tables"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "authors"
+    },
+    {
+      "type": "varchar(255)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "name",
+      "entityType": "columns",
+      "table": "authors"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "book_id",
+      "entityType": "columns",
+      "table": "book_authors"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "author_id",
+      "entityType": "columns",
+      "table": "book_authors"
+    },
+    {
+      "type": "tinyint unsigned",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "author_order",
+      "entityType": "columns",
+      "table": "book_authors"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "book_id",
+      "entityType": "columns",
+      "table": "book_categories"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "category_id",
+      "entityType": "columns",
+      "table": "book_categories"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "book_copies"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "book_id",
+      "entityType": "columns",
+      "table": "book_copies"
+    },
+    {
+      "type": "varchar(32)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "barcode",
+      "entityType": "columns",
+      "table": "book_copies"
+    },
+    {
+      "type": "varchar(50)",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "shelf_code",
+      "entityType": "columns",
+      "table": "book_copies"
+    },
+    {
+      "type": "date",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "acquired_at",
+      "entityType": "columns",
+      "table": "book_copies"
+    },
+    {
+      "type": "enum('good','worn','damaged')",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "physical_condition",
+      "entityType": "columns",
+      "table": "book_copies"
+    },
+    {
+      "type": "enum('available','on_loan','on_hold','in_repair','lost','retired')",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "circulation_status",
+      "entityType": "columns",
+      "table": "book_copies"
+    },
+    {
+      "type": "datetime(3)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "book_copies"
+    },
+    {
+      "type": "datetime(3)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "table": "book_copies"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "book_external_refs"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "book_id",
+      "entityType": "columns",
+      "table": "book_external_refs"
+    },
+    {
+      "type": "enum('GOOGLE_BOOKS')",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "provider",
+      "entityType": "columns",
+      "table": "book_external_refs"
+    },
+    {
+      "type": "varchar(64)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "external_id",
+      "entityType": "columns",
+      "table": "book_external_refs"
+    },
+    {
+      "type": "varchar(1000)",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "source_url",
+      "entityType": "columns",
+      "table": "book_external_refs"
+    },
+    {
+      "type": "enum('PARTIAL','ALL_PAGES','NO_PAGES','UNKNOWN')",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "viewability",
+      "entityType": "columns",
+      "table": "book_external_refs"
+    },
+    {
+      "type": "boolean",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "embeddable",
+      "entityType": "columns",
+      "table": "book_external_refs"
+    },
+    {
+      "type": "varchar(1000)",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "web_reader_link",
+      "entityType": "columns",
+      "table": "book_external_refs"
+    },
+    {
+      "type": "char(2)",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "access_country",
+      "entityType": "columns",
+      "table": "book_external_refs"
+    },
+    {
+      "type": "json",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "raw_snapshot",
+      "entityType": "columns",
+      "table": "book_external_refs"
+    },
+    {
+      "type": "datetime(3)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "fetched_at",
+      "entityType": "columns",
+      "table": "book_external_refs"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "book_identifiers"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "book_id",
+      "entityType": "columns",
+      "table": "book_identifiers"
+    },
+    {
+      "type": "enum('ISBN_10','ISBN_13','OTHER')",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "identifier_type",
+      "entityType": "columns",
+      "table": "book_identifiers"
+    },
+    {
+      "type": "varchar(64)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "identifier_value",
+      "entityType": "columns",
+      "table": "book_identifiers"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "books"
+    },
+    {
+      "type": "varchar(500)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "title",
+      "entityType": "columns",
+      "table": "books"
+    },
+    {
+      "type": "varchar(500)",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "subtitle",
+      "entityType": "columns",
+      "table": "books"
+    },
+    {
+      "type": "bigint",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "publisher_id",
+      "entityType": "columns",
+      "table": "books"
+    },
+    {
+      "type": "varchar(10)",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "published_date_text",
+      "entityType": "columns",
+      "table": "books"
+    },
+    {
+      "type": "smallint",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "published_year",
+      "entityType": "columns",
+      "table": "books"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "description",
+      "entityType": "columns",
+      "table": "books"
+    },
+    {
+      "type": "varchar(8)",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "language_code",
+      "entityType": "columns",
+      "table": "books"
+    },
+    {
+      "type": "varchar(1000)",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "cover_url",
+      "entityType": "columns",
+      "table": "books"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "material_type_id",
+      "entityType": "columns",
+      "table": "books"
+    },
+    {
+      "type": "varchar(50)",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "classification_code",
+      "entityType": "columns",
+      "table": "books"
+    },
+    {
+      "type": "bigint",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "replacement_cost_vnd",
+      "entityType": "columns",
+      "table": "books"
+    },
+    {
+      "type": "enum('active','retired')",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": "'active'",
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "status",
+      "entityType": "columns",
+      "table": "books"
+    },
+    {
+      "type": "datetime(3)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "books"
+    },
+    {
+      "type": "datetime(3)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "table": "books"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "categories"
+    },
+    {
+      "type": "varchar(150)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "name",
+      "entityType": "columns",
+      "table": "categories"
+    },
+    {
+      "type": "bigint",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "parent_id",
+      "entityType": "columns",
+      "table": "categories"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "material_types"
+    },
+    {
+      "type": "varchar(32)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "code",
+      "entityType": "columns",
+      "table": "material_types"
+    },
+    {
+      "type": "varchar(100)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "name",
+      "entityType": "columns",
+      "table": "material_types"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "publishers"
+    },
+    {
+      "type": "varchar(255)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "name",
+      "entityType": "columns",
+      "table": "publishers"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "loan_items"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "loan_id",
+      "entityType": "columns",
+      "table": "loan_items"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "copy_id",
+      "entityType": "columns",
+      "table": "loan_items"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "policy_id",
+      "entityType": "columns",
+      "table": "loan_items"
+    },
+    {
+      "type": "datetime(3)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "borrowed_at",
+      "entityType": "columns",
+      "table": "loan_items"
+    },
+    {
+      "type": "datetime(3)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "due_at",
+      "entityType": "columns",
+      "table": "loan_items"
+    },
+    {
+      "type": "datetime(3)",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "returned_at",
+      "entityType": "columns",
+      "table": "loan_items"
+    },
+    {
+      "type": "enum('good','worn','damaged')",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "return_condition",
+      "entityType": "columns",
+      "table": "loan_items"
+    },
+    {
+      "type": "datetime(3)",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "lost_declared_at",
+      "entityType": "columns",
+      "table": "loan_items"
+    },
+    {
+      "type": "enum('on_loan','returned','lost')",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "status",
+      "entityType": "columns",
+      "table": "loan_items"
+    },
+    {
+      "type": "smallint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": "0",
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "renewal_count",
+      "entityType": "columns",
+      "table": "loan_items"
+    },
+    {
+      "type": "smallint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "applied_loan_days",
+      "entityType": "columns",
+      "table": "loan_items"
+    },
+    {
+      "type": "smallint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "applied_max_renewals",
+      "entityType": "columns",
+      "table": "loan_items"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "applied_daily_fee_vnd",
+      "entityType": "columns",
+      "table": "loan_items"
+    },
+    {
+      "type": "bigint",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": {
+        "as": "IF(status = 'on_loan', copy_id, NULL)",
+        "type": "stored"
+      },
+      "name": "open_copy_id",
+      "entityType": "columns",
+      "table": "loan_items"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "loan_renewals"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "loan_item_id",
+      "entityType": "columns",
+      "table": "loan_renewals"
+    },
+    {
+      "type": "datetime(3)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "old_due_at",
+      "entityType": "columns",
+      "table": "loan_renewals"
+    },
+    {
+      "type": "datetime(3)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "new_due_at",
+      "entityType": "columns",
+      "table": "loan_renewals"
+    },
+    {
+      "type": "datetime(3)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "renewed_at",
+      "entityType": "columns",
+      "table": "loan_renewals"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "performed_by_user_id",
+      "entityType": "columns",
+      "table": "loan_renewals"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "loans"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "reader_id",
+      "entityType": "columns",
+      "table": "loans"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "processed_by_user_id",
+      "entityType": "columns",
+      "table": "loans"
+    },
+    {
+      "type": "datetime(3)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "borrowed_at",
+      "entityType": "columns",
+      "table": "loans"
+    },
+    {
+      "type": "enum('open','closed')",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "status",
+      "entityType": "columns",
+      "table": "loans"
+    },
+    {
+      "type": "datetime(3)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "loans"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "reservations"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "reader_id",
+      "entityType": "columns",
+      "table": "reservations"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "book_id",
+      "entityType": "columns",
+      "table": "reservations"
+    },
+    {
+      "type": "datetime(3)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "requested_at",
+      "entityType": "columns",
+      "table": "reservations"
+    },
+    {
+      "type": "enum('waiting','ready','fulfilled','cancelled','expired')",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "status",
+      "entityType": "columns",
+      "table": "reservations"
+    },
+    {
+      "type": "bigint",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "assigned_copy_id",
+      "entityType": "columns",
+      "table": "reservations"
+    },
+    {
+      "type": "datetime(3)",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "ready_at",
+      "entityType": "columns",
+      "table": "reservations"
+    },
+    {
+      "type": "datetime(3)",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "hold_expires_at",
+      "entityType": "columns",
+      "table": "reservations"
+    },
+    {
+      "type": "bigint",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "fulfilled_loan_item_id",
+      "entityType": "columns",
+      "table": "reservations"
+    },
+    {
+      "type": "datetime(3)",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "closed_at",
+      "entityType": "columns",
+      "table": "reservations"
+    },
+    {
+      "type": "varchar(64)",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "close_reason",
+      "entityType": "columns",
+      "table": "reservations"
+    },
+    {
+      "type": "enum('staff','reader','system')",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "closed_by_kind",
+      "entityType": "columns",
+      "table": "reservations"
+    },
+    {
+      "type": "bigint",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "closed_by_user_id",
+      "entityType": "columns",
+      "table": "reservations"
+    },
+    {
+      "type": "tinyint",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": {
+        "as": "IF(status IN ('waiting', 'ready'), 1, NULL)",
+        "type": "stored"
+      },
+      "name": "active_flag",
+      "entityType": "columns",
+      "table": "reservations"
+    },
+    {
+      "type": "bigint",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": {
+        "as": "IF(status = 'ready', assigned_copy_id, NULL)",
+        "type": "stored"
+      },
+      "name": "ready_copy_id",
+      "entityType": "columns",
+      "table": "reservations"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "fine_adjustments"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "fine_id",
+      "entityType": "columns",
+      "table": "fine_adjustments"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "amount_vnd",
+      "entityType": "columns",
+      "table": "fine_adjustments"
+    },
+    {
+      "type": "varchar(500)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "reason",
+      "entityType": "columns",
+      "table": "fine_adjustments"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "adjusted_by_user_id",
+      "entityType": "columns",
+      "table": "fine_adjustments"
+    },
+    {
+      "type": "datetime(3)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "adjusted_at",
+      "entityType": "columns",
+      "table": "fine_adjustments"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "payment_id",
+      "entityType": "columns",
+      "table": "fine_payment_allocations"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "fine_id",
+      "entityType": "columns",
+      "table": "fine_payment_allocations"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "amount_vnd",
+      "entityType": "columns",
+      "table": "fine_payment_allocations"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "fine_payments"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "reader_id",
+      "entityType": "columns",
+      "table": "fine_payments"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "received_by_user_id",
+      "entityType": "columns",
+      "table": "fine_payments"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "amount_vnd",
+      "entityType": "columns",
+      "table": "fine_payments"
+    },
+    {
+      "type": "datetime(3)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "paid_at",
+      "entityType": "columns",
+      "table": "fine_payments"
+    },
+    {
+      "type": "enum('cash','bank_transfer')",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "method",
+      "entityType": "columns",
+      "table": "fine_payments"
+    },
+    {
+      "type": "varchar(64)",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "reference_no",
+      "entityType": "columns",
+      "table": "fine_payments"
+    },
+    {
+      "type": "varchar(64)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "request_key",
+      "entityType": "columns",
+      "table": "fine_payments"
+    },
+    {
+      "type": "datetime(3)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "fine_payments"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "fines"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "loan_item_id",
+      "entityType": "columns",
+      "table": "fines"
+    },
+    {
+      "type": "enum('late','damaged','lost')",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "fine_type",
+      "entityType": "columns",
+      "table": "fines"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "default_amount_vnd",
+      "entityType": "columns",
+      "table": "fines"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "assessed_amount_vnd",
+      "entityType": "columns",
+      "table": "fines"
+    },
+    {
+      "type": "varchar(500)",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "reason",
+      "entityType": "columns",
+      "table": "fines"
+    },
+    {
+      "type": "datetime(3)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "assessed_at",
+      "entityType": "columns",
+      "table": "fines"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "assessed_by_user_id",
+      "entityType": "columns",
+      "table": "fines"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "app_users"
+    },
+    {
+      "type": "char(36)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "supabase_user_id",
+      "entityType": "columns",
+      "table": "app_users"
+    },
+    {
+      "type": "enum('active','inactive')",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": "'active'",
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "status",
+      "entityType": "columns",
+      "table": "app_users"
+    },
+    {
+      "type": "datetime(3)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "app_users"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "library_cards"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "reader_id",
+      "entityType": "columns",
+      "table": "library_cards"
+    },
+    {
+      "type": "varchar(32)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "card_number",
+      "entityType": "columns",
+      "table": "library_cards"
+    },
+    {
+      "type": "datetime(3)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "issued_at",
+      "entityType": "columns",
+      "table": "library_cards"
+    },
+    {
+      "type": "datetime(3)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "expires_at",
+      "entityType": "columns",
+      "table": "library_cards"
+    },
+    {
+      "type": "enum('active','expired','lost','revoked')",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "status",
+      "entityType": "columns",
+      "table": "library_cards"
+    },
+    {
+      "type": "datetime(3)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "library_cards"
+    },
+    {
+      "type": "bigint",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": {
+        "as": "IF(status = 'active', reader_id, NULL)",
+        "type": "stored"
+      },
+      "name": "active_reader_id",
+      "entityType": "columns",
+      "table": "library_cards"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "permissions"
+    },
+    {
+      "type": "varchar(64)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "code",
+      "entityType": "columns",
+      "table": "permissions"
+    },
+    {
+      "type": "varchar(255)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "description",
+      "entityType": "columns",
+      "table": "permissions"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "reader_types"
+    },
+    {
+      "type": "varchar(32)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "code",
+      "entityType": "columns",
+      "table": "reader_types"
+    },
+    {
+      "type": "varchar(100)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "name",
+      "entityType": "columns",
+      "table": "reader_types"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "readers"
+    },
+    {
+      "type": "bigint",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "user_id",
+      "entityType": "columns",
+      "table": "readers"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "reader_type_id",
+      "entityType": "columns",
+      "table": "readers"
+    },
+    {
+      "type": "varchar(200)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "full_name",
+      "entityType": "columns",
+      "table": "readers"
+    },
+    {
+      "type": "varchar(320)",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "email",
+      "entityType": "columns",
+      "table": "readers"
+    },
+    {
+      "type": "varchar(20)",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "phone",
+      "entityType": "columns",
+      "table": "readers"
+    },
+    {
+      "type": "enum('active','suspended','inactive')",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": "'active'",
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "status",
+      "entityType": "columns",
+      "table": "readers"
+    },
+    {
+      "type": "datetime(3)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "readers"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "role_id",
+      "entityType": "columns",
+      "table": "role_permissions"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "permission_id",
+      "entityType": "columns",
+      "table": "role_permissions"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "roles"
+    },
+    {
+      "type": "varchar(64)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "code",
+      "entityType": "columns",
+      "table": "roles"
+    },
+    {
+      "type": "varchar(100)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "name",
+      "entityType": "columns",
+      "table": "roles"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "user_id",
+      "entityType": "columns",
+      "table": "user_roles"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "role_id",
+      "entityType": "columns",
+      "table": "user_roles"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": true,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "loan_policies"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "reader_type_id",
+      "entityType": "columns",
+      "table": "loan_policies"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "material_type_id",
+      "entityType": "columns",
+      "table": "loan_policies"
+    },
+    {
+      "type": "smallint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "max_active_items",
+      "entityType": "columns",
+      "table": "loan_policies"
+    },
+    {
+      "type": "smallint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "loan_days",
+      "entityType": "columns",
+      "table": "loan_policies"
+    },
+    {
+      "type": "smallint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "max_renewals",
+      "entityType": "columns",
+      "table": "loan_policies"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "daily_late_fee_vnd",
+      "entityType": "columns",
+      "table": "loan_policies"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "debt_block_threshold_vnd",
+      "entityType": "columns",
+      "table": "loan_policies"
+    },
+    {
+      "type": "datetime(3)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "valid_from",
+      "entityType": "columns",
+      "table": "loan_policies"
+    },
+    {
+      "type": "datetime(3)",
+      "notNull": false,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "valid_to",
+      "entityType": "columns",
+      "table": "loan_policies"
+    },
+    {
+      "type": "bigint",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "created_by_user_id",
+      "entityType": "columns",
+      "table": "loan_policies"
+    },
+    {
+      "type": "datetime(3)",
+      "notNull": true,
+      "autoIncrement": false,
+      "default": null,
+      "onUpdateNow": false,
+      "onUpdateNowFsp": null,
+      "charSet": null,
+      "collation": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "loan_policies"
+    },
+    {
+      "columns": [
+        "book_id",
+        "author_id"
+      ],
+      "name": "PRIMARY",
+      "table": "book_authors",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "book_id",
+        "category_id"
+      ],
+      "name": "PRIMARY",
+      "table": "book_categories",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "payment_id",
+        "fine_id"
+      ],
+      "name": "PRIMARY",
+      "table": "fine_payment_allocations",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "role_id",
+        "permission_id"
+      ],
+      "name": "PRIMARY",
+      "table": "role_permissions",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "user_id",
+        "role_id"
+      ],
+      "name": "PRIMARY",
+      "table": "user_roles",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "name": "PRIMARY",
+      "table": "authors",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "name": "PRIMARY",
+      "table": "book_copies",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "name": "PRIMARY",
+      "table": "book_external_refs",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "name": "PRIMARY",
+      "table": "book_identifiers",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "name": "PRIMARY",
+      "table": "books",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "name": "PRIMARY",
+      "table": "categories",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "name": "PRIMARY",
+      "table": "material_types",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "name": "PRIMARY",
+      "table": "publishers",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "name": "PRIMARY",
+      "table": "loan_items",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "name": "PRIMARY",
+      "table": "loan_renewals",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "name": "PRIMARY",
+      "table": "loans",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "name": "PRIMARY",
+      "table": "reservations",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "name": "PRIMARY",
+      "table": "fine_adjustments",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "name": "PRIMARY",
+      "table": "fine_payments",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "name": "PRIMARY",
+      "table": "fines",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "name": "PRIMARY",
+      "table": "app_users",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "name": "PRIMARY",
+      "table": "library_cards",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "name": "PRIMARY",
+      "table": "permissions",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "name": "PRIMARY",
+      "table": "reader_types",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "name": "PRIMARY",
+      "table": "readers",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "name": "PRIMARY",
+      "table": "roles",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "name": "PRIMARY",
+      "table": "loan_policies",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        {
+          "value": "name",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "authors_name_ix",
+      "entityType": "indexes",
+      "table": "authors"
+    },
+    {
+      "columns": [
+        {
+          "value": "book_id",
+          "isExpression": false
+        },
+        {
+          "value": "author_order",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "book_authors_order_uq",
+      "entityType": "indexes",
+      "table": "book_authors"
+    },
+    {
+      "columns": [
+        {
+          "value": "author_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "book_authors_author_ix",
+      "entityType": "indexes",
+      "table": "book_authors"
+    },
+    {
+      "columns": [
+        {
+          "value": "category_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "book_categories_category_ix",
+      "entityType": "indexes",
+      "table": "book_categories"
+    },
+    {
+      "columns": [
+        {
+          "value": "barcode",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "book_copies_barcode_uq",
+      "entityType": "indexes",
+      "table": "book_copies"
+    },
+    {
+      "columns": [
+        {
+          "value": "id",
+          "isExpression": false
+        },
+        {
+          "value": "book_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "book_copies_id_book_uq",
+      "entityType": "indexes",
+      "table": "book_copies"
+    },
+    {
+      "columns": [
+        {
+          "value": "book_id",
+          "isExpression": false
+        },
+        {
+          "value": "circulation_status",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "book_copies_book_status_ix",
+      "entityType": "indexes",
+      "table": "book_copies"
+    },
+    {
+      "columns": [
+        {
+          "value": "provider",
+          "isExpression": false
+        },
+        {
+          "value": "external_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "book_external_refs_provider_uq",
+      "entityType": "indexes",
+      "table": "book_external_refs"
+    },
+    {
+      "columns": [
+        {
+          "value": "book_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "book_external_refs_book_ix",
+      "entityType": "indexes",
+      "table": "book_external_refs"
+    },
+    {
+      "columns": [
+        {
+          "value": "book_id",
+          "isExpression": false
+        },
+        {
+          "value": "identifier_type",
+          "isExpression": false
+        },
+        {
+          "value": "identifier_value",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "book_identifiers_uq",
+      "entityType": "indexes",
+      "table": "book_identifiers"
+    },
+    {
+      "columns": [
+        {
+          "value": "identifier_type",
+          "isExpression": false
+        },
+        {
+          "value": "identifier_value",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "book_identifiers_value_ix",
+      "entityType": "indexes",
+      "table": "book_identifiers"
+    },
+    {
+      "columns": [
+        {
+          "value": "title",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "books_title_ix",
+      "entityType": "indexes",
+      "table": "books"
+    },
+    {
+      "columns": [
+        {
+          "value": "published_year",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "books_published_year_ix",
+      "entityType": "indexes",
+      "table": "books"
+    },
+    {
+      "columns": [
+        {
+          "value": "parent_id",
+          "isExpression": false
+        },
+        {
+          "value": "name",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "categories_parent_name_uq",
+      "entityType": "indexes",
+      "table": "categories"
+    },
+    {
+      "columns": [
+        {
+          "value": "code",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "material_types_code_uq",
+      "entityType": "indexes",
+      "table": "material_types"
+    },
+    {
+      "columns": [
+        {
+          "value": "name",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "publishers_name_ix",
+      "entityType": "indexes",
+      "table": "publishers"
+    },
+    {
+      "columns": [
+        {
+          "value": "open_copy_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "loan_items_open_copy_uq",
+      "entityType": "indexes",
+      "table": "loan_items"
+    },
+    {
+      "columns": [
+        {
+          "value": "copy_id",
+          "isExpression": false
+        },
+        {
+          "value": "status",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "loan_items_copy_status_ix",
+      "entityType": "indexes",
+      "table": "loan_items"
+    },
+    {
+      "columns": [
+        {
+          "value": "status",
+          "isExpression": false
+        },
+        {
+          "value": "due_at",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "loan_items_status_due_ix",
+      "entityType": "indexes",
+      "table": "loan_items"
+    },
+    {
+      "columns": [
+        {
+          "value": "loan_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "loan_items_loan_ix",
+      "entityType": "indexes",
+      "table": "loan_items"
+    },
+    {
+      "columns": [
+        {
+          "value": "policy_id",
+          "isExpression": false
+        },
+        {
+          "value": "borrowed_at",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "loan_items_policy_borrowed_ix",
+      "entityType": "indexes",
+      "table": "loan_items"
+    },
+    {
+      "columns": [
+        {
+          "value": "loan_item_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "loan_renewals_item_ix",
+      "entityType": "indexes",
+      "table": "loan_renewals"
+    },
+    {
+      "columns": [
+        {
+          "value": "reader_id",
+          "isExpression": false
+        },
+        {
+          "value": "status",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "loans_reader_status_ix",
+      "entityType": "indexes",
+      "table": "loans"
+    },
+    {
+      "columns": [
+        {
+          "value": "reader_id",
+          "isExpression": false
+        },
+        {
+          "value": "borrowed_at",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "loans_reader_borrowed_ix",
+      "entityType": "indexes",
+      "table": "loans"
+    },
+    {
+      "columns": [
+        {
+          "value": "reader_id",
+          "isExpression": false
+        },
+        {
+          "value": "book_id",
+          "isExpression": false
+        },
+        {
+          "value": "active_flag",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "reservations_active_uq",
+      "entityType": "indexes",
+      "table": "reservations"
+    },
+    {
+      "columns": [
+        {
+          "value": "ready_copy_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "reservations_ready_copy_uq",
+      "entityType": "indexes",
+      "table": "reservations"
+    },
+    {
+      "columns": [
+        {
+          "value": "fulfilled_loan_item_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "reservations_fulfilled_item_uq",
+      "entityType": "indexes",
+      "table": "reservations"
+    },
+    {
+      "columns": [
+        {
+          "value": "book_id",
+          "isExpression": false
+        },
+        {
+          "value": "status",
+          "isExpression": false
+        },
+        {
+          "value": "requested_at",
+          "isExpression": false
+        },
+        {
+          "value": "id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "reservations_queue_ix",
+      "entityType": "indexes",
+      "table": "reservations"
+    },
+    {
+      "columns": [
+        {
+          "value": "fine_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "fine_adjustments_fine_ix",
+      "entityType": "indexes",
+      "table": "fine_adjustments"
+    },
+    {
+      "columns": [
+        {
+          "value": "adjusted_at",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "fine_adjustments_adjusted_at_ix",
+      "entityType": "indexes",
+      "table": "fine_adjustments"
+    },
+    {
+      "columns": [
+        {
+          "value": "fine_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "fine_payment_allocations_fine_ix",
+      "entityType": "indexes",
+      "table": "fine_payment_allocations"
+    },
+    {
+      "columns": [
+        {
+          "value": "request_key",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "fine_payments_request_key_uq",
+      "entityType": "indexes",
+      "table": "fine_payments"
+    },
+    {
+      "columns": [
+        {
+          "value": "reader_id",
+          "isExpression": false
+        },
+        {
+          "value": "paid_at",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "fine_payments_reader_paid_ix",
+      "entityType": "indexes",
+      "table": "fine_payments"
+    },
+    {
+      "columns": [
+        {
+          "value": "paid_at",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "fine_payments_paid_ix",
+      "entityType": "indexes",
+      "table": "fine_payments"
+    },
+    {
+      "columns": [
+        {
+          "value": "loan_item_id",
+          "isExpression": false
+        },
+        {
+          "value": "fine_type",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "fines_item_type_uq",
+      "entityType": "indexes",
+      "table": "fines"
+    },
+    {
+      "columns": [
+        {
+          "value": "assessed_at",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "fines_assessed_at_ix",
+      "entityType": "indexes",
+      "table": "fines"
+    },
+    {
+      "columns": [
+        {
+          "value": "supabase_user_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "app_users_supabase_uq",
+      "entityType": "indexes",
+      "table": "app_users"
+    },
+    {
+      "columns": [
+        {
+          "value": "card_number",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "library_cards_number_uq",
+      "entityType": "indexes",
+      "table": "library_cards"
+    },
+    {
+      "columns": [
+        {
+          "value": "active_reader_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "library_cards_active_reader_uq",
+      "entityType": "indexes",
+      "table": "library_cards"
+    },
+    {
+      "columns": [
+        {
+          "value": "reader_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "library_cards_reader_ix",
+      "entityType": "indexes",
+      "table": "library_cards"
+    },
+    {
+      "columns": [
+        {
+          "value": "code",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "permissions_code_uq",
+      "entityType": "indexes",
+      "table": "permissions"
+    },
+    {
+      "columns": [
+        {
+          "value": "code",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "reader_types_code_uq",
+      "entityType": "indexes",
+      "table": "reader_types"
+    },
+    {
+      "columns": [
+        {
+          "value": "user_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "readers_user_uq",
+      "entityType": "indexes",
+      "table": "readers"
+    },
+    {
+      "columns": [
+        {
+          "value": "reader_type_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "readers_type_ix",
+      "entityType": "indexes",
+      "table": "readers"
+    },
+    {
+      "columns": [
+        {
+          "value": "permission_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "role_permissions_permission_ix",
+      "entityType": "indexes",
+      "table": "role_permissions"
+    },
+    {
+      "columns": [
+        {
+          "value": "code",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "roles_code_uq",
+      "entityType": "indexes",
+      "table": "roles"
+    },
+    {
+      "columns": [
+        {
+          "value": "role_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "user_roles_role_ix",
+      "entityType": "indexes",
+      "table": "user_roles"
+    },
+    {
+      "columns": [
+        {
+          "value": "reader_type_id",
+          "isExpression": false
+        },
+        {
+          "value": "material_type_id",
+          "isExpression": false
+        },
+        {
+          "value": "valid_from",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "using": null,
+      "algorithm": null,
+      "lock": null,
+      "nameExplicit": true,
+      "name": "loan_policies_pair_from_ix",
+      "entityType": "indexes",
+      "table": "loan_policies"
+    },
+    {
+      "columns": [
+        "book_id"
+      ],
+      "tableTo": "books",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "book_authors_book_fk",
+      "entityType": "fks",
+      "table": "book_authors"
+    },
+    {
+      "columns": [
+        "author_id"
+      ],
+      "tableTo": "authors",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "book_authors_author_fk",
+      "entityType": "fks",
+      "table": "book_authors"
+    },
+    {
+      "columns": [
+        "book_id"
+      ],
+      "tableTo": "books",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "book_categories_book_fk",
+      "entityType": "fks",
+      "table": "book_categories"
+    },
+    {
+      "columns": [
+        "category_id"
+      ],
+      "tableTo": "categories",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "book_categories_category_fk",
+      "entityType": "fks",
+      "table": "book_categories"
+    },
+    {
+      "columns": [
+        "book_id"
+      ],
+      "tableTo": "books",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "book_copies_book_fk",
+      "entityType": "fks",
+      "table": "book_copies"
+    },
+    {
+      "columns": [
+        "book_id"
+      ],
+      "tableTo": "books",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "book_external_refs_book_fk",
+      "entityType": "fks",
+      "table": "book_external_refs"
+    },
+    {
+      "columns": [
+        "book_id"
+      ],
+      "tableTo": "books",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "book_identifiers_book_fk",
+      "entityType": "fks",
+      "table": "book_identifiers"
+    },
+    {
+      "columns": [
+        "publisher_id"
+      ],
+      "tableTo": "publishers",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "books_publisher_fk",
+      "entityType": "fks",
+      "table": "books"
+    },
+    {
+      "columns": [
+        "material_type_id"
+      ],
+      "tableTo": "material_types",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "books_material_type_fk",
+      "entityType": "fks",
+      "table": "books"
+    },
+    {
+      "columns": [
+        "parent_id"
+      ],
+      "tableTo": "categories",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "categories_parent_fk",
+      "entityType": "fks",
+      "table": "categories"
+    },
+    {
+      "columns": [
+        "loan_id"
+      ],
+      "tableTo": "loans",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "loan_items_loan_fk",
+      "entityType": "fks",
+      "table": "loan_items"
+    },
+    {
+      "columns": [
+        "copy_id"
+      ],
+      "tableTo": "book_copies",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "loan_items_copy_fk",
+      "entityType": "fks",
+      "table": "loan_items"
+    },
+    {
+      "columns": [
+        "policy_id"
+      ],
+      "tableTo": "loan_policies",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "loan_items_policy_fk",
+      "entityType": "fks",
+      "table": "loan_items"
+    },
+    {
+      "columns": [
+        "loan_item_id"
+      ],
+      "tableTo": "loan_items",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "loan_renewals_item_fk",
+      "entityType": "fks",
+      "table": "loan_renewals"
+    },
+    {
+      "columns": [
+        "performed_by_user_id"
+      ],
+      "tableTo": "app_users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "loan_renewals_performed_by_fk",
+      "entityType": "fks",
+      "table": "loan_renewals"
+    },
+    {
+      "columns": [
+        "reader_id"
+      ],
+      "tableTo": "readers",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "loans_reader_fk",
+      "entityType": "fks",
+      "table": "loans"
+    },
+    {
+      "columns": [
+        "processed_by_user_id"
+      ],
+      "tableTo": "app_users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "loans_processed_by_fk",
+      "entityType": "fks",
+      "table": "loans"
+    },
+    {
+      "columns": [
+        "reader_id"
+      ],
+      "tableTo": "readers",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "reservations_reader_fk",
+      "entityType": "fks",
+      "table": "reservations"
+    },
+    {
+      "columns": [
+        "book_id"
+      ],
+      "tableTo": "books",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "reservations_book_fk",
+      "entityType": "fks",
+      "table": "reservations"
+    },
+    {
+      "columns": [
+        "assigned_copy_id",
+        "book_id"
+      ],
+      "tableTo": "book_copies",
+      "columnsTo": [
+        "id",
+        "book_id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "reservations_copy_book_fk",
+      "entityType": "fks",
+      "table": "reservations"
+    },
+    {
+      "columns": [
+        "fulfilled_loan_item_id"
+      ],
+      "tableTo": "loan_items",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "reservations_fulfilled_item_fk",
+      "entityType": "fks",
+      "table": "reservations"
+    },
+    {
+      "columns": [
+        "closed_by_user_id"
+      ],
+      "tableTo": "app_users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "reservations_closed_by_fk",
+      "entityType": "fks",
+      "table": "reservations"
+    },
+    {
+      "columns": [
+        "fine_id"
+      ],
+      "tableTo": "fines",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "fine_adjustments_fine_fk",
+      "entityType": "fks",
+      "table": "fine_adjustments"
+    },
+    {
+      "columns": [
+        "adjusted_by_user_id"
+      ],
+      "tableTo": "app_users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "fine_adjustments_by_fk",
+      "entityType": "fks",
+      "table": "fine_adjustments"
+    },
+    {
+      "columns": [
+        "payment_id"
+      ],
+      "tableTo": "fine_payments",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "fine_payment_allocations_payment_fk",
+      "entityType": "fks",
+      "table": "fine_payment_allocations"
+    },
+    {
+      "columns": [
+        "fine_id"
+      ],
+      "tableTo": "fines",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "fine_payment_allocations_fine_fk",
+      "entityType": "fks",
+      "table": "fine_payment_allocations"
+    },
+    {
+      "columns": [
+        "reader_id"
+      ],
+      "tableTo": "readers",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "fine_payments_reader_fk",
+      "entityType": "fks",
+      "table": "fine_payments"
+    },
+    {
+      "columns": [
+        "received_by_user_id"
+      ],
+      "tableTo": "app_users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "fine_payments_received_by_fk",
+      "entityType": "fks",
+      "table": "fine_payments"
+    },
+    {
+      "columns": [
+        "loan_item_id"
+      ],
+      "tableTo": "loan_items",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "fines_item_fk",
+      "entityType": "fks",
+      "table": "fines"
+    },
+    {
+      "columns": [
+        "assessed_by_user_id"
+      ],
+      "tableTo": "app_users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "fines_assessed_by_fk",
+      "entityType": "fks",
+      "table": "fines"
+    },
+    {
+      "columns": [
+        "reader_id"
+      ],
+      "tableTo": "readers",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "library_cards_reader_fk",
+      "entityType": "fks",
+      "table": "library_cards"
+    },
+    {
+      "columns": [
+        "user_id"
+      ],
+      "tableTo": "app_users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "readers_user_fk",
+      "entityType": "fks",
+      "table": "readers"
+    },
+    {
+      "columns": [
+        "reader_type_id"
+      ],
+      "tableTo": "reader_types",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "readers_type_fk",
+      "entityType": "fks",
+      "table": "readers"
+    },
+    {
+      "columns": [
+        "role_id"
+      ],
+      "tableTo": "roles",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "role_permissions_role_fk",
+      "entityType": "fks",
+      "table": "role_permissions"
+    },
+    {
+      "columns": [
+        "permission_id"
+      ],
+      "tableTo": "permissions",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "role_permissions_permission_fk",
+      "entityType": "fks",
+      "table": "role_permissions"
+    },
+    {
+      "columns": [
+        "user_id"
+      ],
+      "tableTo": "app_users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "user_roles_user_fk",
+      "entityType": "fks",
+      "table": "user_roles"
+    },
+    {
+      "columns": [
+        "role_id"
+      ],
+      "tableTo": "roles",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "user_roles_role_fk",
+      "entityType": "fks",
+      "table": "user_roles"
+    },
+    {
+      "columns": [
+        "reader_type_id"
+      ],
+      "tableTo": "reader_types",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "loan_policies_reader_type_fk",
+      "entityType": "fks",
+      "table": "loan_policies"
+    },
+    {
+      "columns": [
+        "material_type_id"
+      ],
+      "tableTo": "material_types",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "loan_policies_material_type_fk",
+      "entityType": "fks",
+      "table": "loan_policies"
+    },
+    {
+      "columns": [
+        "created_by_user_id"
+      ],
+      "tableTo": "app_users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "RESTRICT",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "loan_policies_created_by_fk",
+      "entityType": "fks",
+      "table": "loan_policies"
+    },
+    {
+      "value": "author_order >= 1",
+      "name": "book_authors_order_ck",
+      "entityType": "checks",
+      "table": "book_authors"
+    },
+    {
+      "value": "NOT (physical_condition = 'damaged' AND circulation_status IN ('available','on_hold','on_loan'))",
+      "name": "book_copies_damaged_not_lendable_ck",
+      "entityType": "checks",
+      "table": "book_copies"
+    },
+    {
+      "value": "published_year IS NULL OR published_year BETWEEN 1000 AND 2100",
+      "name": "books_published_year_ck",
+      "entityType": "checks",
+      "table": "books"
+    },
+    {
+      "value": "replacement_cost_vnd IS NULL OR replacement_cost_vnd >= 0",
+      "name": "books_replacement_cost_ck",
+      "entityType": "checks",
+      "table": "books"
+    },
+    {
+      "value": "due_at > borrowed_at",
+      "name": "loan_items_due_ck",
+      "entityType": "checks",
+      "table": "loan_items"
+    },
+    {
+      "value": "returned_at IS NULL OR returned_at >= borrowed_at",
+      "name": "loan_items_returned_ck",
+      "entityType": "checks",
+      "table": "loan_items"
+    },
+    {
+      "value": "lost_declared_at IS NULL OR lost_declared_at >= borrowed_at",
+      "name": "loan_items_lost_ck",
+      "entityType": "checks",
+      "table": "loan_items"
+    },
+    {
+      "value": "renewal_count >= 0 AND renewal_count <= applied_max_renewals",
+      "name": "loan_items_renewals_ck",
+      "entityType": "checks",
+      "table": "loan_items"
+    },
+    {
+      "value": "applied_loan_days > 0 AND applied_max_renewals >= 0 AND applied_daily_fee_vnd >= 0",
+      "name": "loan_items_applied_ck",
+      "entityType": "checks",
+      "table": "loan_items"
+    },
+    {
+      "value": "(status = 'on_loan' AND returned_at IS NULL AND return_condition IS NULL AND lost_declared_at IS NULL)\n    OR (status = 'returned' AND returned_at IS NOT NULL AND return_condition IS NOT NULL AND lost_declared_at IS NULL)\n    OR (status = 'lost' AND lost_declared_at IS NOT NULL AND returned_at IS NULL)",
+      "name": "loan_items_status_ck",
+      "entityType": "checks",
+      "table": "loan_items"
+    },
+    {
+      "value": "new_due_at > old_due_at",
+      "name": "loan_renewals_due_ck",
+      "entityType": "checks",
+      "table": "loan_renewals"
+    },
+    {
+      "value": "status <> 'ready' OR (assigned_copy_id IS NOT NULL AND ready_at IS NOT NULL AND hold_expires_at IS NOT NULL AND hold_expires_at > ready_at)",
+      "name": "reservations_ready_ck",
+      "entityType": "checks",
+      "table": "reservations"
+    },
+    {
+      "value": "status <> 'fulfilled' OR fulfilled_loan_item_id IS NOT NULL",
+      "name": "reservations_fulfilled_ck",
+      "entityType": "checks",
+      "table": "reservations"
+    },
+    {
+      "value": "status NOT IN ('cancelled', 'expired', 'fulfilled') OR closed_at IS NOT NULL",
+      "name": "reservations_closed_ck",
+      "entityType": "checks",
+      "table": "reservations"
+    },
+    {
+      "value": "amount_vnd <> 0",
+      "name": "fine_adjustments_amount_ck",
+      "entityType": "checks",
+      "table": "fine_adjustments"
+    },
+    {
+      "value": "CHAR_LENGTH(TRIM(reason)) > 0",
+      "name": "fine_adjustments_reason_ck",
+      "entityType": "checks",
+      "table": "fine_adjustments"
+    },
+    {
+      "value": "amount_vnd > 0",
+      "name": "fine_payment_allocations_amount_ck",
+      "entityType": "checks",
+      "table": "fine_payment_allocations"
+    },
+    {
+      "value": "amount_vnd > 0",
+      "name": "fine_payments_amount_ck",
+      "entityType": "checks",
+      "table": "fine_payments"
+    },
+    {
+      "value": "default_amount_vnd >= 0 AND assessed_amount_vnd >= 0",
+      "name": "fines_amounts_ck",
+      "entityType": "checks",
+      "table": "fines"
+    },
+    {
+      "value": "assessed_amount_vnd = default_amount_vnd OR (reason IS NOT NULL AND CHAR_LENGTH(TRIM(reason)) > 0)",
+      "name": "fines_reason_ck",
+      "entityType": "checks",
+      "table": "fines"
+    },
+    {
+      "value": "expires_at > issued_at",
+      "name": "library_cards_expiry_ck",
+      "entityType": "checks",
+      "table": "library_cards"
+    },
+    {
+      "value": "max_active_items > 0",
+      "name": "loan_policies_max_items_ck",
+      "entityType": "checks",
+      "table": "loan_policies"
+    },
+    {
+      "value": "loan_days > 0",
+      "name": "loan_policies_loan_days_ck",
+      "entityType": "checks",
+      "table": "loan_policies"
+    },
+    {
+      "value": "max_renewals >= 0",
+      "name": "loan_policies_max_renewals_ck",
+      "entityType": "checks",
+      "table": "loan_policies"
+    },
+    {
+      "value": "daily_late_fee_vnd >= 0",
+      "name": "loan_policies_fee_ck",
+      "entityType": "checks",
+      "table": "loan_policies"
+    },
+    {
+      "value": "debt_block_threshold_vnd >= 0",
+      "name": "loan_policies_threshold_ck",
+      "entityType": "checks",
+      "table": "loan_policies"
+    },
+    {
+      "value": "valid_to IS NULL OR valid_to > valid_from",
+      "name": "loan_policies_period_ck",
+      "entityType": "checks",
+      "table": "loan_policies"
+    }
+  ],
+  "renames": []
+}

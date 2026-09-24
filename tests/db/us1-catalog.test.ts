@@ -1,6 +1,6 @@
 import type { Connection } from 'mysql2/promise';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
-import { appConn, call, closeTestPools, expectErrno, ownerQuery } from '../helpers/db';
+import { appConn, call, closeTestPools, expectErrno, expectRule, ownerQuery } from '../helpers/db';
 import { account, book, copy, materialTypeId, truncateAll } from '../helpers/fixtures';
 import { vn } from '../helpers/time';
 
@@ -71,12 +71,12 @@ describe('US1 catalog (T033)', () => {
     ]);
   });
 
-  it('US1-3 R-01: a duplicate barcode is rejected (1062)', async () => {
+  it('US1-3 R-01: a duplicate barcode is rejected (DUPLICATE from 1062)', async () => {
     const staff = await account(['librarian']);
     const bookId = await book();
     await copy(staff, NOW, bookId, { barcode: 'B0001' });
-    await expectErrno(call('sp_register_copy', [staff, NOW, bookId, 'B0001', 'A1', null, 'good'],
-      { outParams: ['p_copy_id'] }), 1062);
+    await expectRule(call('sp_register_copy', [staff, NOW, bookId, 'B0001', 'A1', null, 'good'],
+      { outParams: ['p_copy_id'] }), 'DUPLICATE');
   });
 
   it('US1-4: two editions with the same title are two books', async () => {
@@ -111,12 +111,12 @@ describe('US1 catalog (T033)', () => {
     });
   });
 
-  it('US1-9 R-06a: a damaged copy cannot be available (3819)', async () => {
+  it('US1-9 R-06a: a damaged copy cannot be available (3819 by CHECK, INVALID_TRANSITION by procedure)', async () => {
     const staff = await account(['librarian']);
     const copyId = await copy(staff, NOW, await book());
     await expectErrno(
       ownerQuery(`UPDATE book_copies SET physical_condition = 'damaged' WHERE id = ?`, [copyId]), 3819);
-    await expectErrno(call('sp_change_copy_status', [staff, NOW, copyId, 'available', 'damaged']), 3819);
+    await expectRule(call('sp_change_copy_status', [staff, NOW, copyId, 'available', 'damaged']), 'INVALID_TRANSITION');
   });
 
   it('FR-021 R-02: a book with copies cannot be deleted (1451)', async () => {

@@ -66,6 +66,17 @@ describe('US4 payments (T058)', () => {
     expect(await counts()).toEqual([1, 1]);
   });
 
+  it('US4-12 R-16e: reusing a request key with a different payload is rejected', async () => {
+    const { w, F1, F2 } = await twoFines();
+    await pay(w.staff, PAID, w.readerId, 10000, [{ fineId: F1, amount: 10000 }], 'K7');
+    await expectRule(pay(w.staff, PAID, w.readerId, 20000, [{ fineId: F1, amount: 20000 }], 'K7'), 'IDEMPOTENCY_CONFLICT');
+    await expectRule(pay(w.staff, PAID, w.readerId, 10000, [{ fineId: F2, amount: 10000 }], 'K7'), 'IDEMPOTENCY_CONFLICT');
+    const other = await otherReader(w);
+    await expectRule(pay(w.staff, PAID, other.readerId, 10000, [{ fineId: F1, amount: 10000 }], 'K7'),
+      'IDEMPOTENCY_CONFLICT');
+    expect(await counts()).toEqual([1, 1]);
+  });
+
   it('US4-13 R-26 B-2: the app account cannot write money tables directly (1142)', async () => {
     const { w, F1 } = await twoFines();
     const conn = await appConn();

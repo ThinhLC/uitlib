@@ -50,6 +50,17 @@ describe('US1 copy lifecycle (T034)', () => {
     expect(await status(c)).toBe('in_repair');
   });
 
+  it('FR-006a: a damaged copy cannot be made available until its condition is updated', async () => {
+    const staff = await account(['librarian']);
+    const c = await copy(staff, NOW, await book(), { condition: 'damaged' });
+    expect(await status(c)).toBe('in_repair');
+    await expectRule(call('sp_change_copy_status', [staff, NOW, c, 'available', null]), 'INVALID_TRANSITION');
+    await expectRule(call('sp_change_copy_status', [staff, NOW, c, 'available', 'damaged']), 'INVALID_TRANSITION');
+    expect(await status(c)).toBe('in_repair');
+    await call('sp_change_copy_status', [staff, NOW, c, 'available', 'good']);
+    expect(await status(c)).toBe('available');
+  });
+
   it('B-5 R-06b: illegal transitions are rejected by procedure and by trigger', async () => {
     const staff = await account(['librarian']);
     const bookId = await book();

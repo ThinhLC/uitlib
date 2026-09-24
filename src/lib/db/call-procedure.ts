@@ -1,6 +1,9 @@
 import type { Pool, PoolConnection, RowDataPacket } from 'mysql2/promise';
 
-/** A business rejection raised by a procedure or trigger: `SIGNAL SQLSTATE '45000' 'KEY: detail'`. */
+/**
+ * A business rejection: `SIGNAL SQLSTATE '45000' 'KEY: detail'` from a procedure or trigger, or a
+ * unique-key collision (errno 1062) reported as key `DUPLICATE` with the index name as detail.
+ */
 export class DbRuleError extends Error {
   constructor(
     public readonly key: string,
@@ -36,9 +39,15 @@ interface MysqlError {
 
 function toRuleError(err: unknown): unknown {
   const e = err as MysqlError;
-  if (e?.sqlState === '45000' && typeof e.message === 'string') {
+  if (typeof e?.message !== 'string') return err;
+  if (e.sqlState === '45000') {
     const m = /^([A-Z_]+):\s*([\s\S]*)$/.exec(e.message);
     if (m) return new DbRuleError(m[1], m[2], e.message);
+  }
+  if (e.errno === 1062) {
+    // "Duplicate entry 'x' for key 'table.index'": the index names the rule that was hit.
+    const index = /for key '(?:[^'.]+\.)?([^']+)'/.exec(e.message)?.[1] ?? 'unique key';
+    return new DbRuleError('DUPLICATE', index, e.message);
   }
   return err;
 }

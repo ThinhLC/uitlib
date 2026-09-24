@@ -18,7 +18,9 @@ environment (spec FR-030).
   (borrow, due, return, paid, validity checks); `NOW()` is never used for decisions.
 - On any error the procedure rolls back its whole transaction and re-raises it: business
   rejections as `SQLSTATE '45000'` with `MESSAGE_TEXT = '<KEY>: <detail>'`; deadlock (1213),
-  lock wait timeout (1205), duplicate key (1062) and others as the original error. Callers retry
+  lock wait timeout (1205), duplicate key (1062) and others as the original error. `callProcedure`
+  reports a 1062 to the app as `DbRuleError` key `DUPLICATE` with the unique index name as detail
+  (e.g. `library_cards_active_reader_uq`, `book_copies_barcode_uq`). Callers retry
   only 1213/1205, up to 3 times with a 50–200 ms random back-off.
 - Locks follow the spec's global order: reader type → reader → card → book → copy → policy
   version → loan → loan item → reservation → fine. Within one kind, rows are locked in ascending
@@ -54,7 +56,8 @@ environment (spec FR-030).
 | `FINE_RULE` | Fine amount out of range, missing reason, damaged+lost conflict |
 | `ALLOCATION_MISMATCH` | Σ allocations ≠ amount, over a fine's remaining balance, or another reader's fine |
 | `PAYMENT_EXCEEDS_DEBT` | Payment > reader's outstanding |
-| `DUPLICATE` | Business duplicate detected before the unique key (e.g. active reservation) |
+| `DUPLICATE` | A unique key was hit (1062 mapped by `callProcedure`; detail = index name), or a business duplicate detected before the key (e.g. active reservation) |
+| `IDEMPOTENCY_CONFLICT` | Payment request key reused with a different reader, amount or allocations |
 
 ## Functions [Core, public]
 
@@ -80,10 +83,10 @@ Expected values (from spec US2-10, US4-1, US4-3): `fn_due_at('2026-09-30 16:59:5
 | --- | --- | --- | --- | --- | --- |
 | `sp_create_policy_version` | `policy.manage` | reader_type_id, material_type_id, max_active_items, loan_days, max_renewals, daily_late_fee_vnd, debt_block_threshold_vnd, valid_from | `p_policy_id` | reader type → versions of pair; reject `POLICY_OVERLAP`; insert | FR-009, R-09a |
 | `sp_close_policy_version` | `policy.manage` | policy_id, valid_to | — | reader type → version; reject `POLICY_CLOSE_REJECTED` if `valid_to` < `p_now`, not earlier than current, ≤ `valid_from`, or ≤ max referencing `borrowed_at` | FR-009c, R-09e |
-| `sp_issue_card` | `card.manage` | reader_id, card_number, expires_at | `p_card_id` | reader → reader's cards; insert (UQ gives `DUPLICATE` → 1062 re-raised) | FR-008, R-08a/c |
+| `sp_issue_card` | `card.manage` | reader_id, card_number, expires_at | `p_card_id` | reader → reader's cards; insert (UQ → 1062, reported as `DUPLICATE` re-raised) | FR-008, R-08a/c |
 | `sp_set_card_status` | `card.manage` | card_id, status | — | reader → card; `active` only if unexpired and no other active | FR-008 |
 | `sp_register_copy` | `catalog.write` | book_id, barcode, shelf_code, acquired_at, condition | `p_copy_id` | book → [Ext] queue; insert as `available` (or `in_repair` if damaged); [Ext] promotion | FR-006, FR-006a |
-| `sp_change_copy_status` | `catalog.write` | copy_id, target_status, condition | — | book → copy → [Ext] queue; lifecycle check; [Ext] promotion | FR-006a |
+| `sp_change_copy_status` | `catalog.write` | copy_id, target_status, condition | — | book → copy → [Ext] queue; lifecycle check; `INVALID_TRANSITION` if the target is `available` while the (new) condition is `damaged`; [Ext] promotion | FR-006a |
 | `sp_checkout` | `loan.checkout` | reader_id, copy_ids JSON `[id,…]` | result set: loan_id, loan_item_id, copy_id, due_at | reader → reader's cards (S) → books ↑ → copies ↑ → policy (S) → [Ext] reservation (expire an overdue hold on the copy first); eligibility (FR-009d) with locking reads, debt by `SUM … FOR SHARE`; insert loan, items (snapshot + `fn_due_at`), then copies `on_loan`; all-or-nothing | FR-009b/d, FR-010–012, R-12b |
 | `sp_return_item` | `loan.return` | loan_item_id, return_condition, damaged_fine_vnd NULL, reason NULL | result set of assessed fines | reader → book → copy → loan → loan item → [Ext] queue; item `returned`; `sp__assess_fines`; copy lendable or `in_repair`; loan closed if last | FR-015a/b, R-10a |
 | `sp_declare_lost` | `loan.return` | loan_item_id, lost_fine_vnd NULL, reason NULL | result set of assessed fines | as return; item `lost`, copy `lost`; late (to `p_now`) + lost fines | FR-015a/b |
@@ -93,27 +96,33 @@ Expected values (from spec US2-10, US4-1, US4-3): `fn_due_at('2026-09-30 16:59:5
 
 ### `sp_record_payment` steps
 
-1. If `request_key` exists: return that payment, `p_replayed = TRUE`, no writes.
-2. Permission check; `START TRANSACTION`; lock the reader.
-3. Expand allocations (`JSON_TABLE`). Reject `VALIDATION` if the list is empty, has a duplicate
-   fine, or has an amount ≤ 0.
-4. Lock the fines in ascending id, joined to `loan_items → loans`. Reject `ALLOCATION_MISMATCH`
-   if a fine is missing or belongs to another reader.
-5. For each locked fine, compute the remaining balance as assessed + Σ adjustments −
-   Σ allocations, with the adjustment and allocation sums read `FOR SHARE`. Reject
-   `ALLOCATION_MISMATCH` if any allocation > remaining, or if Σ ≠ `amount_vnd`. Reject
-   `PAYMENT_EXCEEDS_DEBT` if `amount_vnd` > the reader's total remaining, computed by the same
-   `FOR SHARE` sums.
-6. Insert the payment (`paid_at = p_now`), then the allocations.
-7. Re-sum the allocations from the table; `SIGNAL ALLOCATION_MISMATCH` unless it equals
+1. Permission check (`FORBIDDEN`); `request_key` required (`VALIDATION`).
+2. If `request_key` exists: `sp__check_replay` compares reader, amount and allocations with the
+   stored payment. Equal → return that payment, `p_replayed = TRUE`, no writes. Different →
+   `IDEMPOTENCY_CONFLICT`.
+3. Validate the input before any lock: amount > 0, method, allocations expanded with
+   `JSON_TABLE`; `VALIDATION` if the list is empty, has a duplicate fine, or an amount ≤ 0.
+4. `START TRANSACTION`; lock the reader. Every other writer of this reader's fines (return, lost,
+   adjustment, payment) locks the reader first, so the sums below cannot change underneath.
+5. `PAYMENT_EXCEEDS_DEBT` if `amount_vnd` > the reader's total remaining, from assessed +
+   adjustments − allocations read `FOR SHARE`.
+6. Lock the fines in ascending id (`FOR UPDATE OF f`), joined to `loan_items → loans`.
+   `ALLOCATION_MISMATCH` if a fine is missing or belongs to another reader, if an allocation >
+   that fine's remaining balance (sums read `FOR SHARE`), or if Σ ≠ `amount_vnd`.
+7. Insert the payment (`paid_at = p_now`), then the allocations.
+8. Re-sum the allocations from the table; `SIGNAL ALLOCATION_MISMATCH` unless it equals
    `amount_vnd`.
-8. `COMMIT`.
+9. `COMMIT`.
 
-`EXIT HANDLER FOR 1062` (a concurrent call with the same key committed first): `ROLLBACK`,
-return the existing payment, `p_replayed = TRUE`.
+`EXIT HANDLER FOR 1062` (a concurrent call with the same key committed first): `ROLLBACK`, then
+the same comparison as step 2: return the existing payment with `p_replayed = TRUE`, or
+`IDEMPOTENCY_CONFLICT`.
 
 ## Internal helpers [not granted]
 
+- `sp__check_replay(p_payment_id, p_reader_id, p_amount_vnd, p_allocations)` raises
+  `IDEMPOTENCY_CONFLICT` unless the stored payment has the same reader, amount and exactly the
+  same (fine, amount) allocations. Used by `sp_record_payment` (steps 2 and the 1062 handler).
 - `sp__assess_fines(p_loan_item_id, p_actor, p_now, p_end_kind, p_damaged_vnd, p_lost_vnd,
   p_reason)` inserts the late fine
   (`fn_late_fee(fn_days_late(due, p_now), applied_fee, replacement_cost)`) when days > 0, and

@@ -19,7 +19,7 @@ describe('CT-8 US2-3 R-08c R-09a: concurrent card issue and policy creation', ()
       const results = [a, b];
       expect(results.filter((x) => x.status === 'fulfilled')).toHaveLength(1);
       const failed = results.find((x) => x.status === 'rejected') as PromiseRejectedResult;
-      expect(failed.reason.errno).toBe(1062);
+      expect(failed.reason.key).toBe('DUPLICATE');
       const [n] = await ownerQuery(`SELECT COUNT(*) n FROM library_cards WHERE reader_id = ?`, [r]);
       expect(Number(n.n)).toBe(1);
     });
