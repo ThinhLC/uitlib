@@ -3,7 +3,7 @@
  * diagram always matches the migrations (spec FR-024, US6-4, SC-001). Output is deterministic.
  * Usage: pnpm erd:relational [--test | --schema <name>] [--out docs/erd/relational.mmd] [--stdout]
  */
-import { writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import mysql from 'mysql2/promise';
 import { dbConfig } from '../../src/lib/db/config';
 import { schemaFromArgs } from '../db/grants';
@@ -92,6 +92,17 @@ export async function relationalDiagram(schema: string): Promise<string> {
   }
 }
 
+const ARCH_START = '<!-- erd:relational:start -->';
+const ARCH_END = '<!-- erd:relational:end -->';
+
+/** ARCHITECTURE.md with the relational diagram placed between its markers as a Mermaid block. */
+export function embedInArchitecture(doc: string, diagram: string): string {
+  const start = doc.indexOf(ARCH_START);
+  const end = doc.indexOf(ARCH_END);
+  if (start < 0 || end < start) throw new Error('ARCHITECTURE.md: relational ERD markers not found');
+  return `${doc.slice(0, start + ARCH_START.length)}\n\n\`\`\`mermaid\n${diagram}\`\`\`\n\n${doc.slice(end)}`;
+}
+
 async function main() {
   const args = process.argv.slice(2);
   const outIdx = args.indexOf('--out');
@@ -101,6 +112,10 @@ async function main() {
   else {
     writeFileSync(out, text);
     console.log(`wrote ${out}`);
+    if (outIdx < 0) {
+      writeFileSync('ARCHITECTURE.md', embedInArchitecture(readFileSync('ARCHITECTURE.md', 'utf8'), text));
+      console.log('updated ARCHITECTURE.md (relational ERD block)');
+    }
   }
 }
 

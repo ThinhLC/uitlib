@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { testSchemaName } from '../../src/lib/db/config';
 import { parsePredicates } from '../../scripts/db/dictionary';
-import { relationalDiagram } from '../../scripts/erd/relational';
+import { embedInArchitecture, relationalDiagram } from '../../scripts/erd/relational';
 import { parseChen } from '../../scripts/erd/chen-views';
 import { ownerQuery } from '../helpers/db';
 
@@ -16,6 +16,11 @@ describe('US6 ERD and data dictionary stay in sync with the schema (T071)', () =
   it('US6-4 SC-001: the committed relational diagram equals the one generated from the migrated schema', async () => {
     const generated = await relationalDiagram(testSchemaName());
     expect(generated).toBe(readFileSync('docs/erd/relational.mmd', 'utf8'));
+  });
+
+  it('US6-4: the relational ERD in ARCHITECTURE.md equals the one generated from the migrated schema', async () => {
+    const doc = readFileSync('ARCHITECTURE.md', 'utf8');
+    expect(embedInArchitecture(doc, await relationalDiagram(testSchemaName()))).toBe(doc);
   });
 
   it('US6-3: every relation in mapping.md exists, and every table is mapped', async () => {
