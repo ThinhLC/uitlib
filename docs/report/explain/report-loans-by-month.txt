@@ -1,0 +1,15 @@
+-- SELECT * FROM v_report_loans_by_month
+
+-> Table scan on v_report_loans_by_month  (cost=2.5..2.5 rows=0)
+    -> Materialize  (cost=0..0 rows=0)
+        -> Group aggregate: count(distinct loans.id), count(loan_items.id)
+            -> Sort: month_local, rt.`code`
+                -> Stream results  (cost=35.9 rows=31)
+                    -> Nested loop inner join  (cost=35.9 rows=31)
+                        -> Nested loop inner join  (cost=25.1 rows=31)
+                            -> Nested loop inner join  (cost=14.2 rows=31)
+                                -> Covering index scan on li using loan_items_loan_ix  (cost=3.35 rows=31)
+                                -> Single-row index lookup on l using PRIMARY (id=li.loan_id)  (cost=0.253 rows=1)
+                            -> Single-row index lookup on r using PRIMARY (id=l.reader_id)  (cost=0.253 rows=1)
+                        -> Single-row index lookup on rt using PRIMARY (id=r.reader_type_id)  (cost=0.253 rows=1)
+

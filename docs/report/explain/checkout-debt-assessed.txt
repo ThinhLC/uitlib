@@ -1,0 +1,11 @@
+-- SELECT COALESCE(SUM(f.assessed_amount_vnd), 0) FROM loans l JOIN loan_items li ON li.loan_id = l.id JOIN fines f ON f.loan_item_id = li.id WHERE l.reader_id = 1
+
+-> Aggregate: sum(f.assessed_amount_vnd)  (cost=4.45 rows=1)
+    -> Nested loop inner join  (cost=3.75 rows=7)
+        -> Inner hash join (no condition)  (cost=1.3 rows=7)
+            -> Table scan on f  (cost=0.95 rows=7)
+            -> Hash
+                -> Covering index lookup on l using loans_reader_status_ix (reader_id=1)  (cost=0.35 rows=1)
+        -> Filter: (li.loan_id = l.id)  (cost=0.264 rows=1)
+            -> Single-row index lookup on li using PRIMARY (id=f.loan_item_id)  (cost=0.264 rows=1)
+

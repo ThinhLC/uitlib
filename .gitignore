@@ -32,6 +32,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -40,5 +41,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-drizzle/
 .claude
+
+# database backups (scripts/db/backup.ts)
+backups/
+
+# scratch output of scripts/db/spike.ts
+.tmp/

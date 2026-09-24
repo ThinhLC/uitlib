@@ -1,0 +1,5 @@
+-- SELECT id, title FROM books WHERE MATCH(title, subtitle) AGAINST ('database' IN NATURAL LANGUAGE MODE)
+
+-> Filter: (match books.title,books.subtitle against ('database'))  (cost=0.35 rows=1)
+    -> Full-text index search on books using books_title_ft (title='database')  (cost=0.35 rows=1)
+

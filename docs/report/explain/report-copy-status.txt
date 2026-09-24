@@ -1,0 +1,10 @@
+-- SELECT * FROM v_report_copy_status
+
+-> Table scan on v_report_copy_status  (cost=2.5..2.5 rows=0)
+    -> Materialize  (cost=0..0 rows=0)
+        -> Table scan on <temporary>
+            -> Aggregate using temporary table
+                -> Nested loop inner join  (cost=28.1 rows=62)
+                    -> Covering index scan on c using book_copies_book_status_ix  (cost=6.45 rows=62)
+                    -> Single-row index lookup on b using PRIMARY (id=c.book_id)  (cost=0.252 rows=1)
+

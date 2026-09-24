@@ -1,0 +1,143 @@
+RESEARCH ĐỒ ÁN CSDL: HỆ THỐNG QUẢN LÝ THƯ VIỆN
+Ngày tổng hợp: 24/09/2026
+Nguồn yêu cầu: “Nhóm 1_QLTT_HỆ THỐNG QUẢN LÝ THƯ VIỆN.docx.txt” do nhóm cung cấp.
+Định hướng đã xác nhận: MySQL + Drizzle; Supabase Auth cho đăng nhập; Google Books hỗ trợ seed metadata; đọc online chỉ là tính năng cộng điểm.
+
+1. TÓM TẮT VÀ QUYẾT ĐỊNH KIẾN TRÚC
+- MySQL là nguồn dữ liệu chính cho danh mục thư viện, bản sao vật lý, độc giả, quy định, giao dịch, phạt, báo cáo và phân quyền.
+- Drizzle dùng để khai báo schema, migration và truy vấn; nghiệp vụ cần transaction/khóa bản ghi xử lý ở backend. Báo cáo môn học vẫn cần thể hiện SQL DDL, ràng buộc, truy vấn và kỹ thuật xử lý dữ liệu.
+- Supabase quản lý danh tính/đăng nhập; MySQL chỉ lưu ID Supabase và dữ liệu nghiệp vụ. Không thiết kế lại mật khẩu, session hay token.
+- Google Books là nguồn bên ngoài để gợi ý/thêm thông tin thư mục. Không lấy danh sách kết quả Google làm tồn kho thư viện. Chỉ bản sao đã đăng ký vào kho mới có thể mượn.
+- Link đọc hoặc nhúng Google Books phụ thuộc quyền xem từng volume, quốc gia và thời điểm; không thể cam kết đọc toàn văn tất cả sách.
+
+2. PHÂN TÍCH FILE GỐC
+2.1. Yêu cầu đã nêu trong file
+- Chương 1: bài toán thư viện cho nhiều mô hình; nhiều loại tài liệu và độc giả; chính sách mượn linh hoạt; kiểm soát mượn/trả, gia hạn, quá hạn, mất/hỏng và báo cáo.
+- Chương 2: chức năng biên mục, bản sao, độc giả, mượn/trả/gia hạn, quy định/phạt, OPAC, phân quyền/báo cáo; thực thể tác giả, thể loại, NXB, đầu sách, bản sao, loại độc giả, độc giả, phiếu mượn, chi tiết mượn, phạt, nhân viên; ERD, ràng buộc và mô hình logic.
+- Chương 3: DDL, PK/FK/ràng buộc, dữ liệu mẫu và dữ liệu thực.
+- Chương 4: stored procedure, trigger, function, cursor; xác thực/phân quyền, import/export, backup/restore; báo cáo.
+2.2. Các phần còn thiếu hoặc cần chốt
+- Phần ERD, ràng buộc, thiết kế logic, SQL và chương 4 chưa có nội dung triển khai cụ thể.
+- Quy tắc định lượng còn bỏ trống: giới hạn sách, thời hạn, số lần gia hạn, mức phạt, ngưỡng chặn do nợ, thời hạn thẻ, hạn giữ đặt trước.
+- Bản nháp ghi “phiếu mượn chỉ hoàn tất khi xử lý xong vi phạm”: cần tách hoàn trả tài sản khỏi công nợ. Trả sách xong có thể vẫn còn phạt chưa thu.
+- Bản nháp mô tả rất rộng nhiều loại vật liệu; đề xuất triển khai sâu sách in, thiết kế loại tài liệu để mở rộng.
+- Phải thống nhất thuật ngữ: đầu sách/ấn bản biên mục khác với từng bản sao vật lý; tên tác phẩm giống nhau có thể có nhiều ấn bản.
+- Cần xác định liệu giảng viên bắt buộc có cursor vận hành thực tế hay chỉ cần ví dụ minh họa; file có liệt kê cursor.
+
+3. NGHIÊN CỨU GOOGLE BOOKS API
+3.1. Khả năng
+- GET /books/v1/volumes?q=... để tìm; GET /books/v1/volumes/{volumeId} để lấy chi tiết.
+- Tìm bằng ISBN: q=isbn:9780132350884; có printType=books, langRestrict, startIndex/maxResults, filter=free-ebooks tùy trường hợp. Kiểm tra kết quả thực tế, tránh suy ra có sách chỉ từ totalItems.
+- Volume có volumeInfo: title, subtitle, authors, publisher, publishedDate, description, industryIdentifiers (ISBN), categories, imageLinks, language; accessInfo: country, viewability, embeddable, webReaderLink (các trường có thể vắng mặt).
+- viewability có PARTIAL, ALL_PAGES, NO_PAGES, UNKNOWN. ALL_PAGES và publicDomain liên quan quyền xem theo quốc gia. PARTIAL là xem một phần, không phải full ebook. webReaderLink không cho phép xem sách không có quyền xem. Embedded Viewer dùng để nhúng preview/volume được phép, không phải API cung cấp toàn bộ nội dung để tải về lưu.
+3.2. Quy trình seed có kiểm duyệt
+A. Thủ thư tìm sách qua Google Books theo ISBN hoặc nhan đề/tác giả.
+B. Hiển thị danh sách ứng viên và chọn đúng ấn bản; ưu tiên đối chiếu ISBN, tên, NXB, năm, tác giả.
+C. Fetch volume chi tiết; chuẩn hóa và upsert metadata vào bảng MySQL trong transaction.
+D. Dùng UNIQUE(provider, external_id) để import lặp không nhân đôi; cân nhắc ISBN trùng/thiếu và sách nhập thủ công.
+E. Thủ thư sửa/bổ sung mã phân loại, kệ, giá đền bù, rồi tạo từng book_copy với barcode duy nhất. Không tự tạo số bản sao theo dữ liệu Google.
+F. Lưu thời điểm cập nhật dữ liệu từ Google; không ghi đè các trường thư viện đã biên tập khi refresh.
+G. Khi mở trang sách, kiểm tra lại trạng thái quyền xem nếu snapshot cũ; hiện nút Google Books hoặc viewer khi hợp lệ; nếu không, chỉ hiện metadata và tình trạng sách in.
+- Seed minh họa: khoảng 30–50 đầu sách có metadata được rà soát; nhiều bản sao vật lý cho một số sách; thêm sách thủ công và các giao dịch mẫu để kiểm chứng mô hình.
+3.3. Giới hạn và cách trình bày
+- Google Books không phải nguồn xác nhận thư viện sở hữu sách; bản sao và lưu thông là dữ liệu nội bộ.
+- Không giả định mọi volume có ISBN, ảnh bìa, mô tả, quyền nhúng hay toàn văn. ISBN không nhất thiết duy nhất cho mỗi bản ghi do dữ liệu nguồn có thể khác nhau; cần quy trình rà soát trùng.
+- Quyền xem phụ thuộc quốc gia và thay đổi; không dùng metadata cũ làm cam kết nội dung đọc được.
+- Không lưu/copy ebook vào DB; liên kết về Google và tuân thủ yêu cầu attribution/branding khi hiển thị dữ liệu hoặc preview.
+- API key/giới hạn sử dụng phải kiểm tra trong Google Cloud project khi triển khai; không ghi một hạn mức cố định khi chưa xác nhận.
+
+4. THIẾT KẾ DỮ LIỆU MYSQL ĐỀ XUẤT
+Đây là đề xuất thiết kế, không phải các bảng đã được giảng viên quy định sẵn. PK nội bộ nên dùng BIGINT; timestamps dùng DATETIME(3) với quy ước lưu UTC và hiển thị theo múi giờ ứng dụng; tiền VND dùng BIGINT đơn vị đồng (hoặc DECIMAL nếu hỗ trợ ngoại tệ). InnoDB, utf8mb4, FK/index rõ ràng.
+
+4.1. Danh mục
+- books(id PK, title, subtitle, publisher_id FK NULL, published_date_text NULL, description NULL, language_code NULL, cover_url NULL, material_type_id FK, classification_code NULL, replacement_cost_vnd NULL, created_at, updated_at). Giữ published_date_text nếu API trả năm hoặc năm-tháng thay vì ngày đầy đủ; có thể thêm published_year phục vụ lọc.
+- book_identifiers(id PK, book_id FK, identifier_type, identifier_value, UNIQUE(identifier_type, identifier_value) chỉ nếu đã kiểm tra dữ liệu và chọn chính sách dedup phù hợp). Không ép mọi bản ghi phải có ISBN.
+- authors(id PK, name); book_authors(book_id FK, author_id FK, author_order, PK(book_id, author_id)).
+- categories(id PK, name, parent_id FK NULL); book_categories(book_id FK, category_id FK, PK(book_id, category_id)). Phân biệt thể loại nội bộ với chuỗi category Google nếu cần.
+- publishers(id PK, name); material_types(id PK, code UNIQUE, name). MVP có BOOK_PRINT; mở rộng ebook, tạp chí sau.
+- book_external_refs(id PK, book_id FK, provider, external_id, source_url NULL, viewability NULL, embeddable NULL, web_reader_link NULL, access_country NULL, fetched_at, UNIQUE(provider, external_id)). Dữ liệu quyền xem là snapshot.
+- book_copies(id PK, book_id FK, barcode UNIQUE, branch_id FK NULL, shelf_code NULL, acquired_at NULL, condition_code, circulation_status, created_at). Tình trạng vật lý và tình trạng lưu thông là hai khái niệm; có thể tách rõ trường hoặc bảng trạng thái.
+- library_branches(id PK, name, address NULL): chỉ cần nếu xác định nhiều cơ sở; với một cơ sở có thể bỏ và ghi vị trí kệ ở book_copies.
+
+4.2. Người dùng và độc giả
+- app_users(id PK, supabase_user_id CHAR(36) NOT NULL UNIQUE, status, created_at). UUID của Supabase chỉ là tham chiếu logic xuyên hệ CSDL.
+- reader_types(id PK, code UNIQUE, name): sinh viên, giảng viên, độc giả ngoài...
+- readers(id PK, user_id FK app_users NULL UNIQUE, reader_type_id FK, full_name, email NULL, phone NULL, status, created_at). Có thể tạo hồ sơ trước khi độc giả đăng ký tài khoản.
+- library_cards(id PK, reader_id FK, card_number UNIQUE, issued_at, expires_at, status); cần xác định quy tắc một thẻ đang hoạt động/độc giả ở tầng DB hoặc transaction.
+
+4.3. Chính sách và lưu thông
+- loan_policies(id PK, reader_type_id FK, material_type_id FK, max_active_items, loan_days, max_renewals, daily_late_fee_vnd, debt_block_threshold_vnd, valid_from, valid_to NULL). Không cho hai chính sách hiệu lực đồng thời cho cùng cặp loại độc giả/tài liệu; quy tắc khoảng thời gian chồng lấn cần kiểm tra bằng transaction/application hoặc trigger vì MySQL không có exclusion constraint tương đương PostgreSQL.
+- loans(id PK, reader_id FK, processed_by_user_id FK app_users, borrowed_at, status). Một phiếu có nhiều dòng.
+- loan_items(id PK, loan_id FK, copy_id FK, applied_policy_id FK, borrowed_at, due_at, returned_at NULL, return_condition NULL, status, applied_daily_fee_vnd, renewal_count). Snapshot chính sách và mức phạt ngăn sửa chính sách làm thay đổi lịch sử.
+- loan_renewals(id PK, loan_item_id FK, old_due_at, new_due_at, renewed_at, performed_by_user_id FK app_users).
+- reservations(id PK, reader_id FK, book_id FK, requested_at, status, ready_at NULL, expires_at NULL, queue_order/priority nếu cần). Xác định đặt theo đầu sách, không buộc vào bản sao khi xếp hàng.
+
+4.4. Phạt và thanh toán
+- fines(id PK, loan_item_id FK, fine_type, assessed_amount_vnd, assessed_at, status, note NULL). Một dòng mượn có thể phát sinh phạt trễ và phạt hỏng/mất độc lập; kiểm soát chống tạo phạt trễ lặp bằng khóa nghiệp vụ.
+- fine_payments(id PK, reader_id FK, received_by_user_id FK app_users, paid_amount_vnd, paid_at, method, reference_no NULL).
+- fine_payment_allocations(payment_id FK, fine_id FK, amount_vnd, PK(payment_id, fine_id)). Dư nợ = tổng assessed_amount - tổng allocations hợp lệ; doanh thu tiền phạt = số thực thu, không phải tổng đã ghi phạt.
+
+4.5. RBAC
+- roles(id PK, code UNIQUE, name), permissions(id PK, code UNIQUE, description), user_roles(user_id FK, role_id FK, PK(user_id, role_id)), role_permissions(role_id FK, permission_id FK, PK(role_id, permission_id)).
+- Ví dụ: admin, librarian, reader; catalog.write, loan.checkout, loan.return, fine.collect, policy.manage, report.read. reader_type là chính sách mượn, không phải role an ninh.
+
+5. SUPABASE AUTH + MYSQL
+- Supabase Auth lưu auth.users trong PostgreSQL do Supabase quản lý. MySQL không thể tạo FK SQL trực tiếp tới auth.users ở hệ PostgreSQL khác. Chỉ app_users.supabase_user_id UNIQUE và FK nội bộ MySQL đến app_users.id.
+- Flow: client login Supabase -> backend nhận access token -> backend xác minh chữ ký/claims hoặc gọi phương thức xác minh chính thức phù hợp cấu hình signing key -> lấy sub đã xác minh -> tìm/tạo app_users -> nạp roles/permissions từ MySQL -> thực thi nghiệp vụ. Không tin supabase_user_id do client gửi tách rời token.
+- Không lưu password, refresh token trong MySQL. Cần quy trình đồng bộ khi tài khoản Supabase bị xóa hoặc khóa: đánh dấu app_users inactive, giữ lịch sử giao dịch, và cân nhắc chính sách xóa dữ liệu cá nhân. Tránh cascade xóa lịch sử mượn.
+- Supabase RLS không tự bảo vệ MySQL; mọi quyền đọc/ghi MySQL do backend kiểm tra. Quyền thủ thư phải được cấp ở server, không dựa trên thông tin profile có thể tự sửa.
+
+6. RÀNG BUỘC VÀ XỬ LÝ ĐỒNG THỜI
+- PK/FK đầy đủ, NOT NULL có chọn lọc; barcode UNIQUE; external(provider, external_id) UNIQUE; card_number UNIQUE; amount >= 0; due_at > borrowed_at; returned_at >= borrowed_at khi có giá trị.
+- Tối đa một giao dịch mượn đang mở cho một bản sao. MySQL không dùng partial unique index kiểu WHERE returned_at IS NULL; cách chắc chắn: transaction + SELECT ... FOR UPDATE trên book_copies, kiểm tra status và trạng thái loan_item, chốt thay đổi nguyên tử. Có thể dùng thêm cột active_loan_item_id UNIQUE hoặc generated column/index nếu thiết kế yêu cầu bảo vệ mạnh tại DB; cần kiểm thử cú pháp trên phiên bản MySQL thực tế.
+- Checkout transaction: lock bản sao và hồ sơ/thẻ liên quan; kiểm tra thẻ còn hiệu lực, nợ, giới hạn, chính sách, đặt trước; insert loans/loan_items; đổi trạng thái bản sao; commit. Hai request đồng thời phải chỉ một request thành công.
+- Return transaction: khóa bản sao và loan_item; ghi returned_at, condition, đánh giá phí, đổi trạng thái cuốn (available/repair/lost), commit. Việc thu phạt diễn ra riêng; hoàn trả vật lý không bị treo vì chưa trả tiền.
+- Renew transaction: kiểm tra chưa trả, số lần gia hạn, quá hạn/chính sách và hàng chờ đặt trước; chụp old_due_at/new_due_at vào loan_renewals.
+- Lost/damaged: xác nhận hư hỏng/mất, tính phí đền bù, đóng lượt mượn với trạng thái tương ứng và khóa bản sao khỏi lưu thông.
+- Index quan trọng: loan_items(copy_id, returned_at), loan_items(due_at, returned_at), loans(reader_id, borrowed_at), book_copies(book_id, circulation_status), reservations(book_id, status, requested_at), fines(loan_item_id, status), book identifiers, tên sách/tác giả phục vụ tra cứu. Cần giải thích EXPLAIN cho một số truy vấn.
+
+7. MINH CHỨNG THEO CÁC CHƯƠNG BÁO CÁO
+Chương 1: đặt bối cảnh một thư viện trường học cụ thể để quy tắc có giá trị; nêu tác nhân, phạm vi, quy trình biên mục, cấp thẻ, mượn, trả, gia hạn, đặt trước, phạt.
+Chương 2: đặc tả chức năng; tân từ từng bảng; ERD; lực lượng quan hệ và tùy chọn NULL; chuẩn hóa quan hệ nhiều-nhiều; ràng buộc tĩnh và quy tắc liên bảng; giả định chính sách.
+Chương 3: MySQL DDL/migration Drizzle; dữ liệu thực Google Books có nguồn; bản sao/giao dịch minh họa do nhóm sinh; kiểm tra số lượng, dedup và chất lượng metadata.
+Chương 4: procedure/function/trigger/cursor nếu rubric thực sự yêu cầu; transaction và demo cạnh tranh mượn cùng cuốn; mô hình RBAC; quy trình dump/restore; báo cáo SQL. Cursor chỉ nên dành ví dụ xử lý theo lô có lý do rõ ràng, không ép luồng checkout qua cursor.
+Bộ báo cáo: sách quá hạn theo độc giả; mượn theo tháng/loại độc giả; đầu sách phổ biến; bản sao available/on_loan/repair/lost; tiền phạt phát sinh, tiền đã thu, công nợ còn lại. Phân biệt các chỉ số.
+
+8. KỊCH BẢN DỮ LIỆU MẪU VÀ KIỂM TRA
+- Khoảng 30–50 đầu sách nhập có kiểm duyệt từ Google Books, thêm đầu sách nhập tay và một số đầu sách thiếu ISBN hoặc thiếu ảnh.
+- Một đầu sách nhiều tác giả/thể loại; một đầu sách nhiều bản sao; hai ấn bản khác nhau cùng tựa; một độc giả nhiều phiếu; một phiếu nhiều cuốn.
+- Tình huống đúng hạn, quá hạn, gia hạn thành công/thất bại do có đặt trước, hỏng, mất, thanh toán một phần, hết hạn thẻ, vượt giới hạn sách, hai người cùng thử mượn một bản sao.
+- Đối chiếu số bản sao available + on_loan + repair + lost với tồn kho; chứng minh số dư nợ tính từ giao dịch; đánh giá kết quả EXPLAIN và phục hồi từ backup thử nghiệm.
+
+9. CÁC QUYẾT ĐỊNH CẦN NHÓM CHỐT TRƯỚC KHI VIẾT ERD CUỐI
+- Thư viện một cơ sở hay nhiều cơ sở? Một cơ sở là phạm vi tối thiểu đề xuất.
+- Chính sách theo reader_type + material_type; con số max_items, loan_days, renewals, fee/day, debt_block_threshold.
+- Ngày nghỉ có tính vào số ngày quá hạn không? Với đồ án, đề xuất ngày lịch để đơn giản và ghi rõ giả định.
+- Đặt trước theo đầu sách hay bản sao? Đề xuất theo đầu sách.
+- Phạt mất/hỏng cố định hay dựa trên giá đền bù? Đề xuất replacement_cost của đầu sách/bản sao và cho phép ghi đè có lý do.
+- Nhân viên được phép điều chỉnh/xóa khoản phạt không? Đề xuất adjustment có audit trail thay vì xóa giao dịch.
+- Có bắt buộc cursor, chuẩn SQL/phiên bản MySQL, số lượng report cụ thể theo rubric không? Cần xác nhận với giảng viên.
+
+10. NGUỒN CHÍNH THỨC ĐÃ ĐỐI CHIẾU
+Google Books API - Using the API: https://developers.google.com/books/docs/v1/using
+Google Books API - Volumes list: https://developers.google.com/books/docs/v1/reference/volumes/list
+Google Books API - Volume resource: https://developers.google.com/books/docs/v1/reference/volumes
+Google Books API - Volume get: https://developers.google.com/books/docs/v1/reference/volumes/get
+Google Books Embedded Viewer - Developer's Guide: https://developers.google.com/books/docs/viewer/developers_guide
+Google Books Branding Guidelines: https://developers.google.com/books/branding
+Supabase Auth architecture: https://supabase.com/docs/guides/auth/architecture
+Supabase Auth JWTs: https://supabase.com/docs/guides/auth/jwts
+Supabase JavaScript getClaims: https://supabase.com/docs/reference/javascript/auth-getclaims
+Supabase User Management: https://supabase.com/docs/guides/auth/managing-user-data
+
+11. LỘ TRÌNH THỰC HIỆN
+(1) Chốt phạm vi và bảng quy tắc nghiệp vụ bằng con số.
+(2) Vẽ ERD và viết tân từ, xác định khóa/ràng buộc/chuẩn hóa.
+(3) Cài schema MySQL bằng Drizzle migration và trích DDL vào báo cáo.
+(4) Viết import Google Books có duyệt, upsert idempotent và bổ sung dữ liệu thư viện.
+(5) Seed giao dịch và kiểm tra cạnh tranh mượn/trả, phạt, báo cáo.
+(6) Thực hiện phần procedure/function/trigger/cursor theo rubric và backup/restore.
+(7) Hoàn thiện báo cáo, dẫn nguồn thống nhất một chuẩn trích dẫn.
+
+KẾT LUẬN
+Giá trị chính của đồ án là mô hình CSDL thư viện và tính đúng đắn của lưu thông, không phải số lượng sách Google trả về hoặc khả năng hiển thị ebook. Google Books tăng chất lượng dữ liệu mẫu và demo xem trước; MySQL vẫn là nguồn sự thật về tài sản và hoạt động thư viện.

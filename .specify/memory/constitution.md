@@ -1,34 +1,28 @@
 <!--
 Sync Impact Report
 ==================
-Version change: (unversioned template) → 1.0.0
-Bump rationale: First ratification; every placeholder replaced with project governance.
+Version change: 1.1.0 → 1.2.0 → 1.2.1 (all 2026-09-24)
+Bump rationale: 1.2.0 MINOR — a new technology constraint (environment-configurable names and
+secrets) and a changed rule for where account grants live. 1.2.1 PATCH — refines that
+constraint: a minimal, unprefixed variable set; no variables for derived or pinned values; the
+image version is removed from the env list. No principle removed or renamed.
 
-Modified principles (template placeholder → new title):
-- [PRINCIPLE_1_NAME] → I. MySQL Is the Single Source of Truth
-- [PRINCIPLE_2_NAME] → II. Schema-First, Constraint-Enforced Data Model
-- [PRINCIPLE_3_NAME] → III. Transactional Circulation Integrity (NON-NEGOTIABLE)
-- [PRINCIPLE_4_NAME] → IV. Immutable History & Derived Money
-- [PRINCIPLE_5_NAME] → V. Server-Verified Identity & RBAC
-Added principles:
-- VI. Curated External Metadata
-- VII. Academic Traceability & Scoped Simplicity
-Added sections:
-- Technology & Data Constraints (was [SECTION_2_NAME])
-- Development Workflow & Quality Gates (was [SECTION_3_NAME])
-Removed sections: none
+Modified principles:
+- II. Schema-First, Constraint-Enforced Data Model: grants move from custom SQL migrations to a
+  versioned grants script run after migrations. Migrations never name an account.
+Modified sections:
+- Technology & Data Constraints: new rule that no DB names, account names, passwords, host,
+  port or image version are hard-coded; `.env.example` documents them with generic defaults.
+Added sections: none. Removed sections: none.
 
 Templates reviewed (not modified; they read the constitution at runtime):
-- .specify/templates/plan-template.md — "Constitution Check" gate applies principles I–VII
-- .specify/templates/spec-template.md — no change required
-- .specify/templates/tasks-template.md — no change required
+- .specify/templates/plan-template.md, spec-template.md, tasks-template.md — no change required
+Dependent artifacts updated in the same change: specs/001-library-db-design (spec FR-030, plan,
+research R1/R6, data-model privileges, quickstart, tasks).
 
-Follow-up TODOs (business decisions still open; see docs/library_database_research.txt §9):
-- TODO(LOAN_POLICY_NUMBERS): max items, loan days, renewals, daily fee, debt block threshold,
-  card validity, reservation hold window per reader_type × material_type.
-- TODO(RUBRIC_CONFIRMATION): confirm with lecturer whether cursor / procedure / trigger /
-  function are mandatory, the required MySQL version, and the required report count.
-Source: docs/library_database_research.txt (2026-09-24)
+Follow-up TODOs: none.
+Previous amendment: 1.0.0 → 1.1.0 (stored-procedure business rules, DB privilege split,
+Docker MySQL, diagram rules), 2026-09-24.
 -->
 # NexusLib Constitution
 
@@ -50,16 +44,21 @@ not the number of external results or ebook display.
 ### II. Schema-First, Constraint-Enforced Data Model
 
 - Every table MUST be declared in Drizzle schema and changed only through versioned Drizzle
-  migrations; the generated SQL DDL MUST be reproducible for the report.
-- Every table MUST have a `BIGINT` primary key and explicit foreign keys and indexes.
-  Many-to-many relations MUST use junction tables (e.g. `book_authors`, `book_categories`,
-  `user_roles`, `role_permissions`).
+  migrations. Triggers, stored functions, stored procedures and views MUST live in versioned
+  custom SQL migrations in the same history. Account grants MUST be versioned in the
+  repository, as a declarative grants script run right after migrations. Migrations never name
+  an account. The full DDL (including routines and triggers) MUST be reproducible for the
+  report.
+- Every primary entity table MUST have a `BIGINT` surrogate primary key, explicit foreign keys
+  and indexes. Many-to-many relations MUST use junction tables (e.g. `book_authors`,
+  `book_categories`, `user_roles`, `role_permissions`), which MAY use a composite primary key
+  of their two references instead of a surrogate id.
 - Invariants MUST be enforced in the database wherever MySQL can express them: `UNIQUE`
   (barcode, card_number, `(provider, external_id)`, role/permission codes), `CHECK`
   (amounts >= 0, `due_at > borrowed_at`, `returned_at >= borrowed_at`), `NOT NULL` chosen
   deliberately. Rules MySQL cannot express (overlapping policy periods, one open loan per
-  copy, one active card per reader) MUST be documented and enforced in a transaction or
-  trigger, with a test proving it.
+  copy, one active card per reader) MUST be documented and enforced by a generated-column
+  unique key, a trigger, or a locking transaction, with a test proving it.
 - Terminology is fixed: a *book* (đầu sách/ấn bản) is a catalogued edition; a *copy*
   (bản sao) is one physical item with a barcode. Physical condition and circulation status
   are separate attributes.
@@ -70,8 +69,13 @@ evidence, not application code alone.
 ### III. Transactional Circulation Integrity (NON-NEGOTIABLE)
 
 - Checkout, return, renewal, lost/damaged handling and payment allocation MUST each run in a
-  single backend transaction that locks affected rows with `SELECT ... FOR UPDATE` (copy,
-  loan item, reader/card as needed) before validating and writing.
+  single database transaction that locks affected rows with `SELECT ... FOR UPDATE` (copy,
+  loan item, reader/card as needed) before validating and writing. The transaction MUST be
+  implemented as a stored procedure that the server calls; a plain `SELECT` followed by a
+  separate write is never sufficient.
+- On any error the whole transaction MUST be rolled back. Callers MAY retry only deadlocks
+  (1213) and lock wait timeouts (1205), with a bounded number of attempts; business rejections
+  are never retried.
 - Checkout MUST validate, inside the lock: card valid and not expired, reader not blocked by
   debt, active item limit, applicable policy, and reservation queue.
 - Two concurrent checkouts of the same copy MUST result in exactly one success. This MUST be
@@ -103,17 +107,20 @@ Rationale: auditable history lets every report number be recomputed from transac
   or refresh tokens.
 - The backend MUST verify the Supabase access token (signature/claims via the officially
   supported method) and derive the user from the verified `sub`. A user id sent by the client
-  outside the token MUST be ignored.
+  outside the token MUST be ignored. Only this verified account id may be passed as the acting
+  account to operation procedures.
 - `app_users.supabase_user_id` is a unique logical reference (no cross-database FK); all
   internal FKs point to `app_users.id`.
 - Authorization MUST come from MySQL RBAC (`roles`, `permissions`, `user_roles`,
-  `role_permissions`) checked on the server for every mutating or privileged read.
+  `role_permissions`). Every operation procedure MUST check that its acting account is active
+  and holds the required permission before locking or writing; the server MUST also check
+  privileged reads.
   Supabase RLS and user-editable profile data MUST NOT grant library privileges.
 - `reader_type` is a borrowing-policy attribute, never a security role.
 - Deleted or disabled Supabase accounts MUST mark `app_users` inactive while preserving history.
 
 Rationale: two databases cannot share FKs, so trust must be anchored in verified tokens and
-server-side checks.
+checks enforced by the server and the database.
 
 ### VI. Curated External Metadata
 
@@ -138,9 +145,11 @@ Rationale: external data improves sample quality but must never corrupt or defin
   `material_types` table, reservations by book (not copy), overdue counted in calendar days,
   lost/damaged fees based on replacement cost with a reasoned override. Deviations MUST be
   justified in the plan's Complexity Tracking.
-- Stored procedures, functions, triggers and cursors MUST be used only where the rubric
-  requires them or they add clear value; cursors are reserved for justified batch jobs and
-  MUST NOT drive checkout.
+- Stored procedures, functions, triggers and cursors MUST each have a stated purpose:
+  - operation procedures for state-changing business operations (Principle III);
+  - functions for shared calculations;
+  - triggers for guards that CHECK cannot express;
+  - cursors only for justified batch jobs; they MUST NOT drive checkout.
 - Every assumption (policy numbers, holidays, scope) MUST be written down, not implied.
 
 Rationale: a small, fully explained scope scores better than a broad, partially built one.
@@ -150,12 +159,28 @@ Rationale: a small, fully explained scope scores better than a broad, partially 
 - Stack: Next.js 16 (App Router, `src/` layout) + TypeScript, pnpm workspace, Drizzle ORM and
   drizzle-kit with `mysql2`, Supabase Auth, Google Books API v1, Tailwind CSS 4. Before writing
   Next.js code, consult `node_modules/next/dist/docs/` because this version has breaking changes.
-- All database access and business rules run server-side (Route Handlers, Server Actions, or
-  server modules); client components never hold DB credentials or API keys.
-- Required indexes at minimum: `loan_items(copy_id, returned_at)`,
-  `loan_items(due_at, returned_at)`, `loans(reader_id, borrowed_at)`,
-  `book_copies(book_id, circulation_status)`, `reservations(book_id, status, requested_at)`,
-  `fines(loan_item_id, status)`, book identifiers, and title/author search columns. Key
+- Database: MySQL ≥ 8.0.16 (CHECK enforcement); development and tests use MySQL 8.4 in a local
+  Docker container so every teammate runs the same version.
+- All database access runs server-side (Route Handlers, Server Actions, or server modules);
+  client components never hold DB credentials or API keys. Business rules that change
+  circulation, policy, card or money state live in stored procedures invoked by the server.
+  Validation and orchestration live in server code.
+- The application's database account MUST NOT have direct INSERT/UPDATE/DELETE privilege on
+  circulation and money tables; those writes happen only through operation procedures.
+  Migrations run under a separate owner account.
+- No environment-specific name or secret may be hard-coded: database names, account names and
+  passwords, host and port come from environment variables. `.env.example` documents them with
+  generic, project-neutral defaults, so anyone can run Docker and the code with their own
+  values.
+- The set of environment variables MUST stay minimal and unprefixed (no project-name prefix).
+  Values that can be derived (e.g. a test schema name) or fixed by a project decision (e.g. a
+  pinned image version) MUST NOT become new variables. Each new variable needs a stated reason
+  in the spec.
+- Required indexes at minimum: `loan_items(copy_id, status)`, `loan_items(status, due_at)`,
+  `loans(reader_id, borrowed_at)`, `book_copies(book_id, circulation_status)`,
+  `reservations(book_id, status, requested_at)`, `fines(loan_item_id, fine_type)`, book
+  identifiers, and title/author search columns. An explicit status column, not
+  `returned_at IS NULL`, marks open loan items, because lost items have no return time. Key
   report and search queries MUST be accompanied by an `EXPLAIN` analysis.
 - Sample data: roughly 30–50 reviewed Google Books titles plus manual entries, including books
   without ISBN or cover, multi-author/multi-category books, multi-copy books, two editions
@@ -169,8 +194,11 @@ Rationale: a small, fully explained scope scores better than a broad, partially 
   `/speckit-tasks` → `/speckit-implement`. Each plan MUST pass the Constitution Check against
   principles I–VII before design and again after.
 - Schema changes require a migration, an updated ERD/predicate description where affected,
-  and exported DDL for the report.
-- Merge gates: `pnpm lint` and type check pass; migrations apply cleanly to an empty database;
+  and exported DDL for the report. The relational diagram MUST match the migrated schema; the
+  conceptual (Chen) ERD and its mapping to relations MUST be updated when entities or
+  relationships change.
+- Merge gates: `pnpm lint` and type check pass; migrations apply cleanly to an empty
+  database container;
   circulation transactions have tests for success, each rejection rule, and concurrency;
   report queries are verified against seeded data (e.g. available + on_loan + repair + lost =
   total copies; outstanding debt equals assessed minus allocations).
@@ -189,4 +217,4 @@ Rationale: a small, fully explained scope scores better than a broad, partially 
 - Runtime development guidance lives in `AGENTS.md`/`CLAUDE.md`; domain research lives in
   `docs/library_database_research.txt`.
 
-**Version**: 1.0.0 | **Ratified**: 2026-09-24 | **Last Amended**: 2026-09-24
+**Version**: 1.2.1 | **Ratified**: 2026-09-24 | **Last Amended**: 2026-09-24

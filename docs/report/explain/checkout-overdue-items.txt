@@ -1,0 +1,8 @@
+-- SELECT COUNT(*) FROM loans l JOIN loan_items li ON li.loan_id = l.id WHERE l.reader_id = 1 AND li.status = 'on_loan' AND li.due_at < UTC_TIMESTAMP(3)
+
+-> Aggregate: count(0)  (cost=1.53 rows=1)
+    -> Inner hash join (li.loan_id = l.id)  (cost=1.51 rows=0.2)
+        -> Index range scan on li using loan_items_status_due_ix over (status = 'on_loan' AND due_at < '2026-09-24 11:55:49.733'), with index condition: ((li.`status` = 'on_loan') and (li.due_at < <cache>(utc_timestamp(3))))  (cost=0.098 rows=2)
+        -> Hash
+            -> Covering index lookup on l using loans_reader_status_ix (reader_id=1)  (cost=0.35 rows=1)
+

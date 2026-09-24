@@ -1,0 +1,83 @@
+# Predicate (tân từ) of each relation, used by scripts/db/dictionary.ts.
+# Format: <table>: then indented `vi:` and `en:` lines (one line each).
+material_types:
+  vi: Mỗi loại tài liệu có một mã duy nhất và một tên; loại tài liệu quyết định chính sách mượn áp dụng.
+  en: A kind of library material, identified by a unique code; it decides which loan policy applies.
+publishers:
+  vi: Mỗi nhà xuất bản có một mã số và một tên.
+  en: An organisation that publishes editions.
+authors:
+  vi: Mỗi tác giả (cá nhân hoặc tổ chức) có một mã số và một tên.
+  en: A person or organisation credited on books.
+categories:
+  vi: Mỗi thể loại có một tên, có thể thuộc một thể loại cha; tên không trùng trong cùng một cha.
+  en: A subject category, optionally under a parent; names are unique within a parent.
+books:
+  vi: Đầu sách id là một ấn bản được thư viện biên mục, thuộc một loại tài liệu, có thể có nhà xuất bản và giá đền bù.
+  en: Book id is one catalogued edition owned by the library, of one material type.
+book_authors:
+  vi: Đầu sách book_id được ghi công cho tác giả author_id ở vị trí author_order.
+  en: Book book_id is credited to author author_id in position author_order.
+book_categories:
+  vi: Đầu sách book_id được xếp vào thể loại category_id.
+  en: Book book_id is classified in category category_id.
+book_identifiers:
+  vi: Đầu sách book_id mang định danh (loại, giá trị), ví dụ ISBN-13; định danh không bắt buộc duy nhất toàn cục.
+  en: Book book_id carries identifier (type, value); identifiers are not globally unique.
+book_external_refs:
+  vi: Đầu sách book_id được lấy metadata từ bản ghi external_id của nhà cung cấp; ảnh chụp dữ liệu có thời điểm fetched_at.
+  en: Book book_id was sourced from provider record external_id; the snapshot was fetched at fetched_at.
+book_copies:
+  vi: Bản sao có mã vạch barcode là một cuốn vật lý của đầu sách book_id, có tình trạng vật lý và trạng thái lưu thông.
+  en: Copy barcode is one physical item of book book_id, with a physical condition and a circulation status.
+app_users:
+  vi: Người dùng Supabase supabase_user_id được thư viện biết đến như tài khoản id, đang hoạt động hoặc đã khóa.
+  en: Supabase user supabase_user_id is known to the library as account id, active or inactive.
+roles:
+  vi: Mỗi vai trò bảo mật có một mã duy nhất và một tên.
+  en: A security role with a unique code.
+permissions:
+  vi: Mỗi quyền có một mã duy nhất, được các thủ tục nghiệp vụ kiểm tra.
+  en: A permission with a unique code, checked by the operation procedures.
+user_roles:
+  vi: Tài khoản user_id giữ vai trò role_id.
+  en: Account user_id holds role role_id.
+role_permissions:
+  vi: Vai trò role_id được cấp quyền permission_id.
+  en: Role role_id grants permission permission_id.
+reader_types:
+  vi: Mỗi loại độc giả (sinh viên, giảng viên, độc giả ngoài) có một mã duy nhất; đây là thuộc tính chính sách, không phải vai trò bảo mật.
+  en: A borrowing category (student, lecturer, external); a policy attribute, never a security role.
+readers:
+  vi: Độc giả id thuộc loại reader_type_id được mượn sách của thư viện; có thể liên kết với tối đa một tài khoản.
+  en: Reader id of type reader_type_id may borrow from the library; linked to at most one account.
+library_cards:
+  vi: Thẻ card_number được cấp cho độc giả reader_id, có hiệu lực đến expires_at khi còn active; mỗi độc giả có tối đa một thẻ active.
+  en: Card card_number was issued to reader reader_id, valid until expires_at while active; one active card per reader.
+loan_policies:
+  vi: Từ valid_from (tính cả) đến valid_to (không tính), độc giả loại reader_type_id mượn tài liệu loại material_type_id tuân theo các giá trị này.
+  en: Between valid_from (inclusive) and valid_to (exclusive), readers of type reader_type_id borrowing material material_type_id follow these values.
+loans:
+  vi: Nhân viên processed_by_user_id cho độc giả reader_id mượn sách vào lúc borrowed_at; phiếu mở cho đến khi mọi cuốn được trả hoặc báo mất.
+  en: Staff processed_by_user_id lent items to reader reader_id at borrowed_at; open until every item is returned or lost.
+loan_items:
+  vi: Bản sao copy_id được cho mượn trong phiếu loan_id theo phiên bản chính sách policy_id, hạn trả due_at; giữ bản chụp chính sách lúc mượn.
+  en: Copy copy_id was lent in loan loan_id under policy policy_id, due due_at; it keeps a snapshot of the policy.
+loan_renewals:
+  vi: Dòng mượn loan_item_id được gia hạn từ old_due_at đến new_due_at bởi nhân viên performed_by_user_id.
+  en: Loan item loan_item_id was extended from old_due_at to new_due_at by staff performed_by_user_id.
+reservations:
+  vi: Độc giả reader_id xếp hàng đặt trước đầu sách book_id vào lúc requested_at; khi sẵn sàng thì giữ một bản sao cho đến hold_expires_at.
+  en: Reader reader_id queued for book book_id at requested_at; when ready it holds one copy until hold_expires_at.
+fines:
+  vi: Dòng mượn loan_item_id phát sinh khoản phạt loại fine_type với số tiền assessed_amount_vnd; khác mức mặc định thì phải có lý do.
+  en: Loan item loan_item_id incurred a fine_type fine of assessed_amount_vnd; an override needs a reason.
+fine_adjustments:
+  vi: Khoản phạt fine_id được điều chỉnh một số tiền có dấu, có lý do và người thực hiện; không được làm tổng phải thu thấp hơn số đã thu.
+  en: Fine fine_id was corrected by a signed amount with a reason and an actor.
+fine_payments:
+  vi: Nhân viên received_by_user_id nhận amount_vnd từ độc giả reader_id; khoản tiền được phân bổ đủ 100% vào các khoản phạt.
+  en: Staff received_by_user_id received amount_vnd from reader reader_id, fully allocated to fines.
+fine_payment_allocations:
+  vi: Lần thanh toán payment_id trả amount_vnd cho khoản phạt fine_id.
+  en: Payment payment_id settles amount_vnd of fine fine_id.

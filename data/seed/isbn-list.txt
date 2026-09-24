@@ -1,0 +1,58 @@
+# Input for scripts/seed/fetch-google-books.ts (one-off Google Books fetch; not run by the seed).
+# Format:
+#   - one ISBN-10 or ISBN-13 per line (digits only, or with hyphens), or
+#   - q:<Google Books query>, e.g. q:intitle:clean code inauthor:martin (for books without a known ISBN)
+# Lines starting with '#' are comments. Duplicate entries are an error.
+# None of these entries may repeat a book already in books.manual.json.
+
+# Software engineering
+q:intitle:"Extreme Programming Explained" inauthor:beck
+q:intitle:"Continuous Delivery" inauthor:humble
+q:intitle:"Release It!" inauthor:nygard
+q:intitle:"Building Microservices" inauthor:newman
+q:intitle:"Growing Object-Oriented Software, Guided by Tests" inauthor:freeman
+q:intitle:"Implementing Domain-Driven Design" inauthor:vernon
+q:intitle:"The Clean Coder" inauthor:martin
+q:intitle:"Peopleware" inauthor:demarco
+q:intitle:"Software Engineering" inauthor:sommerville
+q:intitle:"Enterprise Integration Patterns" inauthor:hohpe
+q:intitle:"A Philosophy of Software Design" inauthor:ousterhout
+q:intitle:"Site Reliability Engineering" inauthor:beyer
+
+# Algorithms and theory
+q:intitle:"Algorithms" inauthor:sedgewick
+q:intitle:"The Algorithm Design Manual" inauthor:skiena
+q:intitle:"Algorithm Design" inauthor:kleinberg
+q:intitle:"Introduction to the Theory of Computation" inauthor:sipser
+q:intitle:"Concrete Mathematics" inauthor:knuth
+q:intitle:"Grokking Algorithms" inauthor:bhargava
+
+# Programming languages
+q:intitle:"The Rust Programming Language" inauthor:klabnik
+q:intitle:"The Go Programming Language" inauthor:donovan
+q:intitle:"Fluent Python" inauthor:ramalho
+q:intitle:"JavaScript: The Good Parts" inauthor:crockford
+q:intitle:"Java Concurrency in Practice" inauthor:goetz
+q:intitle:"The C++ Programming Language" inauthor:stroustrup
+
+# Databases and data systems
+q:intitle:"SQL Antipatterns" inauthor:karwin
+q:intitle:"High Performance MySQL" inauthor:schwartz
+q:intitle:"Database Management Systems" inauthor:ramakrishnan
+q:intitle:"An Introduction to Database Systems" inauthor:date
+q:intitle:"Readings in Database Systems" inauthor:stonebraker
+q:intitle:"SQL Performance Explained" inauthor:winand
+q:intitle:"Database Internals" inauthor:petrov
+
+# Systems, networks, AI
+q:intitle:"Operating System Concepts" inauthor:silberschatz
+q:intitle:"Modern Operating Systems" inauthor:tanenbaum
+q:intitle:"Computer Organization and Design" inauthor:patterson
+q:intitle:"Computer Networks" inauthor:tanenbaum
+q:intitle:"Pattern Recognition and Machine Learning" inauthor:bishop
+
+# Vietnamese books
+q:intitle:"Số đỏ" inauthor:"Vũ Trọng Phụng"
+q:intitle:"Tắt đèn" inauthor:"Ngô Tất Tố"
+q:intitle:"Nỗi buồn chiến tranh" inauthor:"Bảo Ninh"
+q:intitle:"Cho tôi xin một vé đi tuổi thơ" inauthor:"Nguyễn Nhật Ánh"

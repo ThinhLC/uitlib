@@ -1,0 +1,269 @@
+@startchen conceptual
+' Conceptual ERD (Chen notation) — source: specs/001-library-db-design/data-model.md "Conceptual model".
+' Cardinalities are (min,max) of each entity's participation. RESERVATION is an [Ext] workflow entity.
+
+entity MATERIAL_TYPE {
+  Code <<key>>
+  Name
+}
+entity PUBLISHER {
+  PublisherId <<key>>
+  Name
+}
+entity AUTHOR {
+  AuthorId <<key>>
+  Name
+}
+entity CATEGORY {
+  CategoryId <<key>>
+  Name
+}
+entity BOOK {
+  BookId <<key>>
+  Title
+  Subtitle
+  PublishedDate
+  Description
+  Language
+  Cover
+  Classification
+  ReplacementCost
+  Status
+  Identifiers <<multi>> {
+    IdentifierType
+    IdentifierValue
+  }
+}
+entity COPY {
+  Barcode <<key>>
+  ShelfCode
+  AcquiredAt
+  PhysicalCondition
+  CirculationStatus
+}
+entity EXTERNAL_REFERENCE {
+  ProviderExternalId <<key>>
+  RawSnapshot
+  Viewability
+  FetchedAt
+}
+entity ACCOUNT {
+  SupabaseUserId <<key>>
+  AccountStatus
+}
+entity ROLE {
+  RoleCode <<key>>
+  RoleName
+}
+entity PERMISSION {
+  PermissionCode <<key>>
+  PermissionDescription
+}
+entity READER_TYPE {
+  ReaderTypeCode <<key>>
+  ReaderTypeName
+}
+entity READER {
+  ReaderId <<key>>
+  FullName
+  Email
+  Phone
+  ReaderStatus
+}
+entity LIBRARY_CARD {
+  CardNumber <<key>>
+  IssuedAt
+  ExpiresAt
+  CardStatus
+}
+entity LOAN_POLICY_VERSION {
+  PolicyId <<key>>
+  MaxActiveItems
+  LoanDays
+  MaxRenewals
+  DailyLateFee
+  DebtBlockThreshold
+  ValidFrom
+  ValidTo
+}
+entity LOAN {
+  LoanId <<key>>
+  BorrowedAt
+  LoanStatus
+}
+entity LOAN_ITEM {
+  LoanItemId <<key>>
+  DueAt
+  ReturnedAt
+  ReturnCondition
+  LostDeclaredAt
+  ItemStatus
+  RenewalCount
+  AppliedPolicySnapshot
+}
+entity RENEWAL {
+  RenewalId <<key>>
+  OldDueAt
+  NewDueAt
+  RenewedAt
+}
+entity RESERVATION {
+  ReservationId <<key>>
+  RequestedAt
+  ReservationStatus
+  ReadyAt
+  HoldExpiresAt
+  CloseReason
+}
+entity FINE {
+  FineId <<key>>
+  FineType
+  DefaultAmount
+  AssessedAmount
+  FineReason
+  AssessedAt
+}
+entity FINE_ADJUSTMENT {
+  AdjustmentId <<key>>
+  SignedAmount
+  AdjustmentReason
+  AdjustedAt
+}
+entity PAYMENT {
+  RequestKey <<key>>
+  PaymentAmount
+  PaidAt
+  Method
+  Reference
+}
+
+relationship WRITTEN_BY {
+  AuthorOrder
+}
+WRITTEN_BY -(1,N)- BOOK
+WRITTEN_BY -(0,N)- AUTHOR
+
+relationship CLASSIFIED_IN {
+}
+CLASSIFIED_IN -(0,N)- BOOK
+CLASSIFIED_IN -(0,N)- CATEGORY
+
+relationship SUBCATEGORY_OF {
+}
+SUBCATEGORY_OF -(0,1)- CATEGORY
+SUBCATEGORY_OF -(0,N)- CATEGORY
+
+relationship PUBLISHED_BY {
+}
+PUBLISHED_BY -(0,1)- BOOK
+PUBLISHED_BY -(0,N)- PUBLISHER
+
+relationship OF_TYPE {
+}
+OF_TYPE -(1,1)- BOOK
+OF_TYPE -(0,N)- MATERIAL_TYPE
+
+relationship HAS_COPY {
+}
+HAS_COPY -(1,1)- COPY
+HAS_COPY -(0,N)- BOOK
+
+relationship SOURCED_FROM {
+}
+SOURCED_FROM -(1,1)- EXTERNAL_REFERENCE
+SOURCED_FROM -(0,N)- BOOK
+
+relationship SIGNS_IN_AS {
+}
+SIGNS_IN_AS -(0,1)- READER
+SIGNS_IN_AS -(0,1)- ACCOUNT
+
+relationship IS_OF_TYPE {
+}
+IS_OF_TYPE -(1,1)- READER
+IS_OF_TYPE -(0,N)- READER_TYPE
+
+relationship HOLDS {
+}
+HOLDS -(1,1)- LIBRARY_CARD
+HOLDS -(0,N)- READER
+
+relationship HAS_ROLE {
+}
+HAS_ROLE -(0,N)- ACCOUNT
+HAS_ROLE -(0,N)- ROLE
+
+relationship GRANTS {
+}
+GRANTS -(0,N)- ROLE
+GRANTS -(0,N)- PERMISSION
+
+relationship GOVERNS {
+}
+GOVERNS -(1,1)- LOAN_POLICY_VERSION
+GOVERNS -(0,N)- READER_TYPE
+GOVERNS -(0,N)- MATERIAL_TYPE
+
+relationship BORROWS {
+}
+BORROWS -(1,1)- LOAN
+BORROWS -(0,N)- READER
+
+relationship PROCESSES {
+}
+PROCESSES -(1,1)- LOAN
+PROCESSES -(0,N)- ACCOUNT
+
+relationship CONTAINS {
+}
+CONTAINS -(1,1)- LOAN_ITEM
+CONTAINS -(1,N)- LOAN
+
+relationship LENDS {
+}
+LENDS -(1,1)- LOAN_ITEM
+LENDS -(0,N)- COPY
+
+relationship APPLIES {
+}
+APPLIES -(1,1)- LOAN_ITEM
+APPLIES -(0,N)- LOAN_POLICY_VERSION
+
+relationship EXTENDS {
+}
+EXTENDS -(1,1)- RENEWAL
+EXTENDS -(0,N)- LOAN_ITEM
+
+relationship REQUESTS {
+}
+REQUESTS -(1,1)- RESERVATION
+REQUESTS -(0,N)- READER
+REQUESTS -(0,N)- BOOK
+
+relationship HELD_AS {
+}
+HELD_AS -(0,1)- RESERVATION
+HELD_AS -(0,N)- COPY
+
+relationship INCURS {
+}
+INCURS -(1,1)- FINE
+INCURS -(0,N)- LOAN_ITEM
+
+relationship CORRECTS {
+}
+CORRECTS -(1,1)- FINE_ADJUSTMENT
+CORRECTS -(0,N)- FINE
+
+relationship PAYS {
+}
+PAYS -(1,1)- PAYMENT
+PAYS -(0,N)- READER
+
+relationship SETTLES {
+  AllocatedAmount
+}
+SETTLES -(1,N)- PAYMENT
+SETTLES -(0,N)- FINE
+
+@endchen
