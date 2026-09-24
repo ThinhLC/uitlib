@@ -245,6 +245,9 @@ interface Ctx {
   /** Fines by label, set by return / lost steps. */
   fines: Map<string, { id: number; amount: number }>;
   policies: Map<string, number>;
+  /** Card id per reader key, and book id per copy barcode (set by the setup steps). */
+  cards: Map<string, number>;
+  bookOf: Map<string, number>;
   readerTypes: Map<string, number>;
   materialType: number;
 }
@@ -337,6 +340,19 @@ async function rejected(key: string, action: Promise<unknown>) {
     throw err;
   }
   throw new Error(`scenario: expected ${key}, but the call succeeded`);
+}
+
+async function reserve(ctx: Ctx, now: string, reader: string, barcode: string) {
+  const book = ctx.bookOf.get(barcode);
+  const { out } = await call(ctx, 'sp_reserve', [ctx.staff.lib1, now, ctx.reader(reader), book], ['p_reservation_id']);
+  return `${reader} reserves the book of ${barcode} (reservation ${String(out.p_reservation_id)})`;
+}
+
+/** Reservation statuses of a copy's book in queue order, for the log. */
+async function queueState(ctx: Ctx, barcode: string) {
+  const [rows] = await ctx.pool.query<RowDataPacket[]>(
+    `SELECT status FROM reservations WHERE book_id = ? ORDER BY requested_at, id`, [ctx.bookOf.get(barcode)]);
+  return `queue: ${rows.map((r) => String(r.status)).join(' / ')}`;
 }
 
 const STUDENT_P2_FROM = '2026-10-01 00:00';
@@ -453,6 +469,27 @@ const STEPS: Step[] = [
   } },
   { at: '2026-09-30 23:59:59.900', covers: 'US2-10 checkout just before P1 ends', run: (c, n) => checkout(c, n, 'S05', ['M005']) },
   { at: '2026-10-01 00:00:00.100', covers: 'US2-10 checkout under P2', run: (c, n) => checkout(c, n, 'S12', ['M006']) },
+
+  // --- [Ext] reservation queue: an ineligible head, a soft-blocked holder whose hold expires, a fulfilment
+  { at: '2026-10-02 09:00', covers: 'loan of a one-copy book', run: (c, n) => checkout(c, n, 'L03', ['M022']) },
+  { at: '2026-10-03 09:00', covers: 'Ext: reservation (queue 1st)', run: (c, n) => reserve(c, n, 'E02', 'M022') },
+  { at: '2026-10-03 09:05', covers: 'Ext: reservation (queue 2nd, has an overdue item)', run: (c, n) => reserve(c, n, 'S11', 'M022') },
+  { at: '2026-10-03 09:10', covers: 'Ext: reservation (queue 3rd)', run: (c, n) => reserve(c, n, 'S08', 'M022') },
+  { at: '2026-10-04 10:00', covers: 'Ext: renewal refused: reserved', run: (c, n) =>
+    rejected('RENEWAL_REJECTED', renew(c, n, 'M022')) },
+  { at: '2026-10-04 11:00', covers: 'card revoked (queue head becomes ineligible)', run: async (ctx, now) => {
+    await call(ctx, 'sp_set_card_status', [ctx.staff.lib1, now, ctx.cards.get('E02'), 'revoked']);
+    return 'E02 card revoked';
+  } },
+  { at: '2026-10-05 15:00', covers: 'Ext: return promotes the queue', run: async (ctx, now) =>
+    `${await giveBack(ctx, now, 'M022')}; ${await queueState(ctx, 'M022')}` },
+  { at: '2026-10-06 10:00', covers: 'Ext: soft-blocked holder cannot collect', run: (c, n) =>
+    rejected('OVERDUE_BLOCKED', checkout(c, n, 'S11', ['M022'])) },
+  { at: '2026-10-08 15:00', covers: 'Ext: expired hold passes to the next reader', run: async (ctx, now) => {
+    const { out } = await call(ctx, 'sp_expire_holds', [ctx.staff.admin, now], ['p_count']);
+    return `${String(out.p_count)} hold(s) expired; ${await queueState(ctx, 'M022')}`;
+  } },
+  { at: '2026-10-09 09:30', covers: 'Ext: holder collects: reservation fulfilled', run: (c, n) => checkout(c, n, 'S08', ['M022']) },
 ];
 
 const localTime = (at: string) => (at.length === 16 ? `${at}:00.000` : at);
@@ -524,6 +561,8 @@ async function run() {
       items: new Map(),
       fines: new Map(),
       policies: new Map(),
+      cards: new Map(),
+      bookOf: new Map(),
       readerTypes: new Map(types.map((t) => [String(t.code), Number(t.id)])),
       materialType: Number(mt.id),
     };
@@ -536,6 +575,7 @@ async function run() {
             const { out } = await call(c, 'sp_register_copy',
               [c.staff.lib1, now, bookIds.get(b), cp.barcode, cp.shelfCode, '2026-07-15', cp.condition], ['p_copy_id']);
             copies.set(cp.barcode, Number(out.p_copy_id));
+            c.bookOf.set(cp.barcode, bookIds.get(b)!);
           }
         }
         return `${copies.size} copies`;
@@ -548,8 +588,9 @@ async function run() {
           const expires = r.key === 'E04'
             ? vn('2026-09-15 23:59:59.999')
             : vn(`${2026 + Math.floor((7 + months) / 12)}-${String(((7 + months) % 12) + 1).padStart(2, '0')}-01 00:00`);
-          await call(c, 'sp_issue_card',
+          const { out } = await call(c, 'sp_issue_card',
             [c.staff.lib1, now, c.reader(r.key), `C2026-${String(++n).padStart(4, '0')}`, expires], ['p_card_id']);
+          c.cards.set(r.key, Number(out.p_card_id));
         }
         return `${n} cards`;
       } },

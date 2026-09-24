@@ -234,3 +234,20 @@ export async function otherReader(w: { staff: number; now: string; bookId: numbe
   await card(w.staff, w.now, readerId);
   return { ...w, readerId };
 }
+
+/** [Ext] sp_reserve: a waiting reservation for a book. */
+export async function reserve(actor: number, now: string, readerId: number, bookId: number): Promise<number> {
+  const { out } = await call('sp_reserve', [actor, now, readerId, bookId], { outParams: ['p_reservation_id'] });
+  return Number((out as any).p_reservation_id);
+}
+
+/** [Ext] sp_cancel_reservation. */
+export async function cancelReservation(actor: number, now: string, reservationId: number, reason: string | null) {
+  await call('sp_cancel_reservation', [actor, now, reservationId, reason]);
+}
+
+/** [Ext] sp_expire_holds: returns how many holds expired. */
+export async function expireHolds(actor: number, now: string): Promise<number> {
+  const { out } = await call('sp_expire_holds', [actor, now], { outParams: ['p_count'] });
+  return Number((out as any).p_count);
+}

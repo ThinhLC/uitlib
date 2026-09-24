@@ -461,7 +461,8 @@ rule in the matrix to a mechanism and a passing test.
   version.
 - **FR-009d**: Checkout eligibility MUST be evaluated inside the checkout transaction, after the
   reader row is locked, using locking reads: reader `active`; card valid at borrow time;
-  outstanding debt ≤ debt-block threshold; open items of that material type + items in this
+  outstanding debt ≤ debt-block threshold (when one checkout mixes material types, the strictest
+  threshold among their policy versions applies); open items of that material type + items in this
   checkout ≤ max active items; no overdue open item (D7); each copy `available`, or **[Ext]**
   `on_hold` for this reader's `ready` reservation. A multi-copy checkout is all-or-nothing (D13).
 

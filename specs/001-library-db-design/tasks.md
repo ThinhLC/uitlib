@@ -984,7 +984,7 @@ quickstart run.
 
 ### Reservations and holds (US3 [Ext])
 
-- [ ] T092 [P] [US3] Create `tests/db/us3-reservations.test.ts` (R-14e, R-14f, R-14g) covering:
+- [X] T092 [P] [US3] Create `tests/db/us3-reservations.test.ts` (R-14e, R-14f, R-14g) covering:
   - US3-7 (a return promotes R1 → `ready`, copy `on_hold`);
   - US3-8 (hold expiry passes to R2, or releases to `available`);
   - US3-9 (only the holder can borrow; the holder's checkout → `fulfilled`);
@@ -994,15 +994,15 @@ quickstart run.
     then expires);
   - US3-6 [Ext] (renewal rejected with `reserved`);
   - I-2 and I-3 views empty.
-- [ ] T093 [P] [US3] Create the concurrency tests
+- [X] T093 [P] [US3] Create the concurrency tests
   `tests/concurrency/ct-09-holder-vs-expiry.test.ts`,
   `tests/concurrency/ct-10-return-vs-cancel.test.ts`,
   `tests/concurrency/ct-11-return-vs-reserve.test.ts` and
   `tests/concurrency/ct-12-renew-vs-reserve.test.ts` (CT-9…CT-12), each with `repeat20`.
-- [ ] T094 [US3] Custom migration `ext_reservation_trigger`: `trg_reservations_bu` allows only
+- [X] T094 [US3] Custom migration `ext_reservation_trigger`: `trg_reservations_bu` allows only
   `waiting→ready|cancelled` and `ready→fulfilled|expired|cancelled`; anything else raises
   `INVALID_TRANSITION`.
-- [ ] T095 [US3] Custom migration `ext_promote_queue`: `sp__promote_queue(p_copy_id,
+- [X] T095 [US3] Custom migration `ext_promote_queue`: `sp__promote_queue(p_copy_id,
   p_actor_user_id, p_now)`, not granted, implementing FR-014b.
   - Lock the book's `waiting` reservations `ORDER BY requested_at, id FOR UPDATE`.
   - Walk them: cancel hard-ineligible readers (reader not `active`, or no card with
@@ -1014,7 +1014,7 @@ quickstart run.
 
   Re-create `sp_register_copy`, `sp_change_copy_status`, `sp_return_item` and `sp_checkout`
   (`DROP` + `CREATE`) so the `[Ext]` extension points call it or accept holds.
-- [ ] T096 [US3] Custom migration `ext_reservation_procedures`:
+- [X] T096 [US3] Custom migration `ext_reservation_procedures`:
   - `sp_reserve(p_actor_user_id, p_now, p_reader_id, p_book_id, OUT p_reservation_id)`:
     permission `reservation.manage`, or the actor is the reader's account; lock reader → book →
     copies `FOR SHARE`; FR-014a checks.
@@ -1026,14 +1026,15 @@ quickstart run.
     `sp__promote_queue`).
   - `sp_expire_holds(p_actor_user_id, p_now, OUT p_count)`: checks `reservation.manage`, then
     calls the helper.
-  - Update `sp_renew` for the `reserved` rejection.
-- [ ] T097 [US3] Custom migration `ext_hold_expiry_event`: `CREATE EVENT ev_expire_holds ON
+  - Update `sp_renew` for the `reserved` rejection. (Already present since `us3_renew`: a `FOR SHARE`
+    read of the book's waiting reservations after the book lock; covered by US3-6 [Ext] and CT-12.)
+- [X] T097 [US3] Custom migration `ext_hold_expiry_event`: `CREATE EVENT ev_expire_holds ON
   SCHEDULE EVERY 15 MINUTE DO CALL sp__expire_holds_batch(UTC_TIMESTAMP(3), @expired_count)`
   (FR-014c). Add
   to `tests/db/us3-reservations.test.ts` a check that the event exists and is `ENABLED` in
   `information_schema.EVENTS`, and that calling `sp__expire_holds_batch` directly as the app
   account is denied (1370).
-- [ ] T098 [US3] Run `pnpm test:db -- us3-reservations` and
+- [X] T098 [US3] Run `pnpm test:db -- us3-reservations` and
   `pnpm test:concurrency -- --ext ct-09 ct-10 ct-11 ct-12` until green. Re-run the full Core
   suite to confirm there are no regressions.
 

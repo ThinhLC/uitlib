@@ -1,5 +1,5 @@
 -- SELECT id FROM loan_policies WHERE reader_type_id = 1 AND material_type_id = 1 AND valid_from <= UTC_TIMESTAMP(3) AND (valid_to IS NULL OR valid_to > UTC_TIMESTAMP(3))
 
 -> Filter: ((loan_policies.valid_to is null) or (loan_policies.valid_to > <cache>(utc_timestamp(3))))  (cost=0.66 rows=0.5)
-    -> Index range scan on loan_policies using loan_policies_pair_from_ix over (reader_type_id = 1 AND material_type_id = 1 AND valid_from <= '2026-09-24 11:55:49.736'), with index condition: ((loan_policies.material_type_id = 1) and (loan_policies.reader_type_id = 1) and (loan_policies.valid_from <= <cache>(utc_timestamp(3))))  (cost=0.66 rows=1)
+    -> Index range scan on loan_policies using loan_policies_pair_from_ix over (reader_type_id = 1 AND material_type_id = 1 AND valid_from <= '2026-09-24 15:58:11.376'), with index condition: ((loan_policies.material_type_id = 1) and (loan_policies.reader_type_id = 1) and (loan_policies.valid_from <= <cache>(utc_timestamp(3))))  (cost=0.66 rows=1)
 

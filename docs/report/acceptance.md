@@ -22,7 +22,7 @@
 | 6 | `pnpm db:report -- --month 2026-08 --month 2026-09 --month 2026-10` | "SC-006: cumulative identity and roll-forward hold for every reader" (totals below) |
 | 7 | `pnpm test:db` | 15 files, 77 tests passed |
 | 7 | `pnpm test:concurrency` | 5 files, 11 tests passed; each CT repeated 20×, invariants checked after each run |
-| 7 | `pnpm test:concurrency -- --ext` | Not run (Phase 10) |
+| 7 | CT-9…CT-12 | Not part of this Core run; see the Phase 10 addendum |
 | 8 | `pnpm erd:relational`, `pnpm erd:render` | Diagrams regenerated |
 | 8 | `pnpm db:dictionary` | 27 relations |
 | 8 | `pnpm db:ddl` | 2555 lines |
@@ -63,7 +63,7 @@ are written through the operation procedures with explicit times (FR-025b).
 | Policy change after loans exist (SC-007) | `close STUDENT P1, create P2 (SC-007)` (P1 `valid_to` = 2026-10-01 00:00 local) |
 | Checkout just before a policy version ends (US2-10) | `US2-10 checkout just before P1 ends` (2026-09-30 23:59:59.900, due 10-14, P1), `US2-10 checkout under P2` (2026-10-01 00:00:00.100, due 10-08, P2) |
 | Reader with several loans | `reader with several loans` (S02, L02) |
-| [Ext] Reservation queue | Not in Core (Phase 10) |
+| [Ext] Reservation queue | Added in Phase 10: `Ext: reservation (queue 1st…3rd)` on M022, `card revoked (queue head becomes ineligible)`, `Ext: return promotes the queue` (head cancelled `ineligible_at_promotion`, S11 ready), `Ext: soft-blocked holder cannot collect` (`OVERDUE_BLOCKED`), `Ext: expired hold passes to the next reader`, `Ext: holder collects: reservation fulfilled`, `Ext: renewal refused: reserved` |
 
 ### Manual demo (§9)
 
@@ -162,9 +162,9 @@ Titles are quoted from `it(`/`describe(` strings. Paths are under `tests/`.
 | R-14b | Core schema | DB: CHECK | same RS-1 test | Covered |
 | R-14c | Core schema | DB: composite FK | same RS-1 test | Covered |
 | R-14d | Core schema | DB-derived unique | same RS-1 test | Covered |
-| R-14e | Ext | Procedure | — | Phase 10 |
-| R-14f | Ext | Procedure | — | Phase 10 |
-| R-14g | Ext | Procedure | — | Phase 10 |
+| R-14e | Ext | Procedure | `db/us3-reservations.test.ts` › "US3-7 R-14e…", "US3-8 R-14e…", "US3-15 R-14e…"; `concurrency/ct-09…`, `ct-10…` | Covered (Phase 10) |
+| R-14f | Ext | Procedure | `db/us3-reservations.test.ts` › "US3-9 R-14f…"; `concurrency/ct-09-holder-vs-expiry.test.ts` | Covered (Phase 10) |
+| R-14g | Ext | Procedure | `db/us3-reservations.test.ts` › "US3-14 R-14a/g…", "R-14g: a reader account may reserve and cancel only for itself"; `concurrency/ct-11…`, `ct-12…` | Covered (Phase 10) |
 | R-15a | Core | DB: UNIQUE(loan_item_id, fine_type) | `db/us4-fines.test.ts` › "US4-4 R-15a/b: a second late fine is rejected; damaged and lost cannot coexist" | Covered |
 | R-15b | Core | Procedure + trigger guard | `db/us4-fines.test.ts` › "US4-4 R-15a/b: …"; `concurrency/ct-04-06-cross-flows.test.ts` › "CT-5: …" | Covered |
 | R-15c | Core | DB: CHECK | `db/us4-fines.test.ts` › "US4-10 R-15c/d: damaged fine within 0…replacement cost with a reason; otherwise FINE_RULE" | Covered |
@@ -193,5 +193,21 @@ Titles are quoted from `it(`/`describe(` strings. Paths are under `tests/`.
 2. **SC-008**: timed walkthrough by a reviewer unfamiliar with the project.
 3. **Fresh-clone rerun**: after the work is committed, repeat §3–§9 on a fresh clone with an
    empty volume and update this report.
-4. **Phase 10 (Ext)**: reservations and holds (R-14e/f/g, CT-9…CT-12, `--ext`), only after
-   this gate passes.
+4. ~~Phase 10 (Ext)~~: done, see the addendum below.
+
+## 5. Phase 10 addendum: reservations and holds [Ext] (2026-09-24)
+
+Built after the Core gate passed (tasks T092–T098): migrations `ext_reservation_trigger`,
+`ext_promote_queue`, `ext_reservation_procedures`, `ext_hold_expiry_event`.
+
+| Check | Result |
+| --- | --- |
+| `pnpm test:db` | 93 tests passed (13 new in `tests/db/us3-reservations.test.ts`) |
+| `pnpm test:concurrency` | 15 tests passed; CT-9…CT-12 each 20 runs, invariants I-2/I-3 empty after every run |
+| `pnpm db:migrate` on the main schema | 25 migrations; EXECUTE on 26 routines; `ev_expire_holds` ENABLED |
+| `pnpm db:seed --reset` | reservation scenario runs; invariant suite clean; `CHECKSUM TABLE` identical across runs (incl. `reservations`) |
+| `pnpm db:objects` | 17 triggers, 22 procedures, 1 event |
+
+The test schema disables `ev_expire_holds` after migrating (`scripts/db/reset-test.ts`): tests
+pass explicit times, and a wall-clock expiry would race them. The event's existence and schedule
+are tested; its ENABLED state is checked on the main schema (table above).

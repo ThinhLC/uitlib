@@ -107,9 +107,8 @@ Expected:
 
 ```sh
 pnpm test:db                    # functions, acceptance [Core], RS-1, bypass B-1…B-5, ERD sync
-pnpm test:concurrency           # CT-1…CT-8 and CT-13, 20 runs each, invariant views after each run
+pnpm test:concurrency           # CT-1…CT-13, 20 runs each, invariant views after each run
 pnpm test:bypass                # B-1…B-5, 20 runs (SC-003)
-pnpm test:concurrency -- --ext  # CT-9…CT-12, only after the reservation procedures exist
 ```
 
 Expected: all green. Test names carry the scenario and rule ids (e.g. `US3-2 R-12a`), so every

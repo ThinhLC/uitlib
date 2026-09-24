@@ -4,7 +4,7 @@
     -> Nested loop inner join  (cost=3.26 rows=2)
         -> Nested loop inner join  (cost=2.56 rows=2)
             -> Nested loop inner join  (cost=1.86 rows=2)
-                -> Index range scan on li using loan_items_status_due_ix over (status = 'on_loan' AND due_at < '2026-09-24 11:55:49.720'), with index condition: ((li.`status` = 'on_loan') and (li.due_at < <cache>(utc_timestamp(3))))  (cost=1.16 rows=2)
+                -> Index range scan on li using loan_items_status_due_ix over (status = 'on_loan' AND due_at < '2026-09-24 15:58:11.359'), with index condition: ((li.`status` = 'on_loan') and (li.due_at < <cache>(utc_timestamp(3))))  (cost=1.16 rows=2)
                 -> Single-row index lookup on l using PRIMARY (id=li.loan_id)  (cost=0.3 rows=1)
             -> Single-row index lookup on r using PRIMARY (id=l.reader_id)  (cost=0.3 rows=1)
         -> Single-row index lookup on c using PRIMARY (id=li.copy_id)  (cost=0.3 rows=1)

@@ -69,7 +69,7 @@ MySQL reads these values only when the volume is empty. After changing a name or
 | `pnpm db:dictionary` | Regenerate `docs/data-dictionary.md` |
 | `pnpm erd:relational` | Regenerate the relational ERD (Mermaid) from the migrated schema |
 | `pnpm test:db` | Acceptance, bypass, function and ERD-sync tests |
-| `pnpm test:concurrency` | Concurrency tests (each case 20 runs) |
+| `pnpm test:concurrency` | Concurrency tests CT-1…CT-13 (each case 20 runs) |
 | `pnpm test:bypass` | Bypass tests B-1…B-5, 20 runs |
 | `pnpm lint` / `pnpm typecheck` | ESLint / TypeScript |
 
@@ -104,9 +104,9 @@ specs/                 Spec Kit feature specs
 
 ## Status
 
-Core (spec 001) is done and has passed the demo gate (see the acceptance report).
+Core (spec 001) is done and has passed the demo gate (see the acceptance report). The only
+extension, reservations and holds (queue promotion, hold expiry every 15 minutes), is built too.
 Still open:
 
 - fetch Google Books metadata (needs an API key), then have the team review it;
-- reservations and holds (Phase 10, Ext);
 - the Next.js API and Supabase auth (later specs).

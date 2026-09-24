@@ -4,7 +4,7 @@
     -> Materialize  (cost=0..0 rows=0)
         -> Table scan on <temporary>
             -> Aggregate using temporary table
-                -> Nested loop inner join  (cost=28.1 rows=62)
-                    -> Covering index scan on c using book_copies_book_status_ix  (cost=6.45 rows=62)
-                    -> Single-row index lookup on b using PRIMARY (id=c.book_id)  (cost=0.252 rows=1)
+                -> Nested loop inner join  (cost=17.7 rows=62)
+                    -> Covering index scan on b using books_title_ix  (cost=3.45 rows=32)
+                    -> Covering index lookup on c using book_copies_book_status_ix (book_id=b.id)  (cost=0.257 rows=1.94)
 

@@ -18,6 +18,16 @@ export async function resetTestSchema(log = console.log): Promise<void> {
     await conn.end();
   }
   await migrateSchema(schema, log);
+
+  // Tests pass explicit times; a wall-clock event (hold expiry every 15 minutes) would race them.
+  const owner = await mysql.createConnection(dbConfig('owner', { schema }));
+  try {
+    const [events] = await owner.query<mysql.RowDataPacket[]>(
+      `SELECT EVENT_NAME name FROM information_schema.EVENTS WHERE EVENT_SCHEMA = ?`, [schema]);
+    for (const e of events) await owner.query(`ALTER EVENT \`${e.name}\` DISABLE`);
+  } finally {
+    await owner.end();
+  }
 }
 
 if (process.argv[1]?.endsWith('reset-test.ts')) {
