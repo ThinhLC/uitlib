@@ -24,20 +24,23 @@ environment (spec FR-030).
   only 1213/1205, up to 3 times with a 50–200 ms random back-off.
 - Locks follow the spec's global order: reader type → reader → card → book → copy → policy
   version → loan → loan item → reservation → fine. Within one kind, rows are locked in ascending
-  id; reservations in `(requested_at, id)` order.
+  id; reservations in `(requested_at, id)` order. [Ext] Every writer of a book's copies or
+  reservations locks the `books` row first, so reservation work on one book is serialized.
 - **Decisions use locking reads only.** Every value that decides a write (debt, balances, open
   items, overdue items, card validity) comes from `SELECT … FOR UPDATE` / `FOR SHARE` taken
   after the reader lock. The balance functions `fn_fine_net`, `fn_fine_remaining` and
   `fn_reader_outstanding` use plain reads; they are for views and reports and MUST NOT decide a
-  write. `START TRANSACTION WITH CONSISTENT SNAPSHOT` is not used (research R5).
+  write. `START TRANSACTION WITH CONSISTENT SNAPSHOT` is not used (research R5). The one
+  deliberate exception is the hard-eligibility read in `sp__promote_queue` (see Internal
+  helpers).
 
 ## Error keys
 
 | Key | Raised when |
 | --- | --- |
-| `FORBIDDEN` | Actor missing, inactive, or lacks the permission |
+| `FORBIDDEN` | Actor missing, inactive, or lacks the permission; [Ext] for reserve/cancel: not staff and not the reader's own active account |
 | `NOT_FOUND` | A referenced id does not exist |
-| `VALIDATION` | Bad input shape or range (empty list, duplicate id, amount ≤ 0, …) |
+| `VALIDATION` | Bad input shape or range (empty list, duplicate id, amount ≤ 0, …); [Ext] reserve when the book has an `available` copy or the reader has it on loan; staff cancel without a reason |
 | `COPY_NOT_AVAILABLE` | Copy not `available`, or `on_hold` for another reader |
 | `READER_NOT_ACTIVE` | Reader `suspended` / `inactive` |
 | `CARD_INVALID` | No card that is `active` and unexpired at `p_now` |
@@ -46,7 +49,7 @@ environment (spec FR-030).
 | `LIMIT_REACHED` | Open items + requested items > max active items |
 | `NO_POLICY` | No version covers (reader type, material type, `p_now`) |
 | `RENEWAL_REJECTED` | Not on loan, overdue, at limit, or waiting reservation (detail names which) |
-| `INVALID_TRANSITION` | Status change not allowed (procedure check or trigger) |
+| `INVALID_TRANSITION` | Status change not allowed (procedure check or trigger, incl. `trg_reservations_bu`) |
 | `POLICY_OVERLAP` | Version would overlap another for the same pair |
 | `POLICY_CLOSE_REJECTED` | Close is retroactive, extends, or not after every referencing borrow |
 | `POLICY_IMMUTABLE` | Trigger: business value of a version changed |
@@ -56,7 +59,7 @@ environment (spec FR-030).
 | `FINE_RULE` | Fine amount out of range, missing reason, damaged+lost conflict |
 | `ALLOCATION_MISMATCH` | Σ allocations ≠ amount, over a fine's remaining balance, or another reader's fine |
 | `PAYMENT_EXCEEDS_DEBT` | Payment > reader's outstanding |
-| `DUPLICATE` | A unique key was hit (1062 mapped by `callProcedure`; detail = index name), or a business duplicate detected before the key (e.g. active reservation) |
+| `DUPLICATE` | A unique key was hit (1062 mapped by `callProcedure`; detail = index name, e.g. `reservations_active_uq` for a second `waiting`/`ready` reservation of the same reader and book) |
 | `IDEMPOTENCY_CONFLICT` | Payment request key reused with a different reader, amount or allocations |
 
 ## Functions [Core, public]
@@ -84,13 +87,13 @@ Expected values (from spec US2-10, US4-1, US4-3): `fn_due_at('2026-09-30 16:59:5
 | `sp_create_policy_version` | `policy.manage` | reader_type_id, material_type_id, max_active_items, loan_days, max_renewals, daily_late_fee_vnd, debt_block_threshold_vnd, valid_from | `p_policy_id` | reader type → versions of pair; reject `POLICY_OVERLAP`; insert | FR-009, R-09a |
 | `sp_close_policy_version` | `policy.manage` | policy_id, valid_to | — | reader type → version; reject `POLICY_CLOSE_REJECTED` if `valid_to` < `p_now`, not earlier than current, ≤ `valid_from`, or ≤ max referencing `borrowed_at` | FR-009c, R-09e |
 | `sp_issue_card` | `card.manage` | reader_id, card_number, expires_at | `p_card_id` | reader → reader's cards; insert (UQ → 1062, reported as `DUPLICATE` re-raised) | FR-008, R-08a/c |
-| `sp_set_card_status` | `card.manage` | card_id, status | — | reader → card; `active` only if unexpired and no other active | FR-008 |
-| `sp_register_copy` | `catalog.write` | book_id, barcode, shelf_code, acquired_at, condition | `p_copy_id` | book → [Ext] queue; insert as `available` (or `in_repair` if damaged); [Ext] promotion | FR-006, FR-006a |
-| `sp_change_copy_status` | `catalog.write` | copy_id, target_status, condition | — | book → copy → [Ext] queue; lifecycle check; `INVALID_TRANSITION` if the target is `available` while the (new) condition is `damaged`; [Ext] promotion | FR-006a |
-| `sp_checkout` | `loan.checkout` | reader_id, copy_ids JSON `[id,…]` | result set: loan_id, loan_item_id, copy_id, due_at | reader → reader's cards (S) → books ↑ → copies ↑ → policy (S) → [Ext] reservation (expire an overdue hold on the copy first); eligibility (FR-009d) with locking reads, debt by `SUM … FOR SHARE`; insert loan, items (snapshot + `fn_due_at`), then copies `on_loan`; all-or-nothing | FR-009b/d, FR-010–012, R-12b |
-| `sp_return_item` | `loan.return` | loan_item_id, return_condition, damaged_fine_vnd NULL, reason NULL | result set of assessed fines | reader → book → copy → loan → loan item → [Ext] queue; item `returned`; `sp__assess_fines`; copy lendable or `in_repair`; loan closed if last | FR-015a/b, R-10a |
+| `sp_set_card_status` | `card.manage` | card_id, status | — | reader → card; only `active → expired \| lost \| revoked`, else `INVALID_TRANSITION`. All three are terminal: a card never returns to `active`; issue a new card instead | FR-008 |
+| `sp_register_copy` | `catalog.write` | book_id, barcode, shelf_code, acquired_at, condition | `p_copy_id` | book; insert as `available` (or `in_repair` if damaged); [Ext] a copy that is not damaged then runs `sp__promote_queue` (queue locked last), so it may end `on_hold` | FR-006, FR-006a |
+| `sp_change_copy_status` | `catalog.write` | copy_id, target_status, condition | — | book → copy; lifecycle check (`INVALID_TRANSITION` if the copy is `on_loan`/`on_hold`, or the target is `available` while the (new) condition is `damaged`); [Ext] target `available` (repair done, found) then runs `sp__promote_queue` | FR-006a |
+| `sp_checkout` | `loan.checkout` | reader_id, copy_ids JSON `[id,…]` | result set: loan_id, loan_item_id, copy_id, due_at | reader → reader's cards (S) → books ↑ → copies ↑ (each `available` or [Ext] `on_hold`) → policy (S) → [Ext] reservation (step 6b, below); eligibility (FR-009d) with locking reads, debt by `SUM … FOR SHARE`; insert loan, items (snapshot + `fn_due_at`), [Ext] holder's reservations `fulfilled`, then copies `on_loan`; all-or-nothing | FR-009b/d, FR-010–012, R-12b, R-14f |
+| `sp_return_item` | `loan.return` | loan_item_id, return_condition, damaged_fine_vnd NULL, reason NULL | result set of assessed fines | reader → book → copy → loan → loan item → [Ext] queue; item `returned`; `sp__assess_fines`; copy `in_repair` if damaged, else `available` and [Ext] `sp__promote_queue`; loan closed if last | FR-015a/b, R-10a, R-14e |
 | `sp_declare_lost` | `loan.return` | loan_item_id, lost_fine_vnd NULL, reason NULL | result set of assessed fines | as return; item `lost`, copy `lost`; late (to `p_now`) + lost fines | FR-015a/b |
-| `sp_renew` | `loan.renew` | loan_item_id | `p_new_due_at` | reader → book → loan item; checks (FR-013); update due and count; insert renewal | FR-013, R-13a |
+| `sp_renew` | `loan.renew` | loan_item_id | `p_new_due_at` | reader → book → loan item → book's `waiting` reservations (S); checks (FR-013): `not_on_loan`, `overdue`, `limit`, then `reserved` if any `waiting` reservation exists (a `ready` hold does not block); update due and count; insert renewal | FR-013, R-13a |
 | `sp_record_payment` | `fine.collect` | reader_id, amount_vnd, method, reference_no, request_key, allocations JSON `[{fine_id, amount_vnd}]` | `p_payment_id`, `p_replayed` | see below | FR-016, R-16b–e |
 | `sp_adjust_fine` | `fine.adjust` | fine_id, amount_vnd (≠ 0), reason | `p_adjustment_id` | reader (of the fine) → fine `FOR UPDATE`; net and allocated read with `FOR SHARE`; `FINE_RULE` if the reason is blank or afterwards net < allocated or net < 0; insert with `adjusted_at = p_now` | FR-017, R-17a |
 
@@ -118,6 +121,24 @@ Expected values (from spec US2-10, US4-1, US4-3): `fn_due_at('2026-09-30 16:59:5
 the same comparison as step 2: return the existing payment with `p_replayed = TRUE`, or
 `IDEMPOTENCY_CONFLICT`.
 
+### `sp_checkout` step 6b: held copies [Ext]
+
+Runs after the policy lock, for each `on_hold` copy in ascending id:
+
+1. Lock the copy's `ready` reservation (`WHERE ready_copy_id = copy FOR UPDATE`).
+2. If `hold_expires_at ≤ p_now`, expire it on scan (FR-014c): `status = 'expired'`,
+   `close_reason = 'hold_expired'`, `closed_by_kind = 'system'`, `closed_at = p_now`; call
+   `sp__promote_queue`; re-read the copy's `ready` reservation `FOR UPDATE`.
+3. A `ready` reservation of another reader → `COPY_NOT_AVAILABLE` (held for another reader,
+   R-14f); this reader's → remembered for the write step; none left → the copy is lent as an
+   available one.
+
+The holder must still pass every eligibility check (a soft-blocked holder gets `DEBT_BLOCKED`,
+`OVERDUE_BLOCKED` or `LIMIT_REACHED` and keeps the hold). Any failure also rolls back an expiry
+done in step 2. At write time the holder's reservation is set `fulfilled` with
+`fulfilled_loan_item_id` = the new loan item, `closed_at = p_now`, `closed_by_kind = 'staff'`,
+`closed_by_user_id = p_actor_user_id`, before the copy leaves `on_hold`.
+
 ## Internal helpers [not granted]
 
 - `sp__check_replay(p_payment_id, p_reader_id, p_amount_vnd, p_allocations)` raises
@@ -129,22 +150,46 @@ the same comparison as step 2: return the existing payment with `p_replayed = TR
   the damaged or lost fine with the defaults and range checks of FR-015b. It sets `reason` when
   the amount differs from the default.
 - `sp__promote_queue(p_copy_id, p_actor, p_now)` [Ext]: FR-014b promotion walk. It runs inside
-  the caller's transaction.
+  the caller's transaction; the caller holds the book and copy locks and the copy is lendable
+  (`available`, or `on_hold` after a hold ended). Callers: `sp_register_copy`,
+  `sp_change_copy_status`, `sp_return_item`, `sp_cancel_reservation`, `sp_checkout` (step 6b),
+  `sp__expire_holds_batch` (actor `NULL`). Steps:
+  1. Lock the book's whole `waiting` queue `FOR UPDATE` in queue order (`reservations_queue_ix`).
+  2. Take the head (`ORDER BY requested_at, id`). None left → copy `available` (if not already);
+     stop.
+  3. Hard eligibility (D4) by **plain reads**: reader `active` and a card `active` with
+     `expires_at > p_now`. Readers and cards come before books in the lock order, so they are
+     not locked here; checkout re-checks the holder under its own locks, so a stale answer can
+     only give a hold that later expires, never a loan.
+  4. Hard-ineligible → the head is `cancelled` with `close_reason = 'ineligible_at_promotion'`,
+     `closed_by_kind = 'system'`, `closed_at = p_now`; go to step 2. Soft blocks (debt, overdue,
+     limit) are not checked.
+  5. Eligible → copy `on_hold` (if not already); reservation `ready` with `assigned_copy_id`,
+     `ready_at = p_now`, `hold_expires_at = p_now + INTERVAL 3 DAY` (D4 hold window); stop.
+- `sp__expire_holds_batch(p_now, OUT p_count)` [Ext]: see Cursor batches. Calling it as the app
+  account fails with errno 1370.
 
 ## Cursor batches
 
 | Procedure | Tier | Permission | Behaviour |
 | --- | --- | --- | --- |
 | `sp_expire_cards(p_actor, p_now, OUT p_count)` | Core, public | `card.manage` | Cursor over `library_cards` with `status='active' AND expires_at <= p_now`, ordered by `reader_id, id`. One transaction per row: lock reader → card, re-check, set `expired` |
-| `sp_expire_holds(p_actor, p_now, OUT p_count)` | Ext, public | `reservation.manage` | Checks the permission, then calls `sp__expire_holds_batch(p_now, OUT p_count)`: a cursor over `ready` reservations with `hold_expires_at <= p_now`, ordered by `book_id, id`. One transaction per row: lock book → copy → queue, re-check, set `expired`, `sp__promote_queue` |
-| `ev_expire_holds` (EVENT) | Ext, not granted | — | `ON SCHEDULE EVERY 15 MINUTE DO CALL sp__expire_holds_batch(UTC_TIMESTAMP(3), @expired_count)` (FR-014c) |
+| `sp_expire_holds(p_actor, p_now, OUT p_count)` | Ext, public | `reservation.manage` | Checks the permission (`FORBIDDEN`), then calls `sp__expire_holds_batch(p_now, p_count)` |
+| `sp__expire_holds_batch(p_now, OUT p_count)` | Ext, internal | — | Cursor over `ready` reservations with `hold_expires_at <= p_now`, ordered by `book_id, id`. One transaction per row: lock book → copy → reservation `FOR UPDATE` (no reader lock), re-check `ready` and past expiry (a checkout or cancel may have closed it), set `expired` with `close_reason = 'hold_expired'`, `closed_by_kind = 'system'`, `closed_at = p_now`, then `sp__promote_queue(copy, NULL, p_now)`; `p_count` counts expired holds. An error rolls back only the current hold |
+| `ev_expire_holds` (EVENT) | Ext, not granted | — | `ON SCHEDULE EVERY 15 MINUTE ON COMPLETION PRESERVE ENABLE DO CALL sp__expire_holds_batch(UTC_TIMESTAMP(3), @expired_count)` (FR-014c). Needs `event_scheduler=ON`; `pnpm db:reset-test` disables all events in the test schema because tests pass explicit times |
 
-## Ext operation procedures (public once built)
+## Reservation procedures [Ext, public]
 
-| Procedure | Permission | Parameters | Spec |
-| --- | --- | --- | --- |
-| `sp_reserve` | `reservation.manage` or self (actor is the reader's account) | reader_id, book_id | FR-014a |
-| `sp_cancel_reservation` | same | reservation_id, reason | FR-014c |
+| Procedure | Permission | Parameters (after `p_actor_user_id`, `p_now`) | OUT / result | Locks, then writes | Spec |
+| --- | --- | --- | --- | --- | --- |
+| `sp_reserve` | `reservation.manage`, or the actor is the reader's own `active` account (`readers.user_id`); else `FORBIDDEN` before any lock | reader_id, book_id | `p_reservation_id` | reader `FOR UPDATE` (`NOT_FOUND: reader`) → book `FOR UPDATE` (`NOT_FOUND: book`) → the book's `available` copies `FOR SHARE` (any → `VALIDATION`) → the reader's `on_loan` items of the book `FOR SHARE` (any → `VALIDATION`); insert `waiting` with `requested_at = p_now`. A second `waiting`/`ready` reservation for (reader, book) hits `reservations_active_uq` → 1062 → `DUPLICATE`. Reader status and card are not checked (promotion handles them, D4) | FR-014a, D6, R-14a/g |
+| `sp_cancel_reservation` | `reservation.manage` (reason required, else `VALIDATION`; `closed_by_kind = 'staff'`), or the reader's own `active` account (`closed_by_kind = 'reader'`, reason optional); else `FORBIDDEN` | reservation_id, reason | — | plain read of the immutable reader and book (`NOT_FOUND: reservation`), then permission; reader → book → reservation `FOR UPDATE`; not `waiting`/`ready` → `INVALID_TRANSITION`; if `ready`, lock the assigned copy `FOR UPDATE`; set `cancelled`, `closed_at = p_now`, `closed_by_user_id = actor`, `close_reason = reason` or `'cancelled_by_reader'` when blank; if it was `ready`, `sp__promote_queue` on the copy | FR-014c, R-14e |
+
+`trg_reservations_bu` (BEFORE UPDATE) allows only `waiting → ready | cancelled` and
+`ready → fulfilled | expired | cancelled`, and rejects any change of `reader_id` or `book_id`
+(`INVALID_TRANSITION`). Close reasons written by the routines: `ineligible_at_promotion`
+(promotion), `hold_expired` (batch and checkout), `cancelled_by_reader` (default on cancel), or
+the caller's reason.
 
 ## Report procedures [Core, public]
 
