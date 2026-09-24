@@ -602,7 +602,14 @@ async function run() {
       console.log(`${step.at.padEnd(23)} [${step.covers}] ${note ?? ''}`);
     }
 
-    const violations = await findViolations(owner);
+    // The invariant suite runs as the app account, like `pnpm db:check`.
+    const app = await pool.getConnection();
+    let violations: Awaited<ReturnType<typeof findViolations>>;
+    try {
+      violations = await findViolations(app);
+    } finally {
+      app.release();
+    }
     for (const v of violations) console.error(`  ${v.view}:`, v.rows);
     if (violations.length) throw new Error(`invariant suite: ${violations.length} view(s) with violations`);
     console.log(`${schema}: seeded; invariant suite clean`);

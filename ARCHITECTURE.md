@@ -94,7 +94,7 @@ flowchart LR
 | US3 | `us3_loan_item_triggers`, `us3_fine_triggers`, `us3_checkout`, `us3_return_lost`, `us3_renew` |
 | US4 | `us4_money_triggers`, `us4_record_payment`, `us4_reports`, `us4_adjustments` |
 | Fixes | `null_safe_check_fixes`, `integrity_error_keys` |
-| Ext | `ext_reservation_trigger`, `ext_promote_queue` (also re-creates `sp_register_copy`, `sp_change_copy_status`, `sp_return_item`, `sp_checkout`), `ext_reservation_procedures`, `ext_hold_expiry_event` |
+| Ext | `ext_reservation_trigger`, `ext_promote_queue` (also re-creates `sp_register_copy`, `sp_change_copy_status`, `sp_return_item`, `sp_checkout`), `ext_reservation_procedures`, `ext_hold_expiry_event`, `ext_reservation_hardening` (adds `sp__expire_hold`; re-creates `sp__expire_holds_batch`, `sp_checkout`, `sp_reserve`, `sp_cancel_reservation`) |
 
 **drizzle-kit patch.** In drizzle-kit 1.0.0-rc.4 the MySQL diff ignores a *changed* CHECK
 expression (upstream issues #4602, #5730). `patches/drizzle-kit@1.0.0-rc.4.patch` makes
@@ -676,7 +676,13 @@ Rejections use `SIGNAL SQLSTATE '45000'` with `KEY: detail` messages, e.g. `COPY
   loan item → reservation → fine. Multi-row sets are locked in ascending id.
 - Every procedure has `EXIT HANDLER FOR SQLEXCEPTION BEGIN ROLLBACK; RESIGNAL; END`, so an
   error never leaves partial rows. The cursor batches (`sp_expire_cards`,
-  `sp__expire_holds_batch`) commit one row at a time, so an error undoes only the current row.
+  `sp__expire_holds_batch`) commit one row at a time, so an error rolls back only the current
+  row. `sp__expire_holds_batch` runs each hold through `sp__expire_hold`; a hold that hits a
+  lock wait timeout or deadlock (1205/1213) is skipped and the run goes on, while any other
+  error stops the run (holds already committed stay expired).
+- [Ext] `sp_checkout` expires overdue holds on the scanned copies in step 0, before its own
+  transaction, each through `sp__expire_hold` in its own committed transaction. That expiry
+  stands even when the checkout is then rejected.
 - `callProcedure` retries only deadlock (1213) and lock wait timeout (1205), with a new
   connection and a 50–200 ms random back-off. Business rejections are never retried.
 - Tests `tests/concurrency/ct-*` race two real sessions behind a gate session. They wait for
@@ -951,6 +957,9 @@ sequenceDiagram
     CP->>SP: CALL (loan.checkout)
     Note over SP: JSON array non-empty and ids distinct, else VALIDATION
     SP->>SP: CREATE TEMPORARY TABLE tmp_checkout from JSON_TABLE
+    opt [Ext] step 0: a scanned copy has a ready hold past hold_expires_at (flow 16)
+        SP->>DB: CALL sp__expire_hold (own committed transaction)
+    end
     SP->>DB: START TRANSACTION
     SP->>DB: SELECT readers (status, type) FOR UPDATE
     alt missing / not active
@@ -971,9 +980,11 @@ sequenceDiagram
         SP-->>CP: NO_POLICY → ROLLBACK
     end
     opt [Ext] some copy is on_hold (step 6b, flow 16)
-        SP->>DB: ready reservation of the copy FOR UPDATE (expire it and promote if past hold_expires_at)
+        SP->>DB: reservation WHERE ready_copy_id = copy FOR UPDATE (expire it and promote if past hold_expires_at)
         alt held for another reader
             SP-->>CP: COPY_NOT_AVAILABLE → ROLLBACK
+        else no ready hold but copy still on_hold
+            SP-->>CP: COPY_STATE → ROLLBACK
         end
     end
     SP->>DB: SUM fines + adjustments − allocations of reader FOR SHARE
@@ -1007,8 +1018,8 @@ sequenceDiagram
 - Checkout locks rows in this order: reader → cards (S) → books ↑ → copies ↑ → policy (S) → [Ext] reservations of held copies → the reader's loans, items and fines (S, for the eligibility sums). The debt check never uses `fn_reader_outstanding`.
 - Eligibility rules (FR-009d): the reader is `active`, the card is valid at `p_now`, the debt is at or below the threshold (the strictest threshold among the requested material types), there is no overdue item (D7), the limit holds for each material type, and each copy is `available`, or `on_hold` for this reader.
 - A copy can have only one open loan item, guaranteed by `UNIQUE(open_copy_id)` (FR-012). The snapshot fields `applied_*` never change afterwards (`trg_loan_items_bu`, `SNAPSHOT_IMMUTABLE`).
-- The procedure is all-or-nothing (D13): any failure rolls back every item and drops the temporary table.
-- [Ext] Held copies (flow 16): checkout expires an overdue hold on a scanned copy and promotes the queue, then accepts an `on_hold` copy only when this reader is the holder. The holder's reservation becomes `fulfilled` with the new loan item.
+- The procedure is all-or-nothing (D13): any failure rolls back every item and drops the temporary table. The only exception is the [Ext] step-0 hold expiry, which commits on its own before the checkout transaction starts.
+- [Ext] Held copies (flow 16): checkout first expires an overdue hold on a scanned copy and promotes the queue (step 0, its own transaction), then accepts an `on_hold` copy only when this reader is the holder. An `on_hold` copy with no ready reservation (broken I-2) is refused with `COPY_STATE`. The holder's reservation becomes `fulfilled` with the new loan item.
 - Error keys: `FORBIDDEN`, `VALIDATION`, `NOT_FOUND`, `READER_NOT_ACTIVE`, `CARD_INVALID`, `COPY_NOT_AVAILABLE`, `NO_POLICY`, `DEBT_BLOCKED`, `OVERDUE_BLOCKED`, `LIMIT_REACHED`, `COPY_STATE`.
 
 ### 6. Return an item
@@ -1369,7 +1380,7 @@ sequenceDiagram
 
 ### 13. Developer pipeline
 
-Every step reads its settings from `.env.local`: `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` and `MYSQL_ROOT_PASSWORD`. Migrations and grants run as the owner (`root`). Seeding runs as the restricted app account and goes through the same procedures the app will use. A backup is restored into a separate schema and has to pass the invariant suite.
+Every step reads its settings from `.env.local`: `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` and `MYSQL_ROOT_PASSWORD`. Migrations and grants run as the owner (`root`); `db:migrate` then runs the invariant suite as the app account and fails if any view has rows. Seeding runs as the restricted app account and goes through the same procedures the app will use. A backup is restored into a separate schema and has to pass the invariant suite.
 
 ```mermaid
 sequenceDiagram
@@ -1392,6 +1403,7 @@ sequenceDiagram
     GR->>DB: GRANT SELECT on every table and view
     GR->>DB: GRANT INSERT/UPDATE/DELETE on catalog and people tables
     GR->>DB: GRANT EXECUTE on public fn_*/sp_* (not sp__*)
+    MG->>DB: app account: findViolations over v_inv_* (fail if any)
     Dev->>SD: pnpm db:seed [--reset]
     SD->>DB: owner: data tables empty? (else require --reset → TRUNCATE)
     SD->>DB: app: one transaction INSERT catalog + people
@@ -1399,7 +1411,7 @@ sequenceDiagram
         SD->>CP: sp_register_copy / sp_issue_card / sp_create_policy_version / sp_checkout / …
         CP->>DB: CALL with explicit p_now
     end
-    SD->>DB: findViolations over v_inv_* (fail if any)
+    SD->>DB: app account: findViolations over v_inv_* (fail if any)
     Dev->>CHK: pnpm db:check
     CHK->>DB: every v_inv_* returns zero rows
     CHK-->>Dev: exit 0
@@ -1414,16 +1426,17 @@ sequenceDiagram
 - Environment variables must stay minimal and unprefixed (FR-030). The test schema is always derived as `${DB_NAME}_test` (`pnpm db:reset-test` drops it, re-creates it and migrates it). No migration names an account.
 - The seed may insert only catalog and people data directly (FR-025b). Copies, cards, policies, loans, fines and payments all go through the procedures, with explicit times.
 - Seeding runs only on an empty schema, or after `--reset` (FR-025a). Reference tables (`material_types`, `reader_types`, roles, permissions) come from migrations and are never truncated.
+- The invariant suite always runs as the app account, like `pnpm db:check`: at the end of `db:migrate` (after the grants) and at the end of `db:seed`.
 - `mysql`/`mysqldump` run inside the container, and the password is passed in `MYSQL_PWD`, never on the command line.
 
 ### Reservations and holds (Ext, flows 14–18)
 
-Reservations are built as an extension on top of the Core circulation (migrations `ext_reservation_trigger`, `ext_promote_queue`, `ext_reservation_procedures`, `ext_hold_expiry_event`). The public procedures are `sp_reserve`, `sp_cancel_reservation` and `sp_expire_holds`. The internal helpers `sp__promote_queue` and `sp__expire_holds_batch` are not granted to the app account. The event `ev_expire_holds` runs the expiry batch every 15 minutes. The Core procedures `sp_register_copy`, `sp_change_copy_status`, `sp_return_item` and `sp_checkout` were re-created so that they promote the queue or accept holds.
+Reservations are built as an extension on top of the Core circulation (migrations `ext_reservation_trigger`, `ext_promote_queue`, `ext_reservation_procedures`, `ext_hold_expiry_event`, `ext_reservation_hardening`). The public procedures are `sp_reserve`, `sp_cancel_reservation` and `sp_expire_holds`. The internal helpers `sp__promote_queue`, `sp__expire_hold` and `sp__expire_holds_batch` are not granted to the app account. The event `ev_expire_holds` runs the expiry batch every 15 minutes. The Core procedures `sp_register_copy`, `sp_change_copy_status`, `sp_return_item` and `sp_checkout` were re-created so that they promote the queue or accept holds.
 
 These rules apply to every flow below:
 
 - **Book-lock serialization.** Every writer of a book's reservations or copy statuses (reserve, cancel, promotion through return, register, repair done or found, checkout, renew, hold expiry) locks the `books` row first. So two such operations on the same book always run one after the other. Reading a reservation `FOR UPDATE` right after the book lock is safe, and CT-10…CT-12 cannot interleave inside one book.
-- **Lock order.** The order is reader → book → copy → (policy, in checkout) → reservations. Within one book, the queue is locked in `(requested_at, id)` order through `reservations_queue_ix`.
+- **Lock order.** The order is reader → card (S, in reserve and checkout) → book → copy → (policy, in checkout) → reservations. Within one book, the queue is locked in `(requested_at, id)` order through `reservations_queue_ix`.
 - **Status guard.** `trg_reservations_bu` allows only `waiting → ready | cancelled` and `ready → fulfilled | expired | cancelled`. It also rejects any change of `reader_id` or `book_id`. Any other change raises `INVALID_TRANSITION`.
 - **Single-row rules.** At most one `waiting`/`ready` reservation per (reader, book) (`reservations_active_uq` on `active_flag`). At most one `ready` hold per copy (`reservations_ready_copy_uq` on `ready_copy_id`). A reservation is fulfilled by at most one loan item (`reservations_fulfilled_item_uq`). A `ready` row needs `assigned_copy_id`, `ready_at` and `hold_expires_at > ready_at` (`reservations_ready_ck`).
 - **Invariants.** I-2 (`v_inv_copy_on_hold`: a copy is `on_hold` exactly when one `ready` reservation holds it) and I-3 (`v_inv_queue_available`: no book has both a `waiting` reservation and an `available` copy) must stay empty. Tests: `tests/db/us3-reservations.test.ts` and CT-9…CT-12.
@@ -1455,6 +1468,13 @@ sequenceDiagram
     alt reader missing
         SP-->>CP: NOT_FOUND: reader → ROLLBACK
     end
+    alt reader not active
+        SP-->>CP: READER_NOT_ACTIVE → ROLLBACK
+    end
+    SP->>DB: COUNT active cards with expires_at after now FOR SHARE
+    alt none
+        SP-->>CP: CARD_INVALID → ROLLBACK
+    end
     SP->>DB: SELECT books FOR UPDATE
     alt book missing
         SP-->>CP: NOT_FOUND: book → ROLLBACK
@@ -1479,12 +1499,12 @@ sequenceDiagram
     end
 ```
 
-- Locks: reader → book → the book's copies (S) → the reader's loan items of the book (S). The `available` count cannot change underneath, because every procedure that makes a copy of this book `available` holds the book lock (CT-11: a return and a reserve on the same book serialize; either the reservation is in the queue before the return promotes it, or the reserve sees the copy and is rejected).
+- Locks: reader → card (S) → book → the book's copies (S) → the reader's loan items of the book (S). The `available` count cannot change underneath, because every procedure that makes a copy of this book `available` holds the book lock (CT-11: a return and a reserve on the same book serialize; either the reservation is in the queue before the return promotes it, or the reserve sees the copy and is rejected).
 - `VALIDATION` covers both D6 preconditions: the book has an `available` copy, or the reader has it `on_loan`. Copies that are `on_hold` for someone else, `in_repair`, `lost` or `retired` do not stop a reservation.
 - `DUPLICATE` has no explicit check. The unique index `reservations_active_uq` raises 1062, and `callProcedure` reports it as `DUPLICATE` with the index name as detail (R-14a).
 - `FORBIDDEN` is raised when the actor lacks `reservation.manage` and is not the reader's own active account. `NOT_FOUND` is raised for a missing reader or book.
-- The reader's status and card are **not** checked here. A hard-ineligible reader can join the queue, and promotion cancels them later (flow 15).
-- Error keys: `FORBIDDEN`, `NOT_FOUND`, `VALIDATION`, `DUPLICATE`.
+- Only a reader who could borrow joins a queue (the same hard checks as promotion, D4): after the reader lock the reader must be `active` (else `READER_NOT_ACTIVE`) and have an `active` card with `expires_at > now`, read `FOR SHARE` (else `CARD_INVALID`). Promotion still re-checks both, because they can change while the reader waits (flow 15).
+- Error keys: `FORBIDDEN`, `NOT_FOUND`, `READER_NOT_ACTIVE`, `CARD_INVALID`, `VALIDATION`, `DUPLICATE`.
 
 ### 15. Queue promotion (on return)
 
@@ -1494,7 +1514,7 @@ sequenceDiagram
 - `sp_register_copy` for a new copy that is not damaged;
 - `sp_change_copy_status` when the target is `available` (repair done, found);
 - `sp_cancel_reservation` when a `ready` hold is cancelled;
-- `sp__expire_holds_batch` and `sp_checkout` step 6b after a hold expires.
+- `sp__expire_hold` (called by `sp__expire_holds_batch` and by `sp_checkout` step 0) and the `sp_checkout` step 6b fallback, after a hold expires.
 
 The diagram shows the return case.
 
@@ -1555,7 +1575,7 @@ sequenceDiagram
 
 ### 16. Checkout of a held copy
 
-`sp_checkout` accepts an `on_hold` copy only for its holder (R-14f). In step 6b, which runs after the policy lock, it first expires an overdue hold on a scanned copy and runs the promotion. This is the "on demand when scanned" expiry of FR-014c. Then it decides who may take the copy. The other steps are the same as in flow 5.
+`sp_checkout` accepts an `on_hold` copy only for its holder (R-14f). Before its own transaction (step 0) it expires an overdue hold on each scanned copy through `sp__expire_hold`, which commits on its own and runs the promotion. This is the "on demand when scanned" expiry of FR-014c, and it stands even if the checkout is then rejected. In step 6b, which runs after the policy lock, it looks up the copy's hold by the unique generated column `ready_copy_id` and decides who may take the copy; a hold that expired between step 0 and the lock is expired there, inside the checkout transaction. The other steps are the same as in flow 5.
 
 ```mermaid
 sequenceDiagram
@@ -1564,6 +1584,7 @@ sequenceDiagram
     participant App as Next.js API (planned)
     participant CP as callProcedure
     participant SP as sp_checkout
+    participant EH as sp__expire_hold
     participant PQ as sp__promote_queue
     participant DB as InnoDB tables
     participant TRG as Triggers
@@ -1571,6 +1592,20 @@ sequenceDiagram
     Librarian->>App: checkout(reader, [copy ids]) incl. a copy from the hold shelf
     App->>CP: sp_checkout(actor, now, reader_id, JSON [ids])
     CP->>SP: CALL (loan.checkout)
+    loop step 0 (before START TRANSACTION): each requested copy
+        SP->>DB: plain read reservations WHERE ready_copy_id = copy AND hold_expires_at ≤ now
+        opt overdue ready hold found
+            SP->>EH: CALL sp__expire_hold(reservation, now)
+            EH->>DB: START TRANSACTION, FOR UPDATE book → copy → reservation
+            opt still ready and past expiry
+                EH->>DB: UPDATE reservations SET expired, close_reason hold_expired, closed_by_kind system
+                EH->>PQ: CALL sp__promote_queue(copy, NULL, now)
+                PQ->>DB: next eligible waiting → ready (copy stays on_hold), or copy → available
+            end
+            EH->>DB: COMMIT (the expiry stands even if the checkout is rejected)
+        end
+    end
+    SP->>DB: START TRANSACTION
     SP->>DB: steps 1–4 as flow 5: reader FOR UPDATE, cards FOR SHARE, books FOR UPDATE ↑
     SP->>DB: step 5: SELECT book_copies.status FOR UPDATE ↑
     alt status on_hold
@@ -1581,7 +1616,7 @@ sequenceDiagram
     SP->>DB: step 6: loan_policies FOR SHARE (NO_POLICY)
     loop step 6b: each held copy, ascending id
         SP->>DB: SELECT reservations WHERE ready_copy_id = copy FOR UPDATE
-        opt hold_expires_at ≤ now (on-demand expiry)
+        opt hold_expires_at ≤ now (fallback: expired between step 0 and the lock)
             SP->>DB: UPDATE reservations SET expired, close_reason hold_expired, closed_by_kind system
             DB->>TRG: trg_reservations_bu (ready → expired)
             SP->>PQ: CALL sp__promote_queue(copy, actor, now)
@@ -1592,8 +1627,10 @@ sequenceDiagram
             SP-->>CP: COPY_NOT_AVAILABLE (held for another reader) → ROLLBACK
         else this reader is the holder
             SP->>SP: tmp_checkout.reservation_id = reservation
-        else no hold left
+        else no ready hold, copy now available (promotion released it)
             Note over SP: the copy is lent as an ordinary available copy
+        else no ready hold but copy still on_hold (broken I-2)
+            SP-->>CP: COPY_STATE → ROLLBACK (never lent)
         end
     end
     SP->>DB: steps 7–9 as flow 5 (DEBT_BLOCKED, OVERDUE_BLOCKED, LIMIT_REACHED)
@@ -1606,11 +1643,12 @@ sequenceDiagram
     SP-->>CP: result set loan_id, loan_item_id, copy_id, due_at
 ```
 
-- Lock order: reader → cards (S) → books ↑ → copies ↑ → policy (S) → reservation (and the queue, when the promotion runs) → the reader's loans, items and fines (S).
+- Lock order: step 0 takes book → copy → reservation per expired hold in its own short transaction, before any checkout lock. The checkout transaction then locks reader → cards (S) → books ↑ → copies ↑ → policy (S) → reservation (and the queue, when the fallback promotion runs) → the reader's loans, items and fines (S).
+- The hold is always found through `ready_copy_id` (unique, generated: the copy id while the reservation is `ready`, else NULL). If no ready reservation holds an `on_hold` copy, the data breaks I-2 and checkout raises `COPY_STATE` instead of lending the copy.
 - `COPY_NOT_AVAILABLE` is raised for a copy that is neither `available` nor `on_hold`, and for an `on_hold` copy whose hold belongs to another reader, including a hold that just passed to the next reader in the queue (a walk-in never gets an expired hold's copy while someone is waiting).
-- The holder still has to pass every eligibility check. A soft-blocked holder gets `DEBT_BLOCKED`, `OVERDUE_BLOCKED` or `LIMIT_REACHED` and keeps the hold until it expires. On any failure the whole call rolls back, including an on-demand expiry done in step 6b. In that case the batch (flow 18) expires the hold later.
+- The holder still has to pass every eligibility check. A soft-blocked holder gets `DEBT_BLOCKED`, `OVERDUE_BLOCKED` or `LIMIT_REACHED` and keeps the hold until it expires. A rejected checkout rolls back only its own transaction: a scan-time expiry from step 0 was already committed and stays. Only an expiry done by the step 6b fallback rolls back with the checkout; the next scan or the batch (flow 18) expires that hold later.
 - The reservation is closed as `fulfilled` with `fulfilled_loan_item_id` and `closed_by_kind = 'staff'`. This happens before the copy leaves `on_hold`, so I-2 holds at commit. CT-9 races the holder's checkout against the expiry batch: the result is exactly one of fulfilled or expired, never both.
-- Error keys: as flow 5, plus `INVALID_TRANSITION` from the reservation trigger.
+- Error keys: as flow 5 (including `COPY_STATE` for an `on_hold` copy without a ready reservation), plus `INVALID_TRANSITION` from the reservation trigger.
 
 ### 17. Cancel a reservation
 
@@ -1631,20 +1669,19 @@ sequenceDiagram
     Reader->>App: cancel(reservation, reason)
     App->>CP: sp_cancel_reservation(actor, now, reservation_id, reason)
     CP->>SP: CALL
-    SP->>DB: plain read reader_id, book_id (immutable)
-    alt reservation missing
-        SP-->>CP: NOT_FOUND: reservation
-    end
+    SP->>DB: plain read reader_id, book_id (immutable, none if missing)
     SP->>FN: fn_has_permission(actor, reservation.manage)
     alt staff
         alt reason blank
             SP-->>CP: VALIDATION (staff cancellation needs a reason)
+        else reservation missing
+            SP-->>CP: NOT_FOUND: reservation
         end
         Note over SP: closed_by_kind = staff
-    else actor is the reader's own active account
+    else reservation exists and belongs to the actor's active reader account
         Note over SP: closed_by_kind = reader
-    else neither
-        SP-->>CP: FORBIDDEN
+    else missing, or someone else's
+        SP-->>CP: FORBIDDEN (same answer, so ids cannot be probed)
     end
     SP->>DB: START TRANSACTION
     SP->>DB: FOR UPDATE reader → book → reservation
@@ -1665,13 +1702,14 @@ sequenceDiagram
 ```
 
 - The reader and book ids come from a plain read before the transaction. They decide the permission and the lock order, and the trigger guarantees they never change.
+- Permission comes before `NOT_FOUND`. Staff (`reservation.manage`) are checked for a reason (`VALIDATION`) and then get `NOT_FOUND` for a missing id. Anyone else gets `FORBIDDEN` unless the reservation exists and belongs to their own active reader account, so a reader account cannot tell a missing id from someone else's reservation.
 - `close_reason` is the given reason, or `cancelled_by_reader` when it is blank (only possible for the reader's own account).
 - Lock order: reader → book → reservation → the assigned copy (when `ready`) → the queue. CT-10 races a return that promotes the queue head against the head's own cancel, and I-2/I-3 hold after every run.
 - Error keys: `NOT_FOUND`, `FORBIDDEN`, `VALIDATION`, `INVALID_TRANSITION`.
 
 ### 18. Hold expiry (batch and event)
 
-`sp__expire_holds_batch(now, OUT count)` is a cursor batch. It expires every `ready` hold whose `hold_expires_at ≤ now`, with one short transaction per hold, and passes each copy to the queue. The event `ev_expire_holds` calls it every 15 minutes with `UTC_TIMESTAMP(3)` (FR-014c). Staff can run it on demand through the public wrapper `sp_expire_holds`, which checks `reservation.manage` first.
+`sp__expire_holds_batch(now, OUT count)` is a cursor batch over the `ready` holds with `hold_expires_at ≤ now` (`ORDER BY book_id, id`). For each one it CALLs `sp__expire_hold(reservation, now, OUT expired)`, which expires the hold and passes the copy to the queue in its own short transaction. `sp_checkout` step 0 uses the same helper (flow 16). The event `ev_expire_holds` calls it every 15 minutes with `UTC_TIMESTAMP(3)` (FR-014c). Staff can run it on demand through the public wrapper `sp_expire_holds`, which checks `reservation.manage` first.
 
 ```mermaid
 sequenceDiagram
@@ -1682,6 +1720,7 @@ sequenceDiagram
     participant CP as callProcedure
     participant SP as sp_expire_holds
     participant EX as sp__expire_holds_batch
+    participant EH as sp__expire_hold
     participant PQ as sp__promote_queue
     participant DB as InnoDB tables
     participant TRG as Triggers
@@ -1698,26 +1737,35 @@ sequenceDiagram
         SP->>EX: CALL sp__expire_holds_batch(now, p_count)
     end
     EX->>DB: OPEN cursor: ready reservations with hold_expires_at ≤ now ORDER BY book_id, id
-    loop each (reservation, book, copy)
-        EX->>DB: START TRANSACTION
-        EX->>DB: FOR UPDATE book → copy → reservation
+    loop each reservation id
+        EX->>EH: CALL sp__expire_hold(reservation, now, @expired)
+        EH->>DB: plain read book_id, assigned_copy_id
+        EH->>DB: START TRANSACTION
+        EH->>DB: FOR UPDATE book → copy → reservation
         alt still ready and past expiry
-            EX->>DB: UPDATE reservations SET expired, close_reason hold_expired, closed_by_kind system
+            EH->>DB: UPDATE reservations SET expired, close_reason hold_expired, closed_by_kind system
             DB->>TRG: trg_reservations_bu (ready → expired)
-            EX->>PQ: CALL sp__promote_queue(copy, NULL, now)
+            EH->>PQ: CALL sp__promote_queue(copy, NULL, now)
             PQ->>DB: next eligible waiting → ready with a new 3-day hold, or copy → available
-            EX->>EX: p_count + 1
+            EH->>DB: COMMIT
+            EH-->>EX: expired = TRUE → p_count + 1
         else closed meanwhile (checkout or cancel)
-            Note over EX: skip
+            EH->>DB: COMMIT
+            EH-->>EX: expired = FALSE
+        else lock wait timeout or deadlock (1205/1213)
+            EH->>DB: ROLLBACK, RESIGNAL
+            Note over EX: handler skips this hold, the run continues
+        else any other error
+            EH->>DB: ROLLBACK, RESIGNAL
+            EX-->>CP: error stops the run
         end
-        EX->>DB: COMMIT
     end
     EX->>DB: CLOSE cursor
     EX-->>CP: OUT p_count
 ```
 
-- Each hold commits on its own. An error rolls back only the current hold and re-raises, and holds already committed stay expired. A new hold created by the promotion expires after `now`, so the same run does not pick it up.
+- Each hold is its own transaction inside `sp__expire_hold`. A hold that hits 1205 or 1213 is rolled back there and skipped; the next run (or the holder's next scan, flow 16) retries it. Any other error rolls back only the current hold and stops the run; holds already committed stay expired. A new hold created by the promotion expires after `now`, so the same run does not pick it up.
 - The batch takes no reader lock. Lock order per hold: book → copy → reservation → queue. The promotion's eligibility reads are plain reads (flow 15). The actor passed to the promotion is `NULL`.
 - `ev_expire_holds` needs `event_scheduler=ON` (`docker/mysql/conf.d/mysql.cnf`). `pnpm db:reset-test` disables every event in the test schema after migrating, because tests pass explicit times and a wall-clock event would race them.
-- `sp__expire_holds_batch` is internal: the app account gets errno 1370 if it calls it directly.
-- Error keys: `FORBIDDEN` (wrapper only), `INVALID_TRANSITION`, plus 1213/1205 retried by the caller.
+- `sp__expire_holds_batch` and `sp__expire_hold` are internal: the app account gets errno 1370 if it calls either directly.
+- Error keys: `FORBIDDEN` (wrapper only), `INVALID_TRANSITION`. 1213/1205 on a single hold are skipped by the batch, not raised.

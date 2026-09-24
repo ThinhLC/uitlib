@@ -5,6 +5,8 @@ import {
   returnItem, truncateAll,
 } from '../helpers/fixtures';
 import { vn } from '../helpers/time';
+import { gate } from '../helpers/concurrency';
+import { rawFixture } from '../helpers/invariants-after-each';
 import { testSchemaName } from '../../src/lib/db/config';
 
 afterAll(closeTestPools);
@@ -86,14 +88,70 @@ describe('US3 [Ext] reservations and holds (T092)', () => {
     const q = await queueWorld(2);
     await returnItem(q.w.staff, vn('2026-09-05 10:00'), q.loanItemId);
     const outsider = (await otherReader(q.w)).readerId;
-    // the scan expires R1's hold and promotes R2, so the outsider is refused (the rollback undoes both)
+    // the scan expires R1's hold and promotes R2 in its own committed transaction, so the outsider
+    // is refused but the expiry stays (it does not wait for the 15-minute batch)
     await expectRule(checkout(q.w.staff, vn('2026-09-09 10:00'), outsider, [q.copyId]), 'COPY_NOT_AVAILABLE');
-    expect((await res(q.reservations[0])).status).toBe('ready');
-    // R2's own scan runs the same expiry and promotion, then lends the copy to R2
-    const [li] = await checkout(q.w.staff, vn('2026-09-09 10:05'), q.readers[1], [q.copyId]);
     expect((await res(q.reservations[0])).status).toBe('expired');
+    expect(await res(q.reservations[1])).toMatchObject({ status: 'ready', ready_at: vn('2026-09-09 10:00') });
+    const [li] = await checkout(q.w.staff, vn('2026-09-09 10:05'), q.readers[1], [q.copyId]);
     expect(await res(q.reservations[1])).toMatchObject({ status: 'fulfilled', fulfilled_loan_item_id: li.loanItemId });
   });
+
+  it('FR-014c: an expiry done at scan time survives a checkout that fails later', async () => {
+    const q = await queueWorld(1);
+    await returnItem(q.w.staff, vn('2026-09-05 10:00'), q.loanItemId);
+    await call('sp_set_card_status', [q.w.staff, vn('2026-09-08 12:00'),
+      (await ownerQuery(`SELECT id FROM library_cards WHERE reader_id = ?`, [q.readers[0]]))[0].id, 'revoked']);
+    // the late holder's own scan: the hold is expired and the copy released, then the card check fails
+    await expectRule(checkout(q.w.staff, vn('2026-09-09 10:00'), q.readers[0], [q.copyId]), 'CARD_INVALID');
+    expect((await res(q.reservations[0])).status).toBe('expired');
+    expect(await copyStatus(q.copyId)).toBe('available');
+  });
+
+  it('I-2: a copy on hold without a ready reservation is refused, not lent', async () => {
+    rawFixture(); // puts a copy on_hold directly as the owner (breaks I-2 on purpose)
+    const w = await lendingWorld({ copies: 1 });
+    await ownerQuery(`UPDATE book_copies SET circulation_status = 'on_hold' WHERE id = ?`, [w.copies[0]]);
+    await expectRule(checkout(w.staff, vn('2026-09-02 10:00'), w.readerId, [w.copies[0]]), 'COPY_STATE');
+  });
+
+  it('R-14g: only an active reader with a valid card can join a queue', async () => {
+    const q = await queueWorld(0);
+    const [suspended, cardless] = [(await otherReader(q.w)).readerId, (await otherReader(q.w)).readerId];
+    await ownerQuery(`UPDATE readers SET status = 'suspended' WHERE id = ?`, [suspended]);
+    await expectRule(reserve(q.w.staff, vn('2026-09-04 10:00'), suspended, q.w.bookId), 'READER_NOT_ACTIVE');
+    const [c] = await ownerQuery(`SELECT id FROM library_cards WHERE reader_id = ?`, [cardless]);
+    await call('sp_set_card_status', [q.w.staff, vn('2026-09-03 10:00'), c.id, 'revoked']);
+    await expectRule(reserve(q.w.staff, vn('2026-09-04 10:00'), cardless, q.w.bookId), 'CARD_INVALID');
+  });
+
+  it('R-14g: a reader account cannot probe other reservations (FORBIDDEN before NOT_FOUND)', async () => {
+    const acct = await account(['reader']);
+    const staff = await account(['librarian']);
+    await expectRule(cancelReservation(acct, vn('2026-09-04 10:00'), 999_999, null), 'FORBIDDEN');
+    await expectRule(cancelReservation(staff, vn('2026-09-04 10:00'), 999_999, 'x'), 'NOT_FOUND');
+  });
+
+  it('FR-014c: the expiry batch skips a hold it cannot lock and still expires the others', async () => {
+    const a = await queueWorld(1);
+    await returnItem(a.w.staff, vn('2026-09-05 10:00'), a.loanItemId);
+    const bookB = await book();
+    const copyB = await copy(a.w.staff, vn('2026-09-01 09:00'), bookB);
+    const [lb] = await checkout(a.w.staff, vn('2026-09-02 10:00'), (await otherReader(a.w)).readerId, [copyB]);
+    const rb = await reserve(a.w.staff, vn('2026-09-03 11:00'), (await otherReader(a.w)).readerId, bookB);
+    await returnItem(a.w.staff, vn('2026-09-05 10:00'), lb.loanItemId);
+
+    const g = await gate('books', a.w.bookId); // a session holds book A until the batch gives up on it
+    try {
+      expect(await expireHolds(a.w.staff, vn('2026-09-09 10:00'))).toBe(1);
+    } finally {
+      await g.release();
+    }
+    expect((await res(a.reservations[0])).status).toBe('ready');
+    expect((await res(rb)).status).toBe('expired');
+    expect(await expireHolds(a.w.staff, vn('2026-09-09 10:00'))).toBe(1);
+    expect((await res(a.reservations[0])).status).toBe('expired');
+  }, 30_000);
 
   it('US3-14 R-14a/g: duplicate reservations and reservations with a way to borrow now are rejected', async () => {
     const q = await queueWorld(1);

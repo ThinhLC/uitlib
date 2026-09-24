@@ -56,7 +56,9 @@ Worked example (US4-14): September → 0, 30,000, 0, 0, 30,000. October → 30,0
 ## Circulation reports (course report, Chapter 4)
 
 These are views (`v_report_overdue`, `v_report_loans_by_month`, `v_report_popular_books`,
-`v_report_copy_status`), and each ships with an `EXPLAIN` in the report.
+`v_report_copy_status`), and each ships with an `EXPLAIN` in the report. A view cannot take a
+`p_now`, so `v_report_overdue` compares with `UTC_TIMESTAMP(3)`: it is the only wall-clock read,
+it is read-only, and no procedure uses it to decide a write.
 
 | Report | Key columns | Main index used |
 | --- | --- | --- |

@@ -1285,15 +1285,17 @@ BEGIN
 
   -- Immutable ids (the trigger forbids changing reader or book); they decide permission and locks.
   SELECT reader_id, book_id INTO v_reader, v_book FROM reservations WHERE id = p_reservation_id;
-  IF v_reader IS NULL THEN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'NOT_FOUND: reservation';
-  END IF;
+  -- Permission first: a reader account learns nothing about reservations that are not its own.
   IF fn_has_permission(p_actor_user_id, 'reservation.manage') THEN
     SET v_kind = 'staff';
     IF p_reason IS NULL OR TRIM(p_reason) = '' THEN
       SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'VALIDATION: staff cancellation needs a reason';
     END IF;
-  ELSEIF EXISTS (SELECT 1 FROM readers r JOIN app_users u ON u.id = r.user_id
+    IF v_reader IS NULL THEN
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'NOT_FOUND: reservation';
+    END IF;
+  ELSEIF v_reader IS NOT NULL
+     AND EXISTS (SELECT 1 FROM readers r JOIN app_users u ON u.id = r.user_id
                   WHERE r.id = v_reader AND u.id = p_actor_user_id AND u.status = 'active') THEN
     SET v_kind = 'reader';
   ELSE
@@ -1444,6 +1446,7 @@ BEGIN
   DECLARE v_holder BIGINT;
   DECLARE v_hold_until DATETIME(3);
   DECLARE v_held INT DEFAULT 0;
+  DECLARE v_expired BOOLEAN;
   DECLARE EXIT HANDLER FOR SQLEXCEPTION
   BEGIN
     ROLLBACK;
@@ -1478,6 +1481,20 @@ BEGIN
     reservation_id BIGINT NULL);
   INSERT INTO tmp_checkout (copy_id)
   SELECT j.id FROM JSON_TABLE(p_copy_ids, '$[*]' COLUMNS (id BIGINT PATH '$')) AS j;
+
+  -- 0. [Ext] Expire overdue holds on the requested copies first, each in its own committed
+  --    transaction (FR-014c "on demand when scanned"), so the expiry stands even if this checkout
+  --    is then rejected. Step 6b re-checks under the checkout's own locks.
+  SET v_i = 0;
+  WHILE v_i < v_n DO
+    SELECT copy_id INTO v_id FROM tmp_checkout ORDER BY copy_id LIMIT v_i, 1;
+    SET v_res = NULL;
+    SELECT id INTO v_res FROM reservations WHERE ready_copy_id = v_id AND hold_expires_at <= p_now;
+    IF v_res IS NOT NULL THEN
+      CALL sp__expire_hold(v_res, p_now, v_expired);
+    END IF;
+    SET v_i = v_i + 1;
+  END WHILE;
 
   START TRANSACTION;
 
@@ -1555,9 +1572,9 @@ BEGIN
     SET v_i = v_i + 1;
   END WHILE;
 
-  -- 6b. [Ext] Held copies (lock order: … policy → reservation). A hold whose expiry has passed is
-  --     expired here and the queue promoted (FR-014c "on demand when scanned"); the copy may then
-  --     be free, or held for the next reader. Only the holder may borrow a held copy (R-14f).
+  -- 6b. [Ext] Held copies (lock order: … policy → reservation), looked up by the unique
+  --     ready_copy_id. A hold that expired after step 0 is expired here within this transaction.
+  --     Only the holder may borrow a held copy (R-14f).
   SELECT COUNT(*) INTO v_held FROM tmp_checkout WHERE on_hold = 1;
   SET v_i = 0;
   WHILE v_i < v_held DO
@@ -1573,7 +1590,13 @@ BEGIN
       SET v_res = NULL;
       SELECT id, reader_id INTO v_res, v_holder FROM reservations WHERE ready_copy_id = v_id FOR UPDATE;
     END IF;
-    IF v_res IS NOT NULL THEN
+    IF v_res IS NULL THEN
+      -- Promotion may have released the copy; on_hold with no ready reservation breaks I-2.
+      SELECT circulation_status INTO v_copy_status FROM book_copies WHERE id = v_id FOR UPDATE;
+      IF v_copy_status = 'on_hold' THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'COPY_STATE: copy is on hold without a ready reservation';
+      END IF;
+    ELSE
       IF v_holder <> p_reader_id THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'COPY_NOT_AVAILABLE: the copy is held for another reader';
       END IF;
@@ -2386,6 +2409,8 @@ BEGIN
   DECLARE v_locked BIGINT;
   DECLARE v_available INT DEFAULT 0;
   DECLARE v_on_loan INT DEFAULT 0;
+  DECLARE v_reader_status VARCHAR(16);
+  DECLARE v_cards INT DEFAULT 0;
   DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN ROLLBACK; RESIGNAL; END;
 
   -- Staff with reservation.manage, or the reader's own active account.
@@ -2396,9 +2421,18 @@ BEGIN
   END IF;
 
   START TRANSACTION;
-  SELECT id INTO v_locked FROM readers WHERE id = p_reader_id FOR UPDATE;
+  SELECT id, status INTO v_locked, v_reader_status FROM readers WHERE id = p_reader_id FOR UPDATE;
   IF v_locked IS NULL THEN
     SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'NOT_FOUND: reader';
+  END IF;
+  -- Only a reader who could borrow joins a queue (the same hard checks as promotion, D4).
+  IF v_reader_status <> 'active' THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'READER_NOT_ACTIVE: reader is suspended or inactive';
+  END IF;
+  SELECT COUNT(*) INTO v_cards FROM library_cards
+   WHERE reader_id = p_reader_id AND status = 'active' AND expires_at > p_now FOR SHARE;
+  IF v_cards = 0 THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'CARD_INVALID: no active, unexpired card';
   END IF;
   SET v_locked = NULL;
   SELECT id INTO v_locked FROM books WHERE id = p_book_id FOR UPDATE;
@@ -2676,6 +2710,52 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp__expire_hold` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'IGNORE_SPACE,ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`%` PROCEDURE `sp__expire_hold`(
+  IN p_reservation_id BIGINT,
+  IN p_now DATETIME(3),
+  OUT p_expired BOOLEAN)
+    COMMENT 'Internal [Ext]: expire one ready hold past its expiry and promote the queue, in its own transaction'
+BEGIN
+  DECLARE v_book BIGINT;
+  DECLARE v_copy BIGINT;
+  DECLARE v_locked BIGINT;
+  DECLARE v_status VARCHAR(16);
+  DECLARE v_until DATETIME(3);
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN ROLLBACK; RESIGNAL; END;
+
+  SET p_expired = FALSE;
+  -- Immutable book; the assigned copy only decides which copy to lock and is re-checked below.
+  SELECT book_id, assigned_copy_id INTO v_book, v_copy FROM reservations WHERE id = p_reservation_id;
+  IF v_copy IS NOT NULL THEN
+    START TRANSACTION;
+    SELECT id INTO v_locked FROM books WHERE id = v_book FOR UPDATE;
+    SELECT id INTO v_locked FROM book_copies WHERE id = v_copy FOR UPDATE;
+    SELECT status, hold_expires_at INTO v_status, v_until FROM reservations WHERE id = p_reservation_id FOR UPDATE;
+    IF v_status = 'ready' AND v_until <= p_now THEN
+      UPDATE reservations
+         SET status = 'expired', closed_at = p_now, closed_by_kind = 'system', close_reason = 'hold_expired'
+       WHERE id = p_reservation_id;
+      CALL sp__promote_queue(v_copy, NULL, p_now);
+      SET p_expired = TRUE;
+    END IF;
+    COMMIT;
+  END IF;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `sp__expire_holds_batch` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -2693,38 +2773,29 @@ CREATE DEFINER=`root`@`%` PROCEDURE `sp__expire_holds_batch`(
 BEGIN
   DECLARE v_done BOOLEAN DEFAULT FALSE;
   DECLARE v_res BIGINT;
-  DECLARE v_book BIGINT;
-  DECLARE v_copy BIGINT;
-  DECLARE v_locked BIGINT;
-  DECLARE v_status VARCHAR(16);
-  DECLARE v_until DATETIME(3);
+  DECLARE v_expired BOOLEAN;
   DECLARE c_holds CURSOR FOR
-    SELECT id, book_id, assigned_copy_id FROM reservations
+    SELECT id FROM reservations
      WHERE status = 'ready' AND hold_expires_at <= p_now
      ORDER BY book_id, id;
   DECLARE CONTINUE HANDLER FOR NOT FOUND SET v_done = TRUE;
-  DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN ROLLBACK; RESIGNAL; END;
 
   SET p_count = 0;
   OPEN c_holds;
   expire: LOOP
-    FETCH c_holds INTO v_res, v_book, v_copy;
+    FETCH c_holds INTO v_res;
     IF v_done THEN
       LEAVE expire;
     END IF;
-    START TRANSACTION;
-    SELECT id INTO v_locked FROM books WHERE id = v_book FOR UPDATE;
-    SELECT id INTO v_locked FROM book_copies WHERE id = v_copy FOR UPDATE;
-    -- Re-check under the locks: a checkout or cancel may have closed it since the cursor read it.
-    SELECT status, hold_expires_at INTO v_status, v_until FROM reservations WHERE id = v_res FOR UPDATE;
-    IF v_status = 'ready' AND v_until <= p_now THEN
-      UPDATE reservations
-         SET status = 'expired', closed_at = p_now, closed_by_kind = 'system', close_reason = 'hold_expired'
-       WHERE id = v_res;
-      CALL sp__promote_queue(v_copy, NULL, p_now);
-      SET p_count = p_count + 1;
-    END IF;
-    COMMIT;
+    -- A hold whose rows are busy (lock wait timeout or deadlock) is skipped: sp__expire_hold has
+    -- rolled it back, and the next run (or the holder's next scan) retries it. Other errors stop the run.
+    one_hold: BEGIN
+      DECLARE EXIT HANDLER FOR 1205, 1213 BEGIN END;
+      CALL sp__expire_hold(v_res, p_now, v_expired);
+      IF v_expired THEN
+        SET p_count = p_count + 1;
+      END IF;
+    END one_hold;
     SET v_done = FALSE;
   END LOOP;
   CLOSE c_holds;
