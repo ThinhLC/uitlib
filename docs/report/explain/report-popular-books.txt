@@ -1,0 +1,14 @@
+-- SELECT * FROM v_report_popular_books ORDER BY loan_items DESC LIMIT 10
+
+-> Limit: 10 row(s)  (cost=2.6..2.6 rows=0)
+    -> Sort: v_report_popular_books.loan_items DESC, limit input to 10 row(s) per chunk  (cost=2.6..2.6 rows=0)
+        -> Table scan on v_report_popular_books  (cost=2.5..2.5 rows=0)
+            -> Materialize  (cost=0..0 rows=0)
+                -> Table scan on <temporary>
+                    -> Aggregate using temporary table
+                        -> Nested loop inner join  (cost=26.7 rows=33)
+                            -> Nested loop inner join  (cost=15.1 rows=33)
+                                -> Covering index scan on li using loan_items_copy_status_ix  (cost=3.55 rows=33)
+                                -> Single-row index lookup on c using PRIMARY (id=li.copy_id)  (cost=0.253 rows=1)
+                            -> Single-row index lookup on b using PRIMARY (id=c.book_id)  (cost=0.253 rows=1)
+

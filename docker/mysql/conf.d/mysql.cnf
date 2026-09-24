@@ -1,0 +1,11 @@
+[mysqld]
+# Store and compute all times in UTC (research R9).
+default_time_zone = '+00:00'
+# Allow a non-SUPER owner to create functions and triggers while binary logging is on.
+log_bin_trust_function_creators = 1
+character-set-server = utf8mb4
+collation-server = utf8mb4_0900_ai_ci
+# Concurrency tests read performance_schema.data_lock_waits.
+performance_schema = ON
+# Needed by the [Ext] hold-expiry event.
+event_scheduler = ON

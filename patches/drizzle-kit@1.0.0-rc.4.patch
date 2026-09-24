@@ -1,0 +1,17 @@
+diff --git a/bin.cjs b/bin.cjs
+index 24e49917fb4adc172cbb2c411a00b6ad40b54c26..a8e86401aa23bd0dd26dd82f3154d37518bed5c4 100755
+--- a/bin.cjs
++++ b/bin.cjs
+@@ -82364,6 +82364,12 @@ var init_diff$5 = __esmMin((() => {
+ 			return true;
+ 		}).map((it) => prepareStatement$4("drop_pk", { pk: it }));
+ 		const createCheckStatements = checksDiff.filter((it) => it.$diffType === "create").filter((it) => !createdTables.some((x) => x.name === it.table)).map((it) => prepareStatement$4("create_check", { check: it }));
++		// [local patch] MySQL: a CHECK whose expression changed under the same name was computed in
++		// `alters` but never emitted. MySQL cannot alter a CHECK expression, so drop and re-create it.
++		for (const it of alters.filter((x) => x.entityType === "checks" && x.$right)) {
++			dropCheckStatements.push(prepareStatement$4("drop_constraint", { constraint: it.$left.name, table: it.$left.table, dropAutoIndex: false }));
++			createCheckStatements.push(prepareStatement$4("create_check", { check: it.$right }));
++		}
+ 		const createIndexesStatements = indexesDiff.filter((it) => it.$diffType === "create").filter((it) => !it.isUnique || !createdTables.some((x) => x.name === it.table)).map((it) => prepareStatement$4("create_index", { index: it }));
+ 		const createFKsStatements = fksDiff.filter((it) => it.$diffType === "create").filter((x) => createdTables.length >= 2 || !createdTables.some((it) => it.name === x.table)).map((it) => prepareStatement$4("create_fk", { fk: it }));
+ 		const createPKStatements = pksDiff.filter((it) => it.$diffType === "create").filter((it) => !createdTables.some((x) => x.name === it.table)).map((it) => prepareStatement$4("create_pk", { pk: it }));

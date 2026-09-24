@@ -1,0 +1,1290 @@
+{
+  "books": [
+    {
+      "book": {
+        "title": "Clean Code",
+        "subtitle": "A Handbook of Agile Software Craftsmanship",
+        "authors": [
+          "Robert C. Martin"
+        ],
+        "publisher": "Prentice Hall",
+        "publishedDateText": "2008-08",
+        "publishedYear": 2008,
+        "description": "A guide to writing readable and maintainable code.",
+        "languageCode": "en",
+        "coverUrl": "https://covers.openlibrary.org/b/isbn/9780132350884-L.jpg",
+        "categories": [
+          "Computer Science > Software Engineering"
+        ],
+        "identifiers": [
+          {
+            "type": "ISBN_13",
+            "value": "9780132350884"
+          }
+        ]
+      },
+      "library": {
+        "classificationCode": "005.1 MAR",
+        "replacementCostVnd": 450000,
+        "copies": [
+          {
+            "barcode": "M001",
+            "shelfCode": "A1-01",
+            "condition": "good"
+          },
+          {
+            "barcode": "M002",
+            "shelfCode": "A1-03",
+            "condition": "good"
+          },
+          {
+            "barcode": "M003",
+            "shelfCode": "A1-06",
+            "condition": "good"
+          }
+        ]
+      }
+    },
+    {
+      "book": {
+        "title": "The Pragmatic Programmer",
+        "subtitle": "Your Journey to Mastery, 20th Anniversary Edition",
+        "authors": [
+          "David Thomas",
+          "Andrew Hunt"
+        ],
+        "publisher": "Addison-Wesley",
+        "publishedDateText": "2019-09",
+        "publishedYear": 2019,
+        "description": "Practical advice on the craft and habits of software development.",
+        "languageCode": "en",
+        "coverUrl": "https://covers.openlibrary.org/b/isbn/9780135957059-L.jpg",
+        "categories": [
+          "Computer Science > Software Engineering"
+        ],
+        "identifiers": [
+          {
+            "type": "ISBN_13",
+            "value": "9780135957059"
+          }
+        ]
+      },
+      "library": {
+        "classificationCode": "005.1 THO",
+        "replacementCostVnd": 520000,
+        "copies": [
+          {
+            "barcode": "M004",
+            "shelfCode": "A1-08",
+            "condition": "good"
+          },
+          {
+            "barcode": "M005",
+            "shelfCode": "A2-01",
+            "condition": "good"
+          }
+        ]
+      }
+    },
+    {
+      "book": {
+        "title": "Design Patterns",
+        "subtitle": "Elements of Reusable Object-Oriented Software",
+        "authors": [
+          "Erich Gamma",
+          "Richard Helm",
+          "Ralph Johnson",
+          "John Vlissides"
+        ],
+        "publisher": "Addison-Wesley",
+        "publishedDateText": "1994-10",
+        "publishedYear": 1994,
+        "description": "A catalog of object-oriented design patterns.",
+        "languageCode": "en",
+        "coverUrl": "https://covers.openlibrary.org/b/isbn/9780201633610-L.jpg",
+        "categories": [
+          "Computer Science > Software Engineering"
+        ],
+        "identifiers": [
+          {
+            "type": "ISBN_13",
+            "value": "9780201633610"
+          }
+        ]
+      },
+      "library": {
+        "classificationCode": "005.12 GAM",
+        "replacementCostVnd": 600000,
+        "copies": [
+          {
+            "barcode": "M006",
+            "shelfCode": "A2-03",
+            "condition": "good"
+          },
+          {
+            "barcode": "M007",
+            "shelfCode": "A2-06",
+            "condition": "worn"
+          }
+        ]
+      }
+    },
+    {
+      "book": {
+        "title": "Refactoring",
+        "subtitle": "Improving the Design of Existing Code",
+        "authors": [
+          "Martin Fowler"
+        ],
+        "publisher": "Addison-Wesley",
+        "publishedDateText": "2018-11",
+        "publishedYear": 2018,
+        "description": "Second edition on restructuring code without changing its behavior.",
+        "languageCode": "en",
+        "coverUrl": "https://covers.openlibrary.org/b/isbn/9780134757599-L.jpg",
+        "categories": [
+          "Computer Science > Software Engineering"
+        ],
+        "identifiers": [
+          {
+            "type": "ISBN_13",
+            "value": "9780134757599"
+          }
+        ]
+      },
+      "library": {
+        "classificationCode": "005.16 FOW",
+        "replacementCostVnd": 550000,
+        "copies": [
+          {
+            "barcode": "M008",
+            "shelfCode": "A2-09",
+            "condition": "good"
+          },
+          {
+            "barcode": "M009",
+            "shelfCode": "A3-01",
+            "condition": "good"
+          }
+        ]
+      }
+    },
+    {
+      "book": {
+        "title": "Introduction to Algorithms",
+        "subtitle": null,
+        "authors": [
+          "Thomas H. Cormen",
+          "Charles E. Leiserson",
+          "Ronald L. Rivest",
+          "Clifford Stein"
+        ],
+        "publisher": "MIT Press",
+        "publishedDateText": "2009-07",
+        "publishedYear": 2009,
+        "description": "Third edition of a comprehensive textbook on algorithms.",
+        "languageCode": "en",
+        "coverUrl": "https://covers.openlibrary.org/b/isbn/9780262033848-L.jpg",
+        "categories": [
+          "Computer Science > Algorithms",
+          "Textbooks"
+        ],
+        "identifiers": [
+          {
+            "type": "ISBN_13",
+            "value": "9780262033848"
+          }
+        ]
+      },
+      "library": {
+        "classificationCode": "005.1 COR",
+        "replacementCostVnd": 1000000,
+        "copies": [
+          {
+            "barcode": "M010",
+            "shelfCode": "A3-04",
+            "condition": "good"
+          },
+          {
+            "barcode": "M011",
+            "shelfCode": "A3-06",
+            "condition": "good"
+          },
+          {
+            "barcode": "M012",
+            "shelfCode": "A3-09",
+            "condition": "good"
+          }
+        ]
+      }
+    },
+    {
+      "book": {
+        "title": "Introduction to Algorithms",
+        "subtitle": null,
+        "authors": [
+          "Thomas H. Cormen",
+          "Charles E. Leiserson",
+          "Ronald L. Rivest",
+          "Clifford Stein"
+        ],
+        "publisher": "MIT Press",
+        "publishedDateText": "2022-04",
+        "publishedYear": 2022,
+        "description": "Fourth edition of a comprehensive textbook on algorithms.",
+        "languageCode": "en",
+        "coverUrl": "https://covers.openlibrary.org/b/isbn/9780262046305-L.jpg",
+        "categories": [
+          "Computer Science > Algorithms",
+          "Textbooks"
+        ],
+        "identifiers": [
+          {
+            "type": "ISBN_13",
+            "value": "9780262046305"
+          }
+        ]
+      },
+      "library": {
+        "classificationCode": "005.1 COR",
+        "replacementCostVnd": 1200000,
+        "copies": [
+          {
+            "barcode": "M013",
+            "shelfCode": "A4-01",
+            "condition": "good"
+          },
+          {
+            "barcode": "M014",
+            "shelfCode": "A4-04",
+            "condition": "good"
+          }
+        ]
+      }
+    },
+    {
+      "book": {
+        "title": "Database System Concepts",
+        "subtitle": null,
+        "authors": [
+          "Abraham Silberschatz",
+          "Henry F. Korth",
+          "S. Sudarshan"
+        ],
+        "publisher": "McGraw-Hill",
+        "publishedDateText": "2019-02",
+        "publishedYear": 2019,
+        "description": "Seventh edition of an introductory textbook on database systems.",
+        "languageCode": "en",
+        "coverUrl": "https://covers.openlibrary.org/b/isbn/9780078022159-L.jpg",
+        "categories": [
+          "Computer Science > Databases",
+          "Computer Science > Computer Systems",
+          "Textbooks"
+        ],
+        "identifiers": [
+          {
+            "type": "ISBN_13",
+            "value": "9780078022159"
+          }
+        ]
+      },
+      "library": {
+        "classificationCode": "005.74 SIL",
+        "replacementCostVnd": 1100000,
+        "copies": [
+          {
+            "barcode": "M015",
+            "shelfCode": "A4-07",
+            "condition": "good"
+          },
+          {
+            "barcode": "M016",
+            "shelfCode": "A4-09",
+            "condition": "good"
+          },
+          {
+            "barcode": "M017",
+            "shelfCode": "B1-02",
+            "condition": "good"
+          },
+          {
+            "barcode": "M018",
+            "shelfCode": "B1-04",
+            "condition": "good"
+          }
+        ]
+      }
+    },
+    {
+      "book": {
+        "title": "Fundamentals of Database Systems",
+        "subtitle": null,
+        "authors": [
+          "Ramez Elmasri",
+          "Shamkant B. Navathe"
+        ],
+        "publisher": "Pearson",
+        "publishedDateText": "2015-06",
+        "publishedYear": 2015,
+        "description": "Seventh edition of a textbook on database design and implementation.",
+        "languageCode": "en",
+        "coverUrl": "https://covers.openlibrary.org/b/isbn/9780133970777-L.jpg",
+        "categories": [
+          "Computer Science > Databases",
+          "Textbooks"
+        ],
+        "identifiers": [
+          {
+            "type": "ISBN_13",
+            "value": "9780133970777"
+          }
+        ]
+      },
+      "library": {
+        "classificationCode": "005.74 ELM",
+        "replacementCostVnd": 1050000,
+        "copies": [
+          {
+            "barcode": "M019",
+            "shelfCode": "B1-07",
+            "condition": "good"
+          },
+          {
+            "barcode": "M020",
+            "shelfCode": "B1-10",
+            "condition": "good"
+          },
+          {
+            "barcode": "M021",
+            "shelfCode": "B2-02",
+            "condition": "worn"
+          }
+        ]
+      }
+    },
+    {
+      "book": {
+        "title": "Structure and Interpretation of Computer Programs",
+        "subtitle": null,
+        "authors": [
+          "Harold Abelson",
+          "Gerald Jay Sussman",
+          "Julie Sussman"
+        ],
+        "publisher": "MIT Press",
+        "publishedDateText": "1996-07",
+        "publishedYear": 1996,
+        "description": "Second edition of a classic introduction to programming using Scheme.",
+        "languageCode": "en",
+        "coverUrl": "https://covers.openlibrary.org/b/isbn/9780262510875-L.jpg",
+        "categories": [
+          "Computer Science > Programming Languages",
+          "Textbooks"
+        ],
+        "identifiers": [
+          {
+            "type": "ISBN_13",
+            "value": "9780262510875"
+          }
+        ]
+      },
+      "library": {
+        "classificationCode": "005.13 ABE",
+        "replacementCostVnd": 700000,
+        "copies": [
+          {
+            "barcode": "M022",
+            "shelfCode": "B2-05",
+            "condition": "good"
+          }
+        ]
+      }
+    },
+    {
+      "book": {
+        "title": "The C Programming Language",
+        "subtitle": null,
+        "authors": [
+          "Brian W. Kernighan",
+          "Dennis M. Ritchie"
+        ],
+        "publisher": "Prentice Hall",
+        "publishedDateText": "1988-03",
+        "publishedYear": 1988,
+        "description": "Second edition of the reference introduction to the C language.",
+        "languageCode": "en",
+        "coverUrl": "https://covers.openlibrary.org/b/isbn/9780131103627-L.jpg",
+        "categories": [
+          "Computer Science > Programming Languages"
+        ],
+        "identifiers": [
+          {
+            "type": "ISBN_13",
+            "value": "9780131103627"
+          }
+        ]
+      },
+      "library": {
+        "classificationCode": "005.133 KER",
+        "replacementCostVnd": 400000,
+        "copies": [
+          {
+            "barcode": "M023",
+            "shelfCode": "B2-07",
+            "condition": "good"
+          },
+          {
+            "barcode": "M024",
+            "shelfCode": "B2-10",
+            "condition": "good"
+          }
+        ]
+      }
+    },
+    {
+      "book": {
+        "title": "Code Complete",
+        "subtitle": null,
+        "authors": [
+          "Steve McConnell"
+        ],
+        "publisher": "Microsoft Press",
+        "publishedDateText": "2004-06",
+        "publishedYear": 2004,
+        "description": "Second edition of a handbook on software construction.",
+        "languageCode": "en",
+        "coverUrl": "https://covers.openlibrary.org/b/isbn/9780735619678-L.jpg",
+        "categories": [
+          "Computer Science > Software Engineering"
+        ],
+        "identifiers": [
+          {
+            "type": "ISBN_13",
+            "value": "9780735619678"
+          }
+        ]
+      },
+      "library": {
+        "classificationCode": "005.1 MCC",
+        "replacementCostVnd": 650000,
+        "copies": [
+          {
+            "barcode": "M025",
+            "shelfCode": "B3-02",
+            "condition": "good"
+          }
+        ]
+      }
+    },
+    {
+      "book": {
+        "title": "Designing Data-Intensive Applications",
+        "subtitle": null,
+        "authors": [
+          "Martin Kleppmann"
+        ],
+        "publisher": "O'Reilly Media",
+        "publishedDateText": "2017-03",
+        "publishedYear": 2017,
+        "description": "An overview of the principles behind reliable, scalable data systems.",
+        "languageCode": "en",
+        "coverUrl": "https://covers.openlibrary.org/b/isbn/9781449373320-L.jpg",
+        "categories": [
+          "Computer Science > Distributed Systems",
+          "Computer Science > Databases"
+        ],
+        "identifiers": [
+          {
+            "type": "ISBN_13",
+            "value": "9781449373320"
+          }
+        ]
+      },
+      "library": {
+        "classificationCode": "005.74 KLE",
+        "replacementCostVnd": 600000,
+        "copies": [
+          {
+            "barcode": "M026",
+            "shelfCode": "B3-05",
+            "condition": "good"
+          },
+          {
+            "barcode": "M027",
+            "shelfCode": "B3-08",
+            "condition": "good"
+          },
+          {
+            "barcode": "M028",
+            "shelfCode": "B3-10",
+            "condition": "good"
+          }
+        ]
+      }
+    },
+    {
+      "book": {
+        "title": "Computer Networking",
+        "subtitle": "A Top-Down Approach",
+        "authors": [
+          "James F. Kurose",
+          "Keith W. Ross"
+        ],
+        "publisher": "Pearson",
+        "publishedDateText": "2016",
+        "publishedYear": 2016,
+        "description": "Seventh edition of an introductory networking textbook.",
+        "languageCode": "en",
+        "coverUrl": "https://covers.openlibrary.org/b/isbn/9780133594140-L.jpg",
+        "categories": [
+          "Computer Science > Networking",
+          "Textbooks"
+        ],
+        "identifiers": [
+          {
+            "type": "ISBN_13",
+            "value": "9780133594140"
+          }
+        ]
+      },
+      "library": {
+        "classificationCode": "004.6 KUR",
+        "replacementCostVnd": 950000,
+        "copies": [
+          {
+            "barcode": "M029",
+            "shelfCode": "B4-03",
+            "condition": "good"
+          },
+          {
+            "barcode": "M030",
+            "shelfCode": "B4-05",
+            "condition": "good"
+          }
+        ]
+      }
+    },
+    {
+      "book": {
+        "title": "Artificial Intelligence",
+        "subtitle": "A Modern Approach",
+        "authors": [
+          "Stuart Russell",
+          "Peter Norvig"
+        ],
+        "publisher": "Pearson",
+        "publishedDateText": "2009-12",
+        "publishedYear": 2009,
+        "description": "Third edition of a broad textbook on artificial intelligence.",
+        "languageCode": "en",
+        "coverUrl": "https://covers.openlibrary.org/b/isbn/9780136042594-L.jpg",
+        "categories": [
+          "Computer Science > Artificial Intelligence",
+          "Textbooks"
+        ],
+        "identifiers": [
+          {
+            "type": "ISBN_13",
+            "value": "9780136042594"
+          }
+        ]
+      },
+      "library": {
+        "classificationCode": "006.3 RUS",
+        "replacementCostVnd": 1100000,
+        "copies": [
+          {
+            "barcode": "M031",
+            "shelfCode": "B4-08",
+            "condition": "good"
+          },
+          {
+            "barcode": "M032",
+            "shelfCode": "C1-01",
+            "condition": "good"
+          }
+        ]
+      }
+    },
+    {
+      "book": {
+        "title": "The Mythical Man-Month",
+        "subtitle": "Essays on Software Engineering, Anniversary Edition",
+        "authors": [
+          "Frederick P. Brooks Jr."
+        ],
+        "publisher": "Addison-Wesley",
+        "publishedDateText": "1995-08",
+        "publishedYear": 1995,
+        "description": "Essays on managing large software projects.",
+        "languageCode": "en",
+        "coverUrl": "https://covers.openlibrary.org/b/isbn/9780201835953-L.jpg",
+        "categories": [
+          "Computer Science > Software Engineering"
+        ],
+        "identifiers": [
+          {
+            "type": "ISBN_13",
+            "value": "9780201835953"
+          }
+        ]
+      },
+      "library": {
+        "classificationCode": "005.1 BRO",
+        "replacementCostVnd": 380000,
+        "copies": [
+          {
+            "barcode": "M033",
+            "shelfCode": "C1-03",
+            "condition": "worn"
+          }
+        ]
+      }
+    },
+    {
+      "book": {
+        "title": "Domain-Driven Design",
+        "subtitle": "Tackling Complexity in the Heart of Software",
+        "authors": [
+          "Eric Evans"
+        ],
+        "publisher": "Addison-Wesley",
+        "publishedDateText": "2003-08",
+        "publishedYear": 2003,
+        "description": "An approach to modeling complex business domains in software.",
+        "languageCode": "en",
+        "coverUrl": "https://covers.openlibrary.org/b/isbn/9780321125217-L.jpg",
+        "categories": [
+          "Computer Science > Software Engineering"
+        ],
+        "identifiers": [
+          {
+            "type": "ISBN_13",
+            "value": "9780321125217"
+          }
+        ]
+      },
+      "library": {
+        "classificationCode": "005.1 EVA",
+        "replacementCostVnd": 620000,
+        "copies": [
+          {
+            "barcode": "M034",
+            "shelfCode": "C1-06",
+            "condition": "good"
+          }
+        ]
+      }
+    },
+    {
+      "book": {
+        "title": "Head First Design Patterns",
+        "subtitle": null,
+        "authors": [
+          "Eric Freeman",
+          "Elisabeth Freeman",
+          "Kathy Sierra",
+          "Bert Bates"
+        ],
+        "publisher": "O'Reilly Media",
+        "publishedDateText": "2004-10",
+        "publishedYear": 2004,
+        "description": null,
+        "languageCode": "en",
+        "coverUrl": "https://covers.openlibrary.org/b/isbn/9780596007126-L.jpg",
+        "categories": [
+          "Computer Science > Software Engineering"
+        ],
+        "identifiers": [
+          {
+            "type": "ISBN_13",
+            "value": "9780596007126"
+          }
+        ]
+      },
+      "library": {
+        "classificationCode": "005.12 FRE",
+        "replacementCostVnd": 480000,
+        "copies": [
+          {
+            "barcode": "M035",
+            "shelfCode": "C1-08",
+            "condition": "good"
+          },
+          {
+            "barcode": "M036",
+            "shelfCode": "C2-01",
+            "condition": "good"
+          }
+        ]
+      }
+    },
+    {
+      "book": {
+        "title": "Effective Java",
+        "subtitle": null,
+        "authors": [
+          "Joshua Bloch"
+        ],
+        "publisher": "Addison-Wesley",
+        "publishedDateText": "2017-12",
+        "publishedYear": 2017,
+        "description": "Third edition of best practices for the Java language.",
+        "languageCode": "en",
+        "coverUrl": "https://covers.openlibrary.org/b/isbn/9780134685991-L.jpg",
+        "categories": [
+          "Computer Science > Programming Languages"
+        ],
+        "identifiers": [
+          {
+            "type": "ISBN_13",
+            "value": "9780134685991"
+          }
+        ]
+      },
+      "library": {
+        "classificationCode": "005.133 BLO",
+        "replacementCostVnd": 500000,
+        "copies": [
+          {
+            "barcode": "M037",
+            "shelfCode": "C2-03",
+            "condition": "good"
+          },
+          {
+            "barcode": "M038",
+            "shelfCode": "C2-06",
+            "condition": "good"
+          }
+        ]
+      }
+    },
+    {
+      "book": {
+        "title": "Deep Learning",
+        "subtitle": null,
+        "authors": [
+          "Ian Goodfellow",
+          "Yoshua Bengio",
+          "Aaron Courville"
+        ],
+        "publisher": "MIT Press",
+        "publishedDateText": "2016-11",
+        "publishedYear": 2016,
+        "description": "A textbook on the theory and practice of deep neural networks.",
+        "languageCode": "en",
+        "coverUrl": "https://covers.openlibrary.org/b/isbn/9780262035613-L.jpg",
+        "categories": [
+          "Computer Science > Artificial Intelligence"
+        ],
+        "identifiers": [
+          {
+            "type": "ISBN_13",
+            "value": "9780262035613"
+          }
+        ]
+      },
+      "library": {
+        "classificationCode": "006.31 GOO",
+        "replacementCostVnd": 850000,
+        "copies": [
+          {
+            "barcode": "M039",
+            "shelfCode": "C2-09",
+            "condition": "good"
+          },
+          {
+            "barcode": "M040",
+            "shelfCode": "C3-01",
+            "condition": "good"
+          }
+        ]
+      }
+    },
+    {
+      "book": {
+        "title": "Computer Systems",
+        "subtitle": "A Programmer's Perspective",
+        "authors": [
+          "Randal E. Bryant",
+          "David R. O'Hallaron"
+        ],
+        "publisher": "Pearson",
+        "publishedDateText": "2015-03",
+        "publishedYear": 2015,
+        "description": "Third edition on how computer systems execute programs.",
+        "languageCode": "en",
+        "coverUrl": "https://covers.openlibrary.org/b/isbn/9780134092669-L.jpg",
+        "categories": [
+          "Computer Science > Computer Systems",
+          "Textbooks"
+        ],
+        "identifiers": [
+          {
+            "type": "ISBN_13",
+            "value": "9780134092669"
+          }
+        ]
+      },
+      "library": {
+        "classificationCode": "004 BRY",
+        "replacementCostVnd": 1000000,
+        "copies": [
+          {
+            "barcode": "M041",
+            "shelfCode": "C3-04",
+            "condition": "good"
+          },
+          {
+            "barcode": "M042",
+            "shelfCode": "C3-06",
+            "condition": "good"
+          }
+        ]
+      }
+    },
+    {
+      "book": {
+        "title": "Compilers",
+        "subtitle": "Principles, Techniques, and Tools",
+        "authors": [
+          "Alfred V. Aho",
+          "Monica S. Lam",
+          "Ravi Sethi",
+          "Jeffrey D. Ullman"
+        ],
+        "publisher": "Addison-Wesley",
+        "publishedDateText": "2006-09",
+        "publishedYear": 2006,
+        "description": "Second edition of a textbook on compiler design.",
+        "languageCode": "en",
+        "coverUrl": "https://covers.openlibrary.org/b/isbn/9780321486813-L.jpg",
+        "categories": [
+          "Computer Science > Programming Languages",
+          "Textbooks"
+        ],
+        "identifiers": [
+          {
+            "type": "ISBN_13",
+            "value": "9780321486813"
+          }
+        ]
+      },
+      "library": {
+        "classificationCode": "005.453 AHO",
+        "replacementCostVnd": 950000,
+        "copies": [
+          {
+            "barcode": "M043",
+            "shelfCode": "C3-09",
+            "condition": "good"
+          }
+        ]
+      }
+    },
+    {
+      "book": {
+        "title": "Test Driven Development",
+        "subtitle": "By Example",
+        "authors": [
+          "Kent Beck"
+        ],
+        "publisher": "Addison-Wesley",
+        "publishedDateText": "2002-11",
+        "publishedYear": 2002,
+        "description": "An introduction to test-driven development through worked examples.",
+        "languageCode": "en",
+        "coverUrl": "https://covers.openlibrary.org/b/isbn/9780321146533-L.jpg",
+        "categories": [
+          "Computer Science > Software Engineering"
+        ],
+        "identifiers": [
+          {
+            "type": "ISBN_13",
+            "value": "9780321146533"
+          }
+        ]
+      },
+      "library": {
+        "classificationCode": "005.14 BEC",
+        "replacementCostVnd": 400000,
+        "copies": [
+          {
+            "barcode": "M044",
+            "shelfCode": "C4-01",
+            "condition": "good"
+          }
+        ]
+      }
+    },
+    {
+      "book": {
+        "title": "Working Effectively with Legacy Code",
+        "subtitle": null,
+        "authors": [
+          "Michael Feathers"
+        ],
+        "publisher": "Prentice Hall",
+        "publishedDateText": "2004-09",
+        "publishedYear": 2004,
+        "description": "Techniques for safely changing existing code bases.",
+        "languageCode": "en",
+        "coverUrl": "https://covers.openlibrary.org/b/isbn/9780131177055-L.jpg",
+        "categories": [
+          "Computer Science > Software Engineering"
+        ],
+        "identifiers": [
+          {
+            "type": "ISBN_13",
+            "value": "9780131177055"
+          }
+        ]
+      },
+      "library": {
+        "classificationCode": "005.16 FEA",
+        "replacementCostVnd": 520000,
+        "copies": [
+          {
+            "barcode": "M045",
+            "shelfCode": "C4-04",
+            "condition": "good"
+          }
+        ]
+      }
+    },
+    {
+      "book": {
+        "title": "Patterns of Enterprise Application Architecture",
+        "subtitle": null,
+        "authors": [
+          "Martin Fowler"
+        ],
+        "publisher": "Addison-Wesley",
+        "publishedDateText": "2002-11",
+        "publishedYear": 2002,
+        "description": null,
+        "languageCode": "en",
+        "coverUrl": "https://covers.openlibrary.org/b/isbn/9780321127426-L.jpg",
+        "categories": [
+          "Computer Science > Software Engineering"
+        ],
+        "identifiers": [
+          {
+            "type": "ISBN_13",
+            "value": "9780321127426"
+          }
+        ]
+      },
+      "library": {
+        "classificationCode": "005.1 FOW",
+        "replacementCostVnd": 580000,
+        "copies": [
+          {
+            "barcode": "M046",
+            "shelfCode": "C4-07",
+            "condition": "good"
+          }
+        ]
+      }
+    },
+    {
+      "book": {
+        "title": "Clean Architecture",
+        "subtitle": "A Craftsman's Guide to Software Structure and Design",
+        "authors": [
+          "Robert C. Martin"
+        ],
+        "publisher": "Prentice Hall",
+        "publishedDateText": "2017-09",
+        "publishedYear": 2017,
+        "description": "Principles for structuring software systems.",
+        "languageCode": "en",
+        "coverUrl": "https://covers.openlibrary.org/b/isbn/9780134494166-L.jpg",
+        "categories": [
+          "Computer Science > Software Engineering"
+        ],
+        "identifiers": [
+          {
+            "type": "ISBN_13",
+            "value": "9780134494166"
+          }
+        ]
+      },
+      "library": {
+        "classificationCode": "005.1 MAR",
+        "replacementCostVnd": 450000,
+        "copies": [
+          {
+            "barcode": "M047",
+            "shelfCode": "C4-09",
+            "condition": "good"
+          },
+          {
+            "barcode": "M048",
+            "shelfCode": "D1-02",
+            "condition": "good"
+          }
+        ]
+      }
+    },
+    {
+      "book": {
+        "title": "The Art of Computer Programming",
+        "subtitle": "Volume 1: Fundamental Algorithms",
+        "authors": [
+          "Donald E. Knuth"
+        ],
+        "publisher": "Addison-Wesley",
+        "publishedDateText": "1997",
+        "publishedYear": 1997,
+        "description": "Third edition of the first volume of a classic series on algorithms.",
+        "languageCode": "en",
+        "coverUrl": "https://covers.openlibrary.org/b/isbn/9780201896831-L.jpg",
+        "categories": [
+          "Computer Science > Algorithms"
+        ],
+        "identifiers": [
+          {
+            "type": "ISBN_13",
+            "value": "9780201896831"
+          }
+        ]
+      },
+      "library": {
+        "classificationCode": "005.1 KNU",
+        "replacementCostVnd": 900000,
+        "copies": [
+          {
+            "barcode": "M049",
+            "shelfCode": "D1-04",
+            "condition": "good"
+          }
+        ]
+      }
+    },
+    {
+      "book": {
+        "title": "Programming Pearls",
+        "subtitle": null,
+        "authors": [
+          "Jon Bentley"
+        ],
+        "publisher": "Addison-Wesley",
+        "publishedDateText": "1999-09",
+        "publishedYear": 1999,
+        "description": "Second edition of essays on programming problems and techniques.",
+        "languageCode": "en",
+        "coverUrl": "https://covers.openlibrary.org/b/isbn/9780201657883-L.jpg",
+        "categories": [
+          "Computer Science > Algorithms"
+        ],
+        "identifiers": [
+          {
+            "type": "ISBN_13",
+            "value": "9780201657883"
+          }
+        ]
+      },
+      "library": {
+        "classificationCode": "005.1 BEN",
+        "replacementCostVnd": 350000,
+        "copies": [
+          {
+            "barcode": "M050",
+            "shelfCode": "D1-07",
+            "condition": "good"
+          }
+        ]
+      }
+    },
+    {
+      "book": {
+        "title": "Giáo trình Cơ sở dữ liệu",
+        "subtitle": null,
+        "authors": [
+          "Khoa Hệ thống Thông tin"
+        ],
+        "publisher": "NXB Đại học Quốc gia TP.HCM",
+        "publishedDateText": "2020",
+        "publishedYear": 2020,
+        "description": "Giáo trình nhập môn cơ sở dữ liệu dành cho sinh viên đại học.",
+        "languageCode": "vi",
+        "coverUrl": null,
+        "categories": [
+          "Computer Science > Databases",
+          "Textbooks"
+        ],
+        "identifiers": []
+      },
+      "library": {
+        "classificationCode": "005.74 KHT",
+        "replacementCostVnd": 120000,
+        "copies": [
+          {
+            "barcode": "M051",
+            "shelfCode": "D1-10",
+            "condition": "good"
+          },
+          {
+            "barcode": "M052",
+            "shelfCode": "D2-02",
+            "condition": "worn"
+          },
+          {
+            "barcode": "M053",
+            "shelfCode": "D2-05",
+            "condition": "good"
+          },
+          {
+            "barcode": "M054",
+            "shelfCode": "D2-07",
+            "condition": "good"
+          }
+        ]
+      }
+    },
+    {
+      "book": {
+        "title": "Giáo trình Hệ quản trị cơ sở dữ liệu",
+        "subtitle": null,
+        "authors": [
+          "Khoa Hệ thống Thông tin"
+        ],
+        "publisher": "NXB Đại học Quốc gia TP.HCM",
+        "publishedDateText": "2021",
+        "publishedYear": 2021,
+        "description": "Giáo trình về hệ quản trị cơ sở dữ liệu dành cho sinh viên đại học.",
+        "languageCode": "vi",
+        "coverUrl": null,
+        "categories": [
+          "Computer Science > Databases",
+          "Textbooks"
+        ],
+        "identifiers": []
+      },
+      "library": {
+        "classificationCode": "005.74 KHT",
+        "replacementCostVnd": 140000,
+        "copies": [
+          {
+            "barcode": "M055",
+            "shelfCode": "D2-10",
+            "condition": "good"
+          },
+          {
+            "barcode": "M056",
+            "shelfCode": "D3-02",
+            "condition": "good"
+          },
+          {
+            "barcode": "M057",
+            "shelfCode": "D3-05",
+            "condition": "good"
+          }
+        ]
+      }
+    },
+    {
+      "book": {
+        "title": "Dế Mèn phiêu lưu ký",
+        "subtitle": null,
+        "authors": [
+          "Tô Hoài"
+        ],
+        "publisher": "NXB Kim Đồng",
+        "publishedDateText": null,
+        "publishedYear": null,
+        "description": "Truyện thiếu nhi kể về cuộc phiêu lưu của chú Dế Mèn.",
+        "languageCode": "vi",
+        "coverUrl": null,
+        "categories": [
+          "Literature > Vietnamese Literature"
+        ],
+        "identifiers": []
+      },
+      "library": {
+        "classificationCode": "895.9223 TOH",
+        "replacementCostVnd": 65000,
+        "copies": [
+          {
+            "barcode": "M058",
+            "shelfCode": "D3-08",
+            "condition": "worn"
+          },
+          {
+            "barcode": "M059",
+            "shelfCode": "D3-10",
+            "condition": "good"
+          }
+        ]
+      }
+    },
+    {
+      "book": {
+        "title": "Truyện Kiều",
+        "subtitle": null,
+        "authors": [
+          "Nguyễn Du"
+        ],
+        "publisher": "NXB Văn học",
+        "publishedDateText": null,
+        "publishedYear": null,
+        "description": "Truyện thơ lục bát kinh điển của văn học Việt Nam.",
+        "languageCode": "vi",
+        "coverUrl": null,
+        "categories": [
+          "Literature > Vietnamese Literature",
+          "Literature > Poetry"
+        ],
+        "identifiers": []
+      },
+      "library": {
+        "classificationCode": "895.9221 NGU",
+        "replacementCostVnd": 90000,
+        "copies": [
+          {
+            "barcode": "M060",
+            "shelfCode": "D4-03",
+            "condition": "good"
+          },
+          {
+            "barcode": "M061",
+            "shelfCode": "D4-05",
+            "condition": "damaged"
+          }
+        ]
+      }
+    },
+    {
+      "book": {
+        "title": "Tài liệu thực hành SQL",
+        "subtitle": null,
+        "authors": [
+          "Bộ môn Cơ sở dữ liệu"
+        ],
+        "publisher": null,
+        "publishedDateText": "2024",
+        "publishedYear": 2024,
+        "description": "Tài liệu thực hành SQL nội bộ dành cho sinh viên.",
+        "languageCode": "vi",
+        "coverUrl": null,
+        "categories": [
+          "Computer Science > Databases"
+        ],
+        "identifiers": []
+      },
+      "library": {
+        "classificationCode": "005.756 BMC",
+        "replacementCostVnd": 60000,
+        "copies": [
+          {
+            "barcode": "M062",
+            "shelfCode": "D4-08",
+            "condition": "good"
+          }
+        ]
+      }
+    }
+  ]
+}

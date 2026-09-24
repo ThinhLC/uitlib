@@ -1,0 +1,244 @@
+﻿ĐẠI HỌC QUỐC GIA THÀNH PHỐ HỒ CHÍ MINH
+TRƯỜNG ĐẠI HỌC CÔNG NGHỆ THÔNG TIN
+KHOA KHOA HỌC VÀ KỸ THUẬT THÔNG TIN
+---------
+ Logo UIT In 
+
+
+
+
+
+
+
+
+
+
+
+BÁO CÁO ĐỒ ÁN QUẢN LÝ THÔNG TIN
+HỆ THỐNG QUẢN LÝ THƯ VIỆN
+
+
+
+
+
+
+
+
+
+
+Sinh viên thực hiện:
+        Lương Cao Thịnh - 26410292
+        Nguyễn Đình Long - 26410237
+        Từ Ngọc Sơn - 26410279
+        <Họ tên SV4> - <MSSV 4>
+        <Họ tên SV5> - <MSSV 5>
+
+
+Giảng viên:
+        <Học hàm/học vị> <Họ tên giảng viên 1>
+           <Học hàm/học vị> <Họ tên giảng viên 2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Thành phố Hồ Chí Minh, tháng .... năm ....
+BÁO CÁO TÓM TẮT
+1. Tiêu đề báo cáo: BÁO CÁO ĐỒ ÁN QUẢN LÝ THƯ VIỆN
+2. Danh sách thành viên
+MSSV
+	Họ tên
+	Ghi chú
+	26410292
+	Lương Cao Thịnh
+	
+
+	26410279
+	Từ Ngọc Sơn
+	
+
+	26410237
+	Nguyễn Đình Long 
+	
+
+	26410313
+	Nguyễn Đình Trung
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+3. Nội dung chi tiết
+Nội dung 1: 
+        + Đề mục 1:
+        + Đề mục 2:
+        + Đề mục 3: 
+        ....
+Nội dung 2: 
+        + Đề mục 1:
+        + Đề mục 2:
+        + Đề mục 3: 
+        ...
+Nội dung 3: 
+        + Đề mục 1:
+        + Đề mục 2:
+        + Đề mục 3: 
+        ...
+4. Phân công công việc
+
+
+MSSV
+	Họ tên
+	Nội dung được phân công
+	200xxx
+	Nguyễn Văn A.
+	Nội dung 1, Nội dung 2: mục 2.1
+	200xxx
+	Nguyễn Văn B.
+	Nội dung 2: mục 2,2; Nội dung 3: mục 3.3
+	200xxx
+	Nguyễn Văn C.
+	Nội dung 3: mục 3.2; mục 3.3
+	________________
+
+
+
+
+
+
+MỤC LỤC
+CHƯƠNG 1: MÔ TẢ BÀI TOÁN        1
+1.1.        Phát biểu bài toán, mục tiêu, đối tượng sử dụng        1
+1.2.        Mô tả quy trình trong thực tế        1
+CHƯƠNG 2: PHÂN TÍCH VÀ THIẾT KẾ HỆ THỐNG        2
+2.1.        Liệt kê và mô tả các chức năng của hệ thống        2
+2.2.        Các đối tượng cần quản lý, thuộc tính và mối quan hệ        2
+2.3.        Ràng buộc trên các đối tượng        2
+2.4.        Mô hình mức quan niệm (Sơ đồ ERD)        2
+2.5.        Thiết kế CSDL mức logic và giải thích các bảng (Tân từ)        2
+CHƯƠNG 3: CÀI ĐẶT        3
+3.1.        Cài đặt mô hình dữ liệu trên hệ quản trị CSDL (Tạo bảng, khóa chính, khóa ngoại, ràng buộc)        3
+3.2.        Xây dựng dữ liệu mẫu và thu thập dữ liệu thực tế        3
+CHƯƠNG 4: QUẢN LÝ THÔNG TIN        4
+4.1.        Xử lý thông tin (Stored Procedure, Trigger, Function, Cursor)        4
+4.2.        An toàn thông tin (Xác thực, Phân quyền, Import, Export, Backup, Restore)        4
+4.3.        Trình bày thông tin (Report)        4
+
+
+
+
+CHƯƠNG 1: MÔ TẢ BÀI TOÁN
+1. 1.1. Phát biểu bài toán, mục tiêu, đối tượng sử dụng
+- Phát biểu bài toán: Trong bối cảnh chuyển đổi số, việc quản lý thư viện truyền thống bộc lộ nhiều hạn chế như quy trình thủ công, khó khăn trong tra cứu, kiểm soát tài sản và thống kê báo cáo. Bài toán đặt ra là cần xây dựng một hệ thống phần mềm quản lý thư viện toàn diện, có khả năng cấu hình linh hoạt và dễ dàng mở rộng để đáp ứng nhu cầu đa dạng của nhiều mô hình thư viện khác nhau (thư viện trường học, thư viện công cộng, thư viện chuyên ngành, thư viện doanh nghiệp, v.v.). Hệ thống không chỉ giải quyết các nghiệp vụ cơ bản mà còn phải thích ứng tốt với các thay đổi về quy mô, loại hình tài liệu và chính sách vận hành thực tế.
+- Mục tiêu:
+  * Quản lý đa dạng các loại hình tài liệu: Hỗ trợ linh hoạt cả tài liệu truyền thống (sách in, tạp chí, bản đồ, đĩa CD/DVD) và tài liệu số (e-book, tài liệu tham khảo trực tuyến, bài báo khoa học) với cấu trúc phân loại có thể tùy chỉnh.
+  * Đa dạng hóa đối tượng phục vụ và phân loại thẻ: Quản lý thông tin độc giả chi tiết, cho phép thiết lập và mở rộng nhiều nhóm đối tượng (học sinh, sinh viên, giảng viên, nhà nghiên cứu, nhân viên nội bộ, độc giả tự do) với các chính sách ưu đãi và quyền hạn riêng.
+  * Tùy biến linh hoạt quy tắc mượn/trả và quy trình nghiệp vụ: Cung cấp cơ chế cấu hình động các quy tắc lưu thông (số lượng sách tối đa, thời hạn mượn, số lần gia hạn, mức phí phạt, chính sách gia hạn) theo từng loại thẻ và loại tài liệu khác nhau, xử lý tốt các trường hợp ngoại lệ trong thực tế.
+  * Tự động hóa và kiểm soát rủi ro: Tự động hóa quy trình mượn/trả, gia hạn, theo dõi sát sao tình trạng tài liệu, tính toán chính xác tiền phạt (trễ hạn, làm hỏng, mất tài liệu) và quản lý công nợ độc giả.
+  * Báo cáo - Thống kê đa chiều và khả năng tích hợp mở rộng: Cung cấp hệ thống báo cáo thống kê trực quan hỗ trợ ra quyết định; đồng thời sẵn sàng kết nối, mở rộng tích hợp với các hệ thống khác (như hệ thống quản lý đào tạo, cổng thông tin nội bộ, cổng thanh toán trực tuyến).
+- Đối tượng sử dụng:
+  * Thủ thư/Nhân viên thư viện: Thực hiện các nghiệp vụ hằng ngày như biên mục tài liệu, cấp/đổi thẻ, xử lý mượn/trả, thu tiền phạt và kiểm kê kho tài liệu.
+  * Quản trị viên/Ban quản lý thư viện: Thiết lập cấu hình hệ thống, định nghĩa các quy tắc mượn/trả, quản lý phân quyền nhân viên và theo dõi các báo cáo thống kê tổng quan.
+  * Độc giả (Sinh viên, Giảng viên, Nhân viên, Độc giả ngoài...): Tra cứu danh mục tài liệu (OPAC), đăng ký mượn/đặt trước, xem lịch sử mượn trả, gia hạn trực tuyến và đọc các tài liệu số được phân quyền.
+2. 1.2. Mô tả quy trình trong thực tế
+Để đảm bảo tính ứng dụng rộng rãi, quy trình quản lý được thiết kế dựa trên mô hình chuẩn của đa số các thư viện:
+Quy trình 1: Quản lý Danh mục Tự liệu (Sách)
+1. Nhân viên nhập thông tin các đầu sách mới (Tên sách, Tác giả, Thể loại, Nhà xuất bản, Năm XB...).
+2. Với mỗi đầu sách, hệ thống quản lý các cuốn sách vật lý (Bản sao) cụ thể, mỗi cuốn có một mã vạch/mã định danh duy nhất và tình trạng riêng (Sẵn sàng, Đang mượn, Đang bảo trì, Mất).
+3. Phân loại tài liệu theo nhiều tiêu chí để dễ tra cứu.
+Quy trình 2: Quản lý Độc giả và Thẻ thư viện
+1. Độc giả đăng ký làm thẻ thư viện, cung cấp thông tin cá nhân.
+2. Nhân viên tạo hồ sơ độc giả trên hệ thống, phân loại thẻ mượn (Loại thẻ quy định số lượng sách được mượn và thời gian mượn tối đa).
+3. Cấp thẻ (có mã độc giả) cho người dùng.
+Quy trình 3: Quy trình Mượn/Trả sách
+- Mượn sách:
+  1. Độc giả xuất trình thẻ thư viện và sách muốn mượn.
+  2. Nhân viên quét mã thẻ để kiểm tra thông tin (Thẻ còn hạn? Có bị khóa do nợ phạt? Đã mượn quá số lượng quy định?).
+  3. Nếu hợp lệ, nhân viên quét mã từng cuốn sách. Hệ thống ghi nhận "Phiếu mượn", chuyển trạng thái sách thành "Đang mượn", và tính toán ngày phải trả.
+- Trả sách:
+  1. Độc giả mang sách đến trả.
+  2. Nhân viên quét mã sách. Hệ thống hiển thị thông tin Phiếu mượn tương ứng.
+  3. Nhân viên kiểm tra tình trạng sách thực tế.
+  4. Nếu sách trả đúng hạn và nguyên vẹn: Cập nhật trạng thái phiếu mượn là "Đã trả", sách chuyển về "Sẵn sàng".
+  5. Nếu sách trả trễ hạn hoặc hỏng/mất: Hệ thống tự động tính toán tiền phạt. Nhân viên lập "Phiếu thu tiền phạt". Trạng thái phiếu mượn chỉ hoàn tất khi đã xử lý xong vi phạm.
+
+
+
+
+
+
+
+
+CHƯƠNG 2: PHÂN TÍCH VÀ THIẾT KẾ HỆ THỐNG
+1. 2.1. Liệt kê và mô tả các chức năng của hệ thống
+1. Quản lý danh mục tài liệu:
+   - Cho phép khai báo và quản lý danh mục các loại hình tài liệu (sách, tạp chí, đĩa CD/DVD, e-book...).
+   - Quản lý thông tin đầu sách, tác giả, thể loại, nhà xuất bản và các bản sao vật lý (mã sách, tình trạng sẵn sàng/đang mượn/hư hỏng).
+2. Quản lý độc giả:
+   - Quản lý thông tin độc giả (họ tên, ngày sinh, địa chỉ, email, ngày cấp/hết hạn thẻ).
+   - Phân loại đối tượng độc giả (học sinh, sinh viên, giảng viên, nhân viên) để áp dụng các chính sách tương ứng.
+3. Quản lý mượn/trả và gia hạn:
+   - Thực hiện lập phiếu mượn sách, ghi nhận mượn/trả tài liệu theo mã sách và mã độc giả.
+   - Hỗ trợ gia hạn thời gian mượn khi đáp ứng điều kiện (sách chưa quá hạn, không có người đặt trước).
+4. Quản lý quy định và xử lý vi phạm:
+   - Cấu hình các quy định mượn/trả (số lượng mượn tối đa, số ngày mượn tối đa, đơn giá phạt trễ hạn/ngày) theo loại độc giả hoặc loại tài liệu.
+   - Tự động tính tiền phạt trễ hạn, ghi nhận phiếu thu tiền phạt hoặc xử lý vi phạm mất/hỏng tài liệu.
+5. Tra cứu tài liệu (OPAC):
+   - Cung cấp chức năng tìm kiếm thông tin tài liệu theo tên sách, tác giả, thể loại, nhà xuất bản.
+   - Hiển thị chi tiết tình trạng sẵn có của từng bản sao tài liệu trong thư viện.
+6. Quản lý người dùng, phân quyền và báo cáo thống kê:
+   - Quản lý tài khoản người dùng nội bộ (Thủ thư, Quản trị viên) và phân quyền thao tác chức năng.
+   - Thống kê tình hình mượn/trả, danh sách sách quá hạn, tổng doanh thu tiền phạt và xuất báo cáo cơ bản.
+2.2. Các đối tượng cần quản lý, thuộc tính và mối quan hệ
+Dựa trên yêu cầu linh hoạt, hệ thống sẽ quản lý các thực thể chính sau:
+- Tác giả (Author): Thông tin người viết sách.
+- Thể loại (Category): Phân loại sách.
+- Nhà xuất bản (Publisher): Nơi phát hành.
+- Đầu sách (Book): Thông tin chung về một tác phẩm (Tên, Năm XB...). Một đầu sách có thể có nhiều tác giả, thuộc nhiều thể loại.
+- Cuốn sách (Book Copy): Là bản vật lý cụ thể của một Đầu sách, có mã riêng biệt để theo dõi tình trạng mượn trả.
+- Loại độc giả (Reader Type): Quy định các luật mượn (số sách tối đa, thời gian tối đa).
+- Độc giả (Reader): Người sử dụng dịch vụ thư viện.
+- Phiếu mượn (Loan/Circulation): Ghi nhận giao dịch mượn một hoặc nhiều cuốn sách của một độc giả tại một thời điểm.
+- Chi tiết mượn (Loan Detail): Chi tiết từng cuốn sách trong một lần mượn, ghi nhận hạn trả và tình trạng trả thực tế của từng cuốn.
+- Phiếu phạt (Penalty/Fine): Ghi nhận các khoản phạt phát sinh từ một chi tiết mượn (trễ hạn, làm hỏng).
+- Nhân viên (Staff): Người thao tác trên hệ thống.
+CHƯƠNG 3: CÀI ĐẶT
+2. 2.3. Ràng buộc trên các đối tượng
+3. 2.4. Mô hình mức quan niệm (Sơ đồ ERD)
+4. 2.5. Thiết kế CSDL mức logic và giải thích các bảng (Tân từ)
+5. 3.1. Cài đặt mô hình dữ liệu trên hệ quản trị CSDL (Tạo bảng, khóa chính, khóa ngoại, ràng buộc)
+3.2. Xây dựng dữ liệu mẫu và thu thập dữ liệu thực tế
+CHƯƠNG 4: QUẢN LÝ THÔNG TIN
+6. 4.1. Xử lý thông tin (Stored Procedure, Trigger, Function, Cursor)
+7. 4.2. An toàn thông tin (Xác thực, Phân quyền, Import, Export, Backup, Restore)
+4.3. Trình bày thông tin (Report)
+TÀI LIỆU THAM KHẢO
+[1] tài liệu tham khảo 1
+[2] tài liệu tham khảo 2
+[3] tài liệu tham khảo 3
+....
+Lưu ý: Các tài liệu tham khảo cần được trích dẫn theo 1 tiêu chuẩn nhất định (APA, MLA, Chicago, Turabian, IEEE, ...).

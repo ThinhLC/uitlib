@@ -1,0 +1,262 @@
+erDiagram
+  app_users {
+    bigint id PK
+    char supabase_user_id UK
+    enum status
+    datetime created_at
+  }
+  authors {
+    bigint id PK
+    varchar name
+  }
+  book_authors {
+    bigint book_id PK, FK
+    bigint author_id PK, FK
+    tinyint author_order
+  }
+  book_categories {
+    bigint book_id PK, FK
+    bigint category_id PK, FK
+  }
+  book_copies {
+    bigint id PK
+    bigint book_id FK
+    varchar barcode UK
+    varchar shelf_code "nullable"
+    date acquired_at "nullable"
+    enum physical_condition
+    enum circulation_status
+    datetime created_at
+    datetime updated_at
+  }
+  book_external_refs {
+    bigint id PK
+    bigint book_id FK
+    enum provider
+    varchar external_id
+    varchar source_url "nullable"
+    enum viewability "nullable"
+    tinyint embeddable "nullable"
+    varchar web_reader_link "nullable"
+    char access_country "nullable"
+    json raw_snapshot
+    datetime fetched_at
+  }
+  book_identifiers {
+    bigint id PK
+    bigint book_id FK
+    enum identifier_type
+    varchar identifier_value
+  }
+  books {
+    bigint id PK
+    varchar title
+    varchar subtitle "nullable"
+    bigint publisher_id FK "nullable"
+    varchar published_date_text "nullable"
+    smallint published_year "nullable"
+    text description "nullable"
+    varchar language_code "nullable"
+    varchar cover_url "nullable"
+    bigint material_type_id FK
+    varchar classification_code "nullable"
+    bigint replacement_cost_vnd "nullable"
+    enum status
+    datetime created_at
+    datetime updated_at
+  }
+  categories {
+    bigint id PK
+    varchar name
+    bigint parent_id FK "nullable"
+  }
+  fine_adjustments {
+    bigint id PK
+    bigint fine_id FK
+    bigint amount_vnd
+    varchar reason
+    bigint adjusted_by_user_id FK
+    datetime adjusted_at
+  }
+  fine_payment_allocations {
+    bigint payment_id PK, FK
+    bigint fine_id PK, FK
+    bigint amount_vnd
+  }
+  fine_payments {
+    bigint id PK
+    bigint reader_id FK
+    bigint received_by_user_id FK
+    bigint amount_vnd
+    datetime paid_at
+    enum method
+    varchar reference_no "nullable"
+    varchar request_key UK
+    datetime created_at
+  }
+  fines {
+    bigint id PK
+    bigint loan_item_id FK
+    enum fine_type
+    bigint default_amount_vnd
+    bigint assessed_amount_vnd
+    varchar reason "nullable"
+    datetime assessed_at
+    bigint assessed_by_user_id FK
+  }
+  library_cards {
+    bigint id PK
+    bigint reader_id FK
+    varchar card_number UK
+    datetime issued_at
+    datetime expires_at
+    enum status
+    datetime created_at
+    bigint active_reader_id UK "nullable, generated"
+  }
+  loan_items {
+    bigint id PK
+    bigint loan_id FK
+    bigint copy_id FK
+    bigint policy_id FK
+    datetime borrowed_at
+    datetime due_at
+    datetime returned_at "nullable"
+    enum return_condition "nullable"
+    datetime lost_declared_at "nullable"
+    enum status
+    smallint renewal_count
+    smallint applied_loan_days
+    smallint applied_max_renewals
+    bigint applied_daily_fee_vnd
+    bigint open_copy_id UK "nullable, generated"
+  }
+  loan_policies {
+    bigint id PK
+    bigint reader_type_id FK
+    bigint material_type_id FK
+    smallint max_active_items
+    smallint loan_days
+    smallint max_renewals
+    bigint daily_late_fee_vnd
+    bigint debt_block_threshold_vnd
+    datetime valid_from
+    datetime valid_to "nullable"
+    bigint created_by_user_id FK
+    datetime created_at
+  }
+  loan_renewals {
+    bigint id PK
+    bigint loan_item_id FK
+    datetime old_due_at
+    datetime new_due_at
+    datetime renewed_at
+    bigint performed_by_user_id FK
+  }
+  loans {
+    bigint id PK
+    bigint reader_id FK
+    bigint processed_by_user_id FK
+    datetime borrowed_at
+    enum status
+    datetime created_at
+  }
+  material_types {
+    bigint id PK
+    varchar code UK
+    varchar name
+  }
+  permissions {
+    bigint id PK
+    varchar code UK
+    varchar description
+  }
+  publishers {
+    bigint id PK
+    varchar name
+  }
+  reader_types {
+    bigint id PK
+    varchar code UK
+    varchar name
+  }
+  readers {
+    bigint id PK
+    bigint user_id FK, UK "nullable"
+    bigint reader_type_id FK
+    varchar full_name
+    varchar email "nullable"
+    varchar phone "nullable"
+    enum status
+    datetime created_at
+  }
+  reservations {
+    bigint id PK
+    bigint reader_id FK
+    bigint book_id FK
+    datetime requested_at
+    enum status
+    bigint assigned_copy_id FK "nullable"
+    datetime ready_at "nullable"
+    datetime hold_expires_at "nullable"
+    bigint fulfilled_loan_item_id FK, UK "nullable"
+    datetime closed_at "nullable"
+    varchar close_reason "nullable"
+    enum closed_by_kind "nullable"
+    bigint closed_by_user_id FK "nullable"
+    tinyint active_flag "nullable, generated"
+    bigint ready_copy_id UK "nullable, generated"
+  }
+  role_permissions {
+    bigint role_id PK, FK
+    bigint permission_id PK, FK
+  }
+  roles {
+    bigint id PK
+    varchar code UK
+    varchar name
+  }
+  user_roles {
+    bigint user_id PK, FK
+    bigint role_id PK, FK
+  }
+  authors ||--o{ book_authors : "author_id"
+  books ||--o{ book_authors : "book_id"
+  books ||--o{ book_categories : "book_id"
+  categories ||--o{ book_categories : "category_id"
+  books ||--o{ book_copies : "book_id"
+  books ||--o{ book_external_refs : "book_id"
+  books ||--o{ book_identifiers : "book_id"
+  material_types ||--o{ books : "material_type_id"
+  publishers |o--o{ books : "publisher_id"
+  categories |o--o{ categories : "parent_id"
+  app_users ||--o{ fine_adjustments : "adjusted_by_user_id"
+  fines ||--o{ fine_adjustments : "fine_id"
+  fines ||--o{ fine_payment_allocations : "fine_id"
+  fine_payments ||--o{ fine_payment_allocations : "payment_id"
+  readers ||--o{ fine_payments : "reader_id"
+  app_users ||--o{ fine_payments : "received_by_user_id"
+  app_users ||--o{ fines : "assessed_by_user_id"
+  loan_items ||--o{ fines : "loan_item_id"
+  readers ||--o{ library_cards : "reader_id"
+  book_copies ||--o{ loan_items : "copy_id"
+  loans ||--o{ loan_items : "loan_id"
+  loan_policies ||--o{ loan_items : "policy_id"
+  app_users ||--o{ loan_policies : "created_by_user_id"
+  material_types ||--o{ loan_policies : "material_type_id"
+  reader_types ||--o{ loan_policies : "reader_type_id"
+  loan_items ||--o{ loan_renewals : "loan_item_id"
+  app_users ||--o{ loan_renewals : "performed_by_user_id"
+  app_users ||--o{ loans : "processed_by_user_id"
+  readers ||--o{ loans : "reader_id"
+  reader_types ||--o{ readers : "reader_type_id"
+  app_users |o--o| readers : "user_id"
+  books ||--o{ reservations : "book_id"
+  app_users |o--o{ reservations : "closed_by_user_id"
+  book_copies |o--o{ reservations : "assigned_copy_id, book_id"
+  loan_items |o--o| reservations : "fulfilled_loan_item_id"
+  readers ||--o{ reservations : "reader_id"
+  permissions ||--o{ role_permissions : "permission_id"
+  roles ||--o{ role_permissions : "role_id"
+  roles ||--o{ user_roles : "role_id"
+  app_users ||--o{ user_roles : "user_id"

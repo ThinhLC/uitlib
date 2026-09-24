@@ -6,7 +6,28 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "db:up": "docker compose --env-file .env.local up -d --wait db",
+    "db:spike": "tsx scripts/db/spike.ts",
+    "db:migrate": "tsx scripts/db/migrate.ts",
+    "db:grants": "tsx scripts/db/grants.ts",
+    "db:reset-test": "tsx scripts/db/reset-test.ts",
+    "db:check": "tsx scripts/db/check.ts",
+    "db:objects": "tsx scripts/db/objects.ts",
+    "db:seed": "tsx scripts/seed/seed.ts",
+    "db:report": "tsx scripts/db/report.ts",
+    "db:ddl": "tsx scripts/db/ddl.ts",
+    "db:explain": "tsx scripts/db/explain.ts",
+    "db:backup": "tsx scripts/db/backup.ts",
+    "db:restore": "tsx scripts/db/restore.ts",
+    "db:dictionary": "tsx scripts/db/dictionary.ts",
+    "erd:relational": "tsx scripts/erd/relational.ts",
+    "erd:render": "bash scripts/erd/render.sh",
+    "test:db": "vitest run tests/db",
+    "test:concurrency": "vitest run tests/concurrency",
+    "test:bypass": "for i in $(seq 1 20); do echo \"run $i/20\"; vitest run tests/db -t 'B-[1-5][: ]' || exit 1; done",
+    "db:down": "docker compose --env-file .env.local down"
   },
   "dependencies": {
     "dotenv": "^18.0.2",
@@ -26,6 +47,7 @@
     "eslint-config-next": "16.3.6",
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^5.0.1"
   }
 }
