@@ -60,8 +60,10 @@ include at least one book with no identifiers and one with no `coverUrl` (FR-025
 
 ## `data/seed/people.json`
 
-- **Accounts**: `supabaseUserId` placeholders (fixed UUIDs), status, and role codes. This covers
-  one admin, two librarians, and reader accounts.
+- **Accounts**: one per role or reader type, carrying the real Supabase user ids of the test
+  users `account+admin|librarian|student|lecturer|external@gmail.com` (spec 002). There is one
+  admin, one librarian, and three reader accounts linked to S01 (STUDENT), L01 (LECTURER) and
+  E01 (EXTERNAL). The other readers have no account; staff act for them at the desk.
 - **Readers**: `key`, reader type code, name, contacts, and an optional account link.
 
 ## Scenario script (in `scripts/seed/seed.ts`, not a data file)
@@ -70,6 +72,8 @@ A time-ordered list of procedure calls with explicit `p_now` values (UTC). Examp
 `sp_create_policy_version`, `sp_issue_card`, `sp_checkout`, `sp_renew`, `sp_return_item`,
 `sp_declare_lost`, `sp_record_payment`, `sp_close_policy_version`, `sp_expire_cards`.
 
-The script MUST cover every [Core] case of spec FR-025, including the US2-10 checkout at
+The script covers the [Core] cases of spec FR-025 with the three test readers (S01, L01, E01).
+Since 2026-09-25 the expired-card and ineligible-queue-head cases are proven only by the test
+suites, not by the seed (see docs/report/acceptance.md §6). It includes the US2-10 checkout at
 2026-09-30 23:59:59.900 local and the US4-14 fine assessed in September and paid in October.
 Each step names the scenario it demonstrates, so the report can cite it.

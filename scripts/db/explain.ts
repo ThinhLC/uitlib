@@ -1,11 +1,12 @@
 /**
- * Save EXPLAIN FORMAT=TREE for the report views and the checkout eligibility queries
+ * Save EXPLAIN FORMAT=TREE for the report views, the checkout eligibility queries and the catalog search
  * (tasks T087, constitution: key queries need an EXPLAIN). Usage: pnpm db:explain [--schema <name>]
  * Writes docs/report/explain/<name>.txt.
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
 import mysql from 'mysql2/promise';
 import { dbConfig } from '../../src/lib/db/config';
+import { searchStatements } from '../../src/server/api/queries/catalog-search';
 import { schemaFromArgs } from './grants';
 
 const QUERIES: Record<string, string> = {
@@ -22,6 +23,11 @@ const QUERIES: Record<string, string> = {
   'checkout-policy-in-effect': `SELECT id FROM loan_policies WHERE reader_type_id = 1 AND material_type_id = 1
      AND valid_from <= UTC_TIMESTAMP(3) AND (valid_to IS NULL OR valid_to > UTC_TIMESTAMP(3))`,
   'search-title-fulltext': `SELECT id, title FROM books WHERE MATCH(title, subtitle) AGAINST ('database' IN NATURAL LANGUAGE MODE)`,
+  // The public catalog search page query (spec 002 T044, research R10): FULLTEXT UNION author prefix.
+  'catalog-search': (() => {
+    const s = searchStatements({ q: 'database design' });
+    return mysql.format(`${s.select} LIMIT 20 OFFSET 0`, s.params as Parameters<typeof mysql.format>[1]);
+  })(),
 };
 
 async function main() {

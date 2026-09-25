@@ -650,6 +650,13 @@ rule in the matrix to a mechanism and a passing test.
     `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` (app account) and `MYSQL_ROOT_PASSWORD`
     (owner = MySQL root). The only optional variable is `GOOGLE_BOOKS_API_KEY`, used by the
     one-off fetch script.
+  - Spec 002 (API) adds `NEXT_PUBLIC_SUPABASE_URL` (required by the API's authenticated routes; the
+    token issuer and signing-key set are derived from it) and the optional `AUTH_HOOK_SECRET`
+    (the secret Supabase generates for the Before User Created hook; it cannot be derived), and
+    `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (the project's publishable key, which the Supabase client needs to
+    finish the auth callback/confirm redirects; it cannot be derived from the URL). The two Supabase names carry
+    Next's `NEXT_PUBLIC_` framework prefix (the browser client needs them), which is not a project
+    prefix. Spec 002 validates the app's variables with `@t3-oss/env-nextjs` in `src/env.ts`.
   - Derived values MUST NOT become new variables: the test schema is `${DB_NAME}_test`, and
     the MySQL image version is pinned in the compose file.
   - `.env.example` MUST provide generic, project-neutral defaults, and anyone MUST be able to

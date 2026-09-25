@@ -12,6 +12,19 @@ const eslintConfig = defineConfig([
     files: ["scripts/**/*.ts", "tests/**/*.ts"],
     rules: { "@typescript-eslint/no-explicit-any": "off" },
   },
+  {
+    // The API contract is imported by the UI: it may depend on zod only, never on server code.
+    files: ["src/lib/api/**/*.ts"],
+    rules: {
+      "no-restricted-imports": ["error", {
+        paths: ["mysql2", "mysql2/promise", "drizzle-orm", "jose", "standardwebhooks", "hono"],
+        patterns: [
+          { group: ["drizzle-orm/*", "hono/*", "@hono/*"], message: "The contract stays framework-free." },
+          { group: ["@/lib/db/**", "@/server/**", "@/integrations/**", "**/lib/db/*", "**/server/*", "**/integrations/*"], message: "The contract must not import server code." },
+        ],
+      }],
+    },
+  },
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",

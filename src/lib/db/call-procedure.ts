@@ -1,4 +1,5 @@
 import type { Pool, PoolConnection, RowDataPacket } from 'mysql2/promise';
+import { withRetry } from './with-retry';
 
 /**
  * A business rejection: `SIGNAL SQLSTATE '45000' 'KEY: detail'` from a procedure or trigger, or a
@@ -29,8 +30,6 @@ export interface CallResult<Out = Record<string, unknown>> {
   out: Out;
 }
 
-const RETRYABLE = new Set([1213, 1205]);
-
 interface MysqlError {
   errno?: number;
   sqlState?: string;
@@ -52,8 +51,6 @@ function toRuleError(err: unknown): unknown {
   return err;
 }
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
 /**
  * Call a stored procedure following contracts/db-routines.md "Calling rules":
  * a fresh pooled connection per attempt (never inside a caller's transaction), retry only
@@ -71,33 +68,29 @@ export async function callProcedure<Out = Record<string, unknown>>(
   const outVars = outParams.map((p) => `@${p}`);
   const placeholders = [...args.map(() => '?'), ...outVars].join(', ');
 
-  for (let attempt = 1; ; attempt++) {
-    let conn: PoolConnection | undefined;
-    try {
-      conn = await pool.getConnection();
-      await conn.query('SET SESSION innodb_lock_wait_timeout = 5');
-      const [result] = await conn.query(`CALL ${name}(${placeholders})`, args);
-      // A CALL returns one array per result set plus a trailing OK packet.
-      const rows = Array.isArray(result)
-        ? (result as unknown[]).filter((r): r is RowDataPacket[] => Array.isArray(r))
-        : [];
-      let out = {} as Out;
-      if (outVars.length) {
-        const [vals] = await conn.query<RowDataPacket[]>(
-          `SELECT ${outVars.map((v, i) => `${v} AS \`${outParams[i]}\``).join(', ')}`,
-        );
-        out = vals[0] as Out;
+  try {
+    return await withRetry(async () => {
+      const conn: PoolConnection = await pool.getConnection();
+      try {
+        await conn.query('SET SESSION innodb_lock_wait_timeout = 5');
+        const [result] = await conn.query(`CALL ${name}(${placeholders})`, args);
+        // A CALL returns one array per result set plus a trailing OK packet.
+        const rows = Array.isArray(result)
+          ? (result as unknown[]).filter((r): r is RowDataPacket[] => Array.isArray(r))
+          : [];
+        let out = {} as Out;
+        if (outVars.length) {
+          const [vals] = await conn.query<RowDataPacket[]>(
+            `SELECT ${outVars.map((v, i) => `${v} AS \`${outParams[i]}\``).join(', ')}`,
+          );
+          out = vals[0] as Out;
+        }
+        return { rows, out };
+      } finally {
+        conn.release();
       }
-      return { rows, out };
-    } catch (err: unknown) {
-      const errno = (err as MysqlError)?.errno;
-      if (errno !== undefined && RETRYABLE.has(errno) && attempt < attempts) {
-        await sleep(50 + Math.random() * 150);
-        continue;
-      }
-      throw toRuleError(err);
-    } finally {
-      conn?.release();
-    }
+    }, attempts);
+  } catch (err: unknown) {
+    throw toRuleError(err);
   }
 }
