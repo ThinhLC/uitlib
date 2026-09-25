@@ -1,7 +1,7 @@
 import type { Pool, RowDataPacket } from 'mysql2/promise';
 import type { Page, PageQuery, Reservation, ReservationStatus } from '@/lib/api/contract';
 import { fromDbTime } from '@/lib/time/db-time';
-import { isNil, toNumberOrNull } from '@/lib/utils';
+import { toNumberOrNull } from '@/lib/utils';
 import { one, paged } from './sql';
 
 /**
@@ -42,7 +42,8 @@ export async function getReservation(pool: Pool, id: number): Promise<Reservatio
 
 /** True when the reader exists. */
 export async function readerExists(pool: Pool, readerId: number): Promise<boolean> {
-  return !isNil(await one(pool, `SELECT 1 FROM readers WHERE id = ?`, [readerId]));
+  const row = await one(pool, `SELECT 1 FROM readers WHERE id = ?`, [readerId]);
+  return Boolean(row);
 }
 
 /** A reader's reservations, newest first. */
@@ -78,7 +79,7 @@ export function listReservations(
     where.push('r.status = ?');
     params.push(q.status);
   }
-  if (!isNil(q.bookId)) {
+  if (q.bookId) {
     where.push('r.book_id = ?');
     params.push(q.bookId);
   }

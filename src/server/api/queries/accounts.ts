@@ -3,7 +3,7 @@ import type { Account, AccountStatus, Page, PageQuery } from '@/lib/api/contract
 import { fromDbTime } from '@/lib/time/db-time';
 import type { Caller } from '@/server/api/context';
 import { ApiError, notFound } from '@/server/api/errors/api-error';
-import { toNumberOrNull } from '@/lib/utils';
+import { isNil, toNumberOrNull } from '@/lib/utils';
 import { one, paged, transaction } from './sql';
 
 const SELECT = `
@@ -53,17 +53,18 @@ export function listAccounts(
 /** One account, or NOT_FOUND `account`. */
 export async function getAccount(pool: Pool | PoolConnection, id: number): Promise<Account> {
   const row = await one(pool, `${SELECT} WHERE u.id = ?`, [id]);
-  if (!row) throw notFound('account');
+  if (isNil(row)) throw notFound('account');
   return toAccount(row);
 }
 
 async function lockAccount(conn: PoolConnection, id: number): Promise<void> {
-  if (!(await one(conn, `SELECT id FROM app_users WHERE id = ? FOR UPDATE`, [id]))) throw notFound('account');
+  const row = await one(conn, `SELECT id FROM app_users WHERE id = ? FOR UPDATE`, [id]);
+  if (isNil(row)) throw notFound('account');
 }
 
 async function roleId(conn: PoolConnection, code: string): Promise<number> {
   const row = await one(conn, `SELECT id FROM roles WHERE code = ?`, [code]);
-  if (!row) throw notFound('role');
+  if (isNil(row)) throw notFound('role');
   return Number(row.id);
 }
 

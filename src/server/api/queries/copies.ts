@@ -2,7 +2,7 @@ import type { Pool, RowDataPacket } from 'mysql2/promise';
 import type { Copy } from '@/lib/api/contract';
 import { fromDbTime } from '@/lib/time/db-time';
 import { notFound } from '@/server/api/errors/api-error';
-import { mapNullable } from '@/lib/utils';
+import { isNil, mapNullable } from '@/lib/utils';
 import { one, rows } from './sql';
 
 /** Copy columns plus the ready reservation holding it (`heldFor`). */
@@ -31,13 +31,14 @@ export function toCopy(r: RowDataPacket): Copy {
 
 /** One copy; NOT_FOUND `copy` when missing. */
 export async function getCopy(pool: Pool, id: number): Promise<Copy> {
-  const r = await one(pool, `${COPY_SELECT} WHERE c.id = ?`, [id]);
-  if (!r) throw notFound('copy');
-  return toCopy(r);
+  const row = await one(pool, `${COPY_SELECT} WHERE c.id = ?`, [id]);
+  if (isNil(row)) throw notFound('copy');
+  return toCopy(row);
 }
 
 /** Every copy of a book, by id; NOT_FOUND `book` when the book does not exist. */
 export async function listCopies(pool: Pool, bookId: number): Promise<Copy[]> {
-  if (!(await one(pool, `SELECT id FROM books WHERE id = ?`, [bookId]))) throw notFound('book');
+  const row = await one(pool, `SELECT id FROM books WHERE id = ?`, [bookId]);
+  if (isNil(row)) throw notFound('book');
   return (await rows(pool, `${COPY_SELECT} WHERE c.book_id = ? ORDER BY c.id`, [bookId])).map(toCopy);
 }

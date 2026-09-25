@@ -10,10 +10,12 @@ export function requestContext(deps: ApiDeps): MiddlewareHandler<AppEnv> {
     const incoming = c.req.header('x-request-id');
     const requestId = incoming && INCOMING.test(incoming) ? incoming : crypto.randomUUID();
     const now = deps.clock();
+
     c.set('requestId', requestId);
     c.set('now', now);
     c.set('dbNow', toDbTime(now));
     c.header('X-Request-Id', requestId);
+
     return next();
   };
 }

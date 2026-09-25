@@ -1,8 +1,12 @@
 import { config as loadEnv } from 'dotenv';
 
 // Connection settings come only from the environment (spec FR-030). Variables already set in the
-// process win over .env.local, so CI or a shell can override any value.
+// process win over .env.local, so CI or a shell can override any value. A module of its own so
+// importers can load it before src/env.ts validates; src/env.ts itself cannot, it runs in the
+// browser too.
 loadEnv({ path: '.env.local', quiet: true });
+
+import { env } from '@/env';
 
 export type DbRole = 'owner' | 'app';
 
@@ -14,27 +18,15 @@ export interface DbConnectionConfig {
   database: string;
 }
 
-function requireEnv(name: string): string {
-  const value = process.env[name];
-  if (value === undefined || value === '') {
-    throw new Error(`Missing env var ${name} (see .env.example)`);
-  }
-  return value;
-}
-
 /** The main schema name, from DB_NAME. */
-export function mainSchemaName(): string {
-  return requireEnv('DB_NAME');
-}
+export const mainSchemaName = () => env.DB_NAME;
 
 /** The test schema is always derived from DB_NAME; no other file builds this name. */
-export function testSchemaName(): string {
-  return `${mainSchemaName()}_test`;
-}
+export const testSchemaName = () => `${mainSchemaName()}_test`;
 
 /** The application account name, from DB_USER. */
 export function appUserName(): string {
-  return requireEnv('DB_USER');
+  return env.DB_USER;
 }
 
 /**
@@ -45,16 +37,11 @@ export function dbConfig(
   role: DbRole,
   opts: { test?: boolean; schema?: string } = {},
 ): DbConnectionConfig {
-  const port = Number(requireEnv('DB_PORT'));
-  if (!Number.isInteger(port) || port <= 0) {
-    throw new Error(`Invalid env var DB_PORT: ${process.env.DB_PORT}`);
-  }
-  const database = opts.schema ?? (opts.test ? testSchemaName() : mainSchemaName());
   return {
-    host: requireEnv('DB_HOST'),
-    port,
-    user: role === 'owner' ? 'root' : appUserName(),
-    password: role === 'owner' ? requireEnv('MYSQL_ROOT_PASSWORD') : requireEnv('DB_PASSWORD'),
-    database,
+    host: env.DB_HOST,
+    port: env.DB_PORT,
+    user: role === 'owner' ? 'root' : env.DB_USER,
+    password: role === 'owner' ? env.MYSQL_ROOT_PASSWORD : env.DB_PASSWORD,
+    database: opts.schema ?? (opts.test ? testSchemaName() : mainSchemaName()),
   };
 }

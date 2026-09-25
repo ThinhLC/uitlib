@@ -5,6 +5,7 @@ import type { ApiDeps, AppEnv } from './context';
 import { ApiError } from './errors/api-error';
 import { enforceAccess } from './middleware/access';
 import { authenticate } from './middleware/auth';
+import { isUndefined } from '@/lib/utils';
 
 export type Reply<Out> = { status: 200 | 201; body: Out } | { status: 204 };
 
@@ -15,7 +16,7 @@ const mounted = new WeakMap<object, Set<EndpointSpec>>();
 /** Record an endpoint registered by hand (routes that answer outside the uniform error shape). */
 export function markMounted(app: object, endpoint: EndpointSpec): void {
   let set = mounted.get(app);
-  if (!set) mounted.set(app, (set = new Set()));
+  if (isUndefined(set)) mounted.set(app, (set = new Set()));
   set.add(endpoint);
 }
 

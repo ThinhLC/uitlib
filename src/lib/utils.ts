@@ -1,6 +1,6 @@
 /** Small shared helpers (null/undefined handling on top of lodash). */
-import { isNil, isUndefined, omitBy, pick, isString } from 'lodash-es';
-export { isNil, isUndefined, pick, isString };
+import { isNil, isUndefined, omitBy, pick, isString, isBoolean } from 'lodash-es';
+export { isNil, isUndefined, pick, isString, isBoolean };
 
 /** `fn(value)`, or `null` when the value is `null` or `undefined` (nullable columns, optional fields). */
 export function mapNullable<T, R>(value: T | null | undefined, fn: (v: T) => R): R | null {

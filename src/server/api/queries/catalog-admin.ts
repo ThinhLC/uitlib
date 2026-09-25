@@ -35,14 +35,14 @@ async function writing<T>(pool: Pool, fn: (conn: PoolConnection) => Promise<T>):
 }
 
 async function materialTypeId(conn: PoolConnection, code: string): Promise<number> {
-  const r = await one(conn, `SELECT id FROM material_types WHERE code = ?`, [code]);
-  if (!r) throw notFound('materialType');
-  return Number(r.id);
+  const row = await one(conn, `SELECT id FROM material_types WHERE code = ?`, [code]);
+  if (isNil(row)) throw notFound('materialType');
+  return Number(row.id);
 }
 
 /** Throw NOT_FOUND `field` unless every id exists in `table`. */
 async function requireAll(conn: PoolConnection, table: 'authors' | 'categories' | 'publishers', ids: number[], field: string) {
-  if (!ids.length) return;
+  if (ids.length === 0) return;
   const found = await rows(conn, `SELECT id FROM ${table} WHERE id IN (?) FOR SHARE`, [ids]);
   if (found.length !== new Set(ids).size) throw notFound(field);
 }
@@ -51,13 +51,13 @@ type Relations = Pick<BookUpdateInput, 'authorIds' | 'categoryIds' | 'identifier
 
 /** Replace the given child sets of a book (`author_order` = array index + 1). */
 async function replaceRelations(conn: PoolConnection, bookId: number, rel: Relations) {
-  if (rel.authorIds) {
+  if (rel.authorIds && rel.authorIds.length) {
     await conn.query(`DELETE FROM book_authors WHERE book_id = ?`, [bookId]);
     await conn.query(`INSERT INTO book_authors (book_id, author_id, author_order) VALUES ?`, [
       rel.authorIds.map((a, i) => [bookId, a, i + 1]),
     ]);
   }
-  if (rel.categoryIds) {
+  if (rel.categoryIds && rel.categoryIds.length) {
     await conn.query(`DELETE FROM book_categories WHERE book_id = ?`, [bookId]);
     if (rel.categoryIds.length) {
       await conn.query(`INSERT INTO book_categories (book_id, category_id) VALUES ?`, [
@@ -65,7 +65,7 @@ async function replaceRelations(conn: PoolConnection, bookId: number, rel: Relat
       ]);
     }
   }
-  if (rel.identifiers) {
+  if (rel.identifiers && rel.identifiers.length) {
     await conn.query(`DELETE FROM book_identifiers WHERE book_id = ?`, [bookId]);
     if (rel.identifiers.length) {
       await conn.query(`INSERT INTO book_identifiers (book_id, identifier_type, identifier_value) VALUES ?`, [
@@ -77,15 +77,15 @@ async function replaceRelations(conn: PoolConnection, bookId: number, rel: Relat
 
 async function verifyReferences(conn: PoolConnection, input: BookUpdateInput): Promise<number | undefined> {
   const mt = isUndefined(input.materialType) ? undefined : await materialTypeId(conn, input.materialType);
-  if (!isNil(input.publisherId)) await requireAll(conn, 'publishers', [input.publisherId], 'publisherId');
-  if (input.authorIds) await requireAll(conn, 'authors', input.authorIds, 'authorIds');
-  if (input.categoryIds) await requireAll(conn, 'categories', input.categoryIds, 'categoryIds');
+  if (input.publisherId) await requireAll(conn, 'publishers', [input.publisherId], 'publisherId');
+  if (input.authorIds && input.authorIds.length) await requireAll(conn, 'authors', input.authorIds, 'authorIds');
+  if (input.categoryIds && input.categoryIds.length) await requireAll(conn, 'categories', input.categoryIds, 'categoryIds');
   return mt;
 }
 
 async function readBack(conn: PoolConnection, id: number): Promise<BookAdmin> {
   const book = await loadBookAdmin(conn, id);
-  if (!book) throw notFound('book');
+  if (isNil(book)) throw notFound('book');
   return book;
 }
 
@@ -99,7 +99,7 @@ export function createBook(pool: Pool, input: BookInput, dbNow: string): Promise
                           status, created_at, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?)`,
       [input.title, input.subtitle ?? null, input.publisherId ?? null, input.publishedDateText ?? null,
-        input.publishedYear ?? null, input.description ?? null, input.languageCode ?? null, input.coverUrl ?? null,
+      input.publishedYear ?? null, input.description ?? null, input.languageCode ?? null, input.coverUrl ?? null,
         mt, input.classificationCode ?? null, input.replacementCostVnd ?? null, dbNow, dbNow],
     );
     const id = res.insertId;
@@ -126,7 +126,9 @@ const COLUMNS = {
 /** Update a book; given arrays replace the stored sets, all in one transaction (FR-024). */
 export function updateBook(pool: Pool, id: number, input: BookUpdateInput, dbNow: string): Promise<BookAdmin> {
   return writing(pool, async (conn) => {
-    if (!(await one(conn, `SELECT id FROM books WHERE id = ? FOR UPDATE`, [id]))) throw notFound('book');
+    const row = await one(conn, `SELECT id FROM books WHERE id = ? FOR UPDATE`, [id]);
+    if (isNil(row)) throw notFound('book');
+
     const mt = await verifyReferences(conn, input);
     const sets: string[] = ['updated_at = ?'];
     const params: unknown[] = [dbNow];
@@ -135,7 +137,7 @@ export function updateBook(pool: Pool, id: number, input: BookUpdateInput, dbNow
       sets.push(`${COLUMNS[field as keyof typeof COLUMNS]} = ?`);
       params.push(v);
     }
-    if (!isUndefined(mt)) {
+    if (mt) {
       sets.push('material_type_id = ?');
       params.push(mt);
     }
@@ -148,7 +150,7 @@ export function updateBook(pool: Pool, id: number, input: BookUpdateInput, dbNow
 /** Staff view of a book; NOT_FOUND `book` when missing. */
 export async function getBookAdmin(pool: Pool, id: number): Promise<BookAdmin> {
   const book = await loadBookAdmin(pool, id);
-  if (!book) throw notFound('book');
+  if (isNil(book)) throw notFound('book');
   return book;
 }
 
@@ -181,11 +183,9 @@ export const createPublisher = (pool: Pool, input: PublisherInput): Promise<Publ
 export function createCategory(pool: Pool, input: CategoryInput): Promise<Category> {
   return writing(pool, async (conn) => {
     const parentId = input.parentId ?? null;
-    if (!isNil(parentId)) await requireAll(conn, 'categories', [parentId], 'parentId');
-    // The unique index does not compare NULL parents, so top-level names are checked here.
-    if (await one(conn, `SELECT id FROM categories WHERE parent_id <=> ? AND name = ? FOR UPDATE`, [parentId, input.name])) {
-      throw new ApiError('DUPLICATE', 'categories_parent_name_uq');
-    }
+    if (parentId) await requireAll(conn, 'categories', [parentId], 'parentId');
+    const row = await one(conn, `SELECT id FROM categories WHERE parent_id <=> ? AND name = ? FOR UPDATE`, [parentId, input.name]);
+    if (row) throw new ApiError('DUPLICATE', 'categories_parent_name_uq');
     const [res] = await conn.query<ResultSetHeader>(`INSERT INTO categories (name, parent_id) VALUES (?, ?)`, [
       input.name,
       parentId,

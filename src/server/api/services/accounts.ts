@@ -1,4 +1,4 @@
-import { isString } from '@/lib/utils'
+import { isString, isUndefined } from '@/lib/utils'
 import type { Pool, PoolConnection, ResultSetHeader, RowDataPacket } from 'mysql2/promise';
 import { withRetry } from '@/lib/db/with-retry';
 import type { Caller } from '@/server/api/context';
@@ -27,7 +27,7 @@ export async function resolveCaller(pool: Pool, subject: string): Promise<Caller
     [subject],
   );
   const row = rows[0];
-  if (!row) return null;
+  if (isUndefined(row)) return null;
   return {
     accountId: Number(row.id),
     subject,

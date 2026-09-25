@@ -4,7 +4,7 @@ import { secureHeaders } from 'hono/secure-headers';
 import type { ApiDeps, AppEnv } from './context';
 import { ApiError } from './errors/api-error';
 import { mapError } from './errors/map-error';
-import { requestContext } from './middleware/request-id';
+import { requestContext } from './middleware/request-context';
 import { routeModules } from './routes';
 
 const MAX_BODY_SIZE = 64 * 1024; // 64 KB

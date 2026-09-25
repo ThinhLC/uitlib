@@ -14,7 +14,7 @@ import type {
   ReaderStatus,
 } from '@/lib/api/contract';
 import { fromDbTime } from '@/lib/time/db-time';
-import { isNil, mapNullable, toNumberOrNull } from '@/lib/utils';
+import { isNil, mapNullable, toNumberOrNull, isBoolean } from '@/lib/utils';
 import { one, paged, rows } from './sql';
 
 export interface LoanItemFilter extends PageQuery {
@@ -39,7 +39,7 @@ export async function listReaderLoanItems(
     where.push('li.status = ?');
     params.push(filter.status);
   }
-  if (!isNil(filter.overdue)) {
+  if (isBoolean(filter.overdue)) {
     where.push(filter.overdue ? "(li.status = 'on_loan' AND li.due_at < ?)" : "NOT (li.status = 'on_loan' AND li.due_at < ?)");
     params.push(now);
   }
@@ -92,12 +92,13 @@ export async function listReaderLoanItems(
 
 /** True when the reader exists. */
 export async function readerExists(pool: Pool, readerId: number): Promise<boolean> {
-  return !isNil(await one(pool, 'SELECT id FROM readers WHERE id = ?', [readerId]));
+  const row = await one(pool, 'SELECT id FROM readers WHERE id = ?', [readerId]);
+  return Boolean(row);
 }
 
 /** A copy by barcode, with its open loan item and ready hold; null when unknown. */
 export async function copyByBarcode(pool: Pool, barcode: string): Promise<CopyScan | null> {
-  const r = await one(
+  const row = await one(
     pool,
     `SELECT c.id, c.book_id, c.barcode, c.shelf_code, c.acquired_at, c.physical_condition, c.circulation_status,
             li.id AS open_loan_item_id, rs.id AS reservation_id, rs.reader_id AS hold_reader_id, rs.hold_expires_at
@@ -107,27 +108,27 @@ export async function copyByBarcode(pool: Pool, barcode: string): Promise<CopySc
       WHERE c.barcode = ?`,
     [barcode],
   );
-  if (!r) return null;
+  if (isNil(row)) return null;
   return {
-    id: Number(r.id),
-    bookId: Number(r.book_id),
-    barcode: String(r.barcode),
-    shelfCode: r.shelf_code ?? null,
-    acquiredAt: fromDbTime(r.acquired_at as string | null),
-    physicalCondition: r.physical_condition as CopyCondition,
-    circulationStatus: r.circulation_status as CirculationStatus,
-    heldFor: mapNullable(r.reservation_id, (reservationId) => ({
+    id: Number(row.id),
+    bookId: Number(row.book_id),
+    barcode: String(row.barcode),
+    shelfCode: row.shelf_code ?? null,
+    acquiredAt: fromDbTime(row.acquired_at as string | null),
+    physicalCondition: row.physical_condition as CopyCondition,
+    circulationStatus: row.circulation_status as CirculationStatus,
+    heldFor: mapNullable(row.reservation_id, (reservationId) => ({
       reservationId: Number(reservationId),
-      readerId: Number(r.hold_reader_id),
-      holdExpiresAt: fromDbTime(String(r.hold_expires_at)),
+      readerId: Number(row.hold_reader_id),
+      holdExpiresAt: fromDbTime(String(row.hold_expires_at)),
     })),
-    openLoanItemId: toNumberOrNull(r.open_loan_item_id),
+    openLoanItemId: toNumberOrNull(row.open_loan_item_id),
   };
 }
 
 /** A card by number with its reader; null when unknown. `validNow` is judged at `now`. */
 export async function cardByNumber(pool: Pool, cardNumber: string, now: string): Promise<CardScan | null> {
-  const r: RowDataPacket | null = await one(
+  const row: RowDataPacket | null = await one(
     pool,
     `SELECT k.id, k.reader_id, k.card_number, k.issued_at, k.expires_at, k.status,
             (k.status = 'active' AND k.expires_at > ?) AS valid_now,
@@ -138,24 +139,24 @@ export async function cardByNumber(pool: Pool, cardNumber: string, now: string):
       WHERE k.card_number = ?`,
     [now, cardNumber],
   );
-  if (!r) return null;
+  if (isNil(row)) return null;
   return {
-    id: Number(r.id),
-    readerId: Number(r.reader_id),
-    cardNumber: String(r.card_number),
-    issuedAt: fromDbTime(String(r.issued_at)),
-    expiresAt: fromDbTime(String(r.expires_at)),
-    status: r.status as CardStatus,
-    validNow: Number(r.valid_now) === 1,
+    id: Number(row.id),
+    readerId: Number(row.reader_id),
+    cardNumber: String(row.card_number),
+    issuedAt: fromDbTime(String(row.issued_at)),
+    expiresAt: fromDbTime(String(row.expires_at)),
+    status: row.status as CardStatus,
+    validNow: Number(row.valid_now) === 1,
     reader: {
-      id: Number(r.reader_id),
-      fullName: String(r.full_name),
-      email: r.email ?? null,
-      phone: r.phone ?? null,
-      readerType: String(r.reader_type),
-      status: r.reader_status as ReaderStatus,
-      accountId: toNumberOrNull(r.user_id),
-      createdAt: fromDbTime(String(r.created_at)),
+      id: Number(row.reader_id),
+      fullName: String(row.full_name),
+      email: row.email ?? null,
+      phone: row.phone ?? null,
+      readerType: String(row.reader_type),
+      status: row.reader_status as ReaderStatus,
+      accountId: toNumberOrNull(row.user_id),
+      createdAt: fromDbTime(String(row.created_at)),
     },
   };
 }

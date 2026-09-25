@@ -6,8 +6,8 @@ import { z } from 'zod';
  * imports this file). Server variables are never readable from client code; `NEXT_PUBLIC_*`
  * variables are inlined into the browser bundle, so they must stay public values.
  *
- * Scripts and tests (tsx, vitest) keep reading the DB variables through `src/lib/db/config.ts`;
- * the owner-only `MYSQL_ROOT_PASSWORD` and `GOOGLE_BOOKS_API_KEY` are not part of the app.
+ * Scripts and tests (tsx, vitest) reach it through `src/lib/db/config.ts`, which loads
+ * .env.local first. `GOOGLE_BOOKS_API_KEY` is not part of it (one seed script only).
  */
 export const env = createEnv({
   server: {
@@ -17,6 +17,8 @@ export const env = createEnv({
     DB_NAME: z.string().min(1),
     DB_USER: z.string().min(1),
     DB_PASSWORD: z.string().min(1),
+    /** MySQL root password; only the owner role of the DB tooling uses it, never the app. */
+    MYSQL_ROOT_PASSWORD: z.string().min(1),
     /** Supabase Before User Created hook secret; the hook route is off when unset. */
     AUTH_HOOK_SECRET: z
       .string()

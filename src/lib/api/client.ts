@@ -26,7 +26,7 @@ export interface FetchOptions {
 }
 
 function queryString(query: Record<string, unknown> | undefined): string {
-  if (!query) return '';
+  if (isUndefined(query)) return '';
   const qs = new URLSearchParams();
   for (const [k, v] of Object.entries(omitNil(query))) qs.set(k, String(v));
   const s = qs.toString();
@@ -46,7 +46,7 @@ export async function apiFetch<E extends EndpointSpec>(
   const url = `${opts.baseUrl ?? ''}/api/v1${buildPath(endpoint.path, params)}${queryString(query)}`;
   const headers: Record<string, string> = {};
   if (opts.token) headers.Authorization = `Bearer ${opts.token}`;
-  if (!isUndefined(body)) headers['Content-Type'] = 'application/json';
+  if (body) headers['Content-Type'] = 'application/json';
   const res = await (opts.fetch ?? fetch)(url, {
     method: endpoint.method,
     headers,
@@ -55,11 +55,9 @@ export async function apiFetch<E extends EndpointSpec>(
   });
   if (res.status === 204) return undefined as OutputOf<E>;
   const json = await res.json().catch(() => null);
-  if (!res.ok) {
-    const fallback: ApiErrorBody = {
-      error: { key: 'INTERNAL', category: 'internal', message: res.statusText, detail: '', requestId: res.headers.get('x-request-id') ?? '' },
-    };
-    throw new ApiClientError(res.status, (json as ApiErrorBody) ?? fallback);
-  }
-  return json as OutputOf<E>;
+  if (res.ok) return json as OutputOf<E>;
+  const fallback: ApiErrorBody = {
+    error: { key: 'INTERNAL', category: 'internal', message: res.statusText, detail: '', requestId: res.headers.get('x-request-id') ?? '' },
+  };
+  throw new ApiClientError(res.status, (json as ApiErrorBody) ?? fallback);
 }

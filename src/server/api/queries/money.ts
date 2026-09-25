@@ -6,7 +6,9 @@ import { one, paged, rows } from './sql';
 import { readerExists } from './people';
 
 async function mustExist(pool: Pool, readerId: number): Promise<void> {
-  if (!(await readerExists(pool, readerId))) throw new ApiError('NOT_FOUND', 'reader');
+  const exist = await readerExists(pool, readerId);
+  if (exist) return;
+  throw new ApiError('NOT_FOUND', 'reader');
 }
 
 const FINES_FROM = `

@@ -10,7 +10,7 @@ import type {
   Page,
 } from '@/lib/api/contract';
 import { notFound } from '@/server/api/errors/api-error';
-import { isNil, mapNullable, toNumberOrNull } from '@/lib/utils';
+import { isNil, isUndefined, mapNullable, toNumberOrNull } from '@/lib/utils';
 import { paged, rows } from './sql';
 
 type Db = Pool | PoolConnection;
@@ -59,16 +59,16 @@ export function searchSql(query: Omit<CatalogSearchQuery, 'page' | 'pageSize'>):
              WHERE a.name LIKE CONCAT(?, '%')) m ON m.id = b.id`;
     params.push(terms || likePrefix(q), likePrefix(q));
   }
-  if (!isNil(query.categoryId)) {
+  if (query.categoryId) {
     conds.push(`b.id IN (SELECT bc.book_id FROM book_categories bc JOIN categories c ON c.id = bc.category_id
                           WHERE c.id = ? OR c.parent_id = ?)`);
     params.push(query.categoryId, query.categoryId);
   }
-  if (!isNil(query.identifier)) {
+  if (query.identifier) {
     conds.push(`b.id IN (SELECT book_id FROM book_identifiers WHERE identifier_value = ?)`);
     params.push(query.identifier);
   }
-  if (!isNil(query.materialType)) {
+  if (query.materialType) {
     conds.push(`mt.code = ?`);
     params.push(query.materialType);
   }
@@ -96,7 +96,7 @@ function push<T>(map: Map<number, T[]>, key: number, v: T) {
 /** Authors (by `author_order`), categories and grouped copy counts for a set of books: 3 queries. */
 async function loadRelated(db: Db, ids: number[]): Promise<Related> {
   const out: Related = { authors: new Map(), categories: new Map(), copies: new Map() };
-  if (!ids.length) return out;
+  if (ids.length === 0) return out;
   const [authors, categories, copies] = await Promise.all([
     rows(db, `SELECT ba.book_id, a.id, a.name FROM book_authors ba JOIN authors a ON a.id = ba.author_id
                WHERE ba.book_id IN (?) ORDER BY ba.book_id, ba.author_order`, [ids]),
@@ -153,7 +153,7 @@ export async function searchCatalog(pool: Pool, query: CatalogSearchQuery): Prom
 /** Staff view of one book, any status; null when it does not exist. */
 export async function loadBookAdmin(db: Db, id: number): Promise<BookAdmin | null> {
   const [r] = await rows(db, `SELECT ${BOOK_COLUMNS} FROM ${BOOK_FROM} WHERE b.id = ?`, [id]);
-  if (!r) return null;
+  if (isUndefined(r)) return null;
   const [rel, identifiers] = await Promise.all([
     loadRelated(db, [id]),
     rows(db, `SELECT identifier_type, identifier_value FROM book_identifiers WHERE book_id = ? ORDER BY id`, [id]),
@@ -173,7 +173,7 @@ export async function loadBookAdmin(db: Db, id: number): Promise<BookAdmin | nul
 /** One public book: active only; a missing or retired book is NOT_FOUND `book` (Clarification A1). */
 export async function getPublicBook(pool: Pool, id: number): Promise<BookDetail> {
   const book = await loadBookAdmin(pool, id);
-  if (!book || book.status !== 'active') throw notFound('book');
+  if (isNil(book) || book.status !== 'active') throw notFound('book');
   // Pick the public fields explicitly so staff-only ones never leak.
   const { replacementCostVnd: _cost, status: _status, ...detail } = book;
   void _cost;

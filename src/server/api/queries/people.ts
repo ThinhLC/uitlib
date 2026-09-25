@@ -135,9 +135,9 @@ export async function getReader(db: Db, readerId: number, dbNow: string): Promis
 }
 
 async function mustGetReader(db: Db, readerId: number, dbNow: string): Promise<Reader> {
-  const r = await getReader(db, readerId, dbNow);
-  if (!r) throw new ApiError('NOT_FOUND', 'reader');
-  return r;
+  const row = await getReader(db, readerId, dbNow);
+  if (isNil(row)) throw new ApiError('NOT_FOUND', 'reader');
+  return row;
 }
 
 /** Insert a reader (direct write, `card.manage`). */
@@ -186,13 +186,13 @@ export async function linkAccount(pool: Pool, readerId: number, accountId: numbe
   try {
     await transaction(pool, async (conn) => {
       const reader = await one(conn, 'SELECT user_id FROM readers WHERE id = ? FOR UPDATE', [readerId]);
-      if (!reader) throw new ApiError('NOT_FOUND', 'reader');
+      if (isNil(reader)) throw new ApiError('NOT_FOUND', 'reader');
       const acct = await one(conn, 'SELECT status FROM app_users WHERE id = ? FOR SHARE', [accountId]);
-      if (!acct) throw new ApiError('NOT_FOUND', 'account');
+      if (isNil(acct)) throw new ApiError('NOT_FOUND', 'account');
       if (acct.status !== 'active') {
         throw new ApiError('VALIDATION', 'account', [{ path: 'accountId', message: 'account is inactive' }]);
       }
-      if (!isNil(reader.user_id)) {
+      if (reader.user_id) {
         throw new ApiError('VALIDATION', 'reader', [{ path: 'readerId', message: 'reader is already linked' }]);
       }
       await conn.query('UPDATE readers SET user_id = ? WHERE id = ?', [accountId, readerId]);
@@ -211,7 +211,8 @@ export async function unlinkAccount(pool: Pool, readerId: number, dbNow: string)
 
 /** Every card of a reader, newest first; NOT_FOUND when the reader does not exist. */
 export async function listCards(pool: Pool, readerId: number, dbNow: string): Promise<Items<Card>> {
-  if (!(await readerExists(pool, readerId))) throw new ApiError('NOT_FOUND', 'reader');
+  const exist = await readerExists(pool, readerId);
+  if (!exist) throw new ApiError('NOT_FOUND', 'reader');
   const rs = await rows(
     pool,
     `SELECT ${CARD_COLUMNS} FROM library_cards c WHERE c.reader_id = ? ORDER BY c.issued_at DESC, c.id DESC`,
@@ -223,7 +224,7 @@ export async function listCards(pool: Pool, readerId: number, dbNow: string): Pr
 /** One card; NOT_FOUND `card`. */
 export async function getCard(pool: Pool, cardId: number, dbNow: string): Promise<Card> {
   const row = await one(pool, `SELECT ${CARD_COLUMNS} FROM library_cards c WHERE c.id = ?`, [cardId]);
-  if (!row) throw new ApiError('NOT_FOUND', 'card');
+  if (isNil(row)) throw new ApiError('NOT_FOUND', 'card');
   return toCard(row, dbNow);
 }
 
@@ -284,7 +285,7 @@ export function listPolicies(
 /** One policy version; NOT_FOUND `policy`. */
 export async function getPolicy(pool: Pool, policyId: number): Promise<PolicyVersion> {
   const row = await one(pool, `${POLICY_SELECT} WHERE p.id = ?`, [policyId]);
-  if (!row) throw new ApiError('NOT_FOUND', 'policy');
+  if (isNil(row)) throw new ApiError('NOT_FOUND', 'policy');
   return toPolicy(row);
 }
 

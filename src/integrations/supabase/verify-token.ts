@@ -10,6 +10,7 @@ import {
 import { ApiError } from '@/server/api/errors/api-error';
 import { DEFAULT_ALLOWED_PROVIDERS, usesAllowedProvider } from './providers';
 import type { VerifiedToken } from '@/server/api/context';
+import { isUndefined } from '@/lib/utils';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -69,7 +70,7 @@ const remoteSets = new Map<string, JWTVerifyGetKey>();
 export function createSupabaseVerifier(supabaseUrl: string, allowedProviders: readonly string[] = DEFAULT_ALLOWED_PROVIDERS) {
   const base = supabaseUrl.replace(/\/+$/, '');
   let keys = remoteSets.get(base);
-  if (!keys) {
+  if (isUndefined(keys)) {
     keys = createRemoteJWKSet(new URL(`${base}/auth/v1/.well-known/jwks.json`));
     remoteSets.set(base, keys);
   }
