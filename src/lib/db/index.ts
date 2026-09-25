@@ -18,4 +18,6 @@ pool.pool.on('connection', (conn) => {
   conn.query('SET SESSION innodb_lock_wait_timeout = 5');
 });
 
-export const db = drizzle({ client: pool });
+// drizzle-orm 1.0.0-rc.4 sets `client.config.supportBigNumbers`, which only the callback pool
+// has; it wraps it with `.promise()` itself. Passing the promise pool throws at import time.
+export const db = drizzle({ client: pool.pool });

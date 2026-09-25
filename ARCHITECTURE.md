@@ -18,12 +18,12 @@ flowchart LR
     L[Librarian / Admin]
     R[Reader]
   end
-  subgraph App["Next.js app (planned)"]
-    API[Route handlers / server actions]
+  subgraph App["Next.js app"]
+    API[API /api/v1<br/>Hono, src/server/api]
     CP[callProcedure<br/>src/lib/db/call-procedure.ts]
     ORM[Drizzle queries<br/>catalog and people reads]
   end
-  SB[(Supabase Auth<br/>planned)]
+  SB[(Supabase Auth<br/>Google sign-in)]
   subgraph MySQL["MySQL 8.4 (Docker)"]
     SP[[Stored procedures sp_*]]
     FN[[Functions fn_*]]
@@ -37,7 +37,8 @@ flowchart LR
 
   L --> API
   R --> API
-  API -. JWT user id .-> SB
+  API -. JWKS, token verify .-> SB
+  SB -. sign-up hook .-> API
   API --> CP --> SP
   API --> ORM --> T
   SP --> FN
@@ -63,9 +64,9 @@ flowchart LR
     - may write only catalog and people tables (`APP_WRITABLE_TABLES` in
       `src/lib/db/grants.ts`);
     - may `EXECUTE` public routines. Internal helpers named `sp__*` are not granted.
-- **Identity.** Supabase (planned) authenticates users. The library keeps `app_users` with the
-  Supabase user id, plus its own roles and permissions, which procedures check with
-  `fn_has_permission`.
+- **Identity.** Supabase authenticates users (Google sign-in only). The API verifies each access
+  token against the project's JWKS. The library keeps `app_users` with the Supabase user id,
+  plus its own roles and permissions, which procedures check with `fn_has_permission` (§8).
 - **Google Books** is called only by a one-off script. The team reviews its output and commits
   it; seeding never calls the network.
 
@@ -80,7 +81,10 @@ flowchart LR
 | Migrations | `drizzle/<timestamp>_<name>/migration.sql` | generated DDL plus custom SQL |
 | Grants | `scripts/db/grants.ts` | applied after every migrate and restore |
 | Seed | `scripts/seed/seed.ts`, `data/seed/` | direct catalog inserts, history via procedures |
-| Tests | `tests/db`, `tests/concurrency` | test schema `${DB_NAME}_test`, invariants after each test |
+| API contract | `src/lib/api/contract/`, `src/lib/api/client.ts` | zod inputs, response types, error keys, `endpoints`; shared with the UI |
+| API server | `src/server/api/`, `src/app/api/[[...route]]/route.ts` | Hono app `/api/v1` mounted in the Next.js App Router (§8) |
+| Supabase | `src/integrations/supabase/` | token verifier (jose + JWKS), sign-up hook verification |
+| Tests | `tests/db`, `tests/concurrency`, `tests/api` | test schema `${DB_NAME}_test`, invariants after each test |
 
 ### Migration order
 
@@ -691,7 +695,7 @@ Rejections use `SIGNAL SQLSTATE '45000'` with `KEY: detail` messages, e.g. `COPY
 
 ## 7. Flows
 
-Each operation is one procedure call made through `callProcedure`. Flow 1 shows the shared retry and error mapping once. Participants are the actor, the planned Next.js API, `callProcedure`, the procedure and its internal `sp__*` helpers, InnoDB tables, triggers and functions; flow 18 also shows the event scheduler. Flows 14–18 cover the reservation extension (Ext).
+Each operation is one procedure call made through `callProcedure`. Flow 1 shows the shared retry and error mapping once. Participants are the actor, the API (§8), `callProcedure`, the procedure and its internal `sp__*` helpers, InnoDB tables, triggers and functions; flow 18 also shows the event scheduler. Flows 14–18 cover the reservation extension (Ext).
 
 ### 1. Calling convention and retry
 
@@ -701,7 +705,7 @@ Every business write goes through one TypeScript helper, `callProcedure` (`src/l
 sequenceDiagram
     autonumber
     actor Librarian
-    participant App as Next.js API (planned)
+    participant App as API (Hono)
     participant CP as callProcedure
     participant SP as sp_xxx
     participant FN as fn_has_permission
@@ -766,7 +770,7 @@ A librarian adds a physical copy with `sp_register_copy`. A copy registered in `
 sequenceDiagram
     autonumber
     actor Librarian
-    participant App as Next.js API (planned)
+    participant App as API (Hono)
     participant CP as callProcedure
     participant SP as sp_register_copy / sp_change_copy_status
     participant PQ as sp__promote_queue
@@ -838,7 +842,7 @@ Loan rules are versioned per (reader type, material type) pair, and each version
 sequenceDiagram
     autonumber
     actor Admin
-    participant App as Next.js API (planned)
+    participant App as API (Hono)
     participant CP as callProcedure
     participant SP as sp_close_policy_version / sp_create_policy_version
     participant DB as InnoDB tables
@@ -891,7 +895,7 @@ A reader can hold at most one `active` card. The database enforces this with a u
 sequenceDiagram
     autonumber
     actor Librarian
-    participant App as Next.js API (planned)
+    participant App as API (Hono)
     participant CP as callProcedure
     participant SP as sp_issue_card / sp_set_card_status
     participant DB as InnoDB tables
@@ -945,7 +949,7 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     actor Librarian
-    participant App as Next.js API (planned)
+    participant App as API (Hono)
     participant CP as callProcedure
     participant SP as sp_checkout
     participant FN as fn_due_at
@@ -1030,7 +1034,7 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     actor Librarian
-    participant App as Next.js API (planned)
+    participant App as API (Hono)
     participant CP as callProcedure
     participant SP as sp_return_item
     participant AF as sp__assess_fines
@@ -1093,7 +1097,7 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     actor Librarian
-    participant App as Next.js API (planned)
+    participant App as API (Hono)
     participant CP as callProcedure
     participant SP as sp_renew
     participant DB as InnoDB tables
@@ -1140,7 +1144,7 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     actor Librarian
-    participant App as Next.js API (planned)
+    participant App as API (Hono)
     participant CP as callProcedure
     participant SP as sp_declare_lost
     participant AF as sp__assess_fines
@@ -1193,7 +1197,7 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     actor Librarian
-    participant App as Next.js API (planned)
+    participant App as API (Hono)
     participant CP as callProcedure
     participant SP as sp_record_payment
     participant DB as InnoDB tables
@@ -1263,7 +1267,7 @@ Corrections are never edits to a fine. They are signed, reasoned rows in `fine_a
 sequenceDiagram
     autonumber
     actor Librarian
-    participant App as Next.js API (planned)
+    participant App as API (Hono)
     participant CP as callProcedure
     participant SP as sp_adjust_fine
     participant DB as InnoDB tables
@@ -1303,7 +1307,7 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     actor Admin
-    participant App as Next.js API (planned)
+    participant App as API (Hono)
     participant CP as callProcedure
     participant SP as sp_expire_cards
     participant DB as InnoDB tables
@@ -1341,7 +1345,7 @@ The debt reports are read-only procedures with no locks and no permission check,
 sequenceDiagram
     autonumber
     actor Admin
-    participant App as Next.js API (planned) or pnpm db:report
+    participant App as API (Hono) or pnpm db:report
     participant SP as sp_report_rollforward / sp_report_cumulative
     participant V as v_report_* / v_inv_* views
     participant DB as InnoDB tables
@@ -1449,7 +1453,7 @@ These rules apply to every flow below:
 sequenceDiagram
     autonumber
     actor Reader
-    participant App as Next.js API (planned)
+    participant App as API (Hono)
     participant CP as callProcedure
     participant SP as sp_reserve
     participant FN as fn_has_permission
@@ -1522,7 +1526,7 @@ The diagram shows the return case.
 sequenceDiagram
     autonumber
     actor Librarian
-    participant App as Next.js API (planned)
+    participant App as API (Hono)
     participant CP as callProcedure
     participant SP as sp_return_item
     participant PQ as sp__promote_queue
@@ -1581,7 +1585,7 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     actor Librarian
-    participant App as Next.js API (planned)
+    participant App as API (Hono)
     participant CP as callProcedure
     participant SP as sp_checkout
     participant EH as sp__expire_hold
@@ -1658,7 +1662,7 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     actor Reader
-    participant App as Next.js API (planned)
+    participant App as API (Hono)
     participant CP as callProcedure
     participant SP as sp_cancel_reservation
     participant FN as fn_has_permission
@@ -1716,7 +1720,7 @@ sequenceDiagram
     autonumber
     actor Admin
     participant EV as ev_expire_holds (event scheduler)
-    participant App as Next.js API (planned)
+    participant App as API (Hono)
     participant CP as callProcedure
     participant SP as sp_expire_holds
     participant EX as sp__expire_holds_batch
@@ -1769,3 +1773,163 @@ sequenceDiagram
 - `ev_expire_holds` needs `event_scheduler=ON` (`docker/mysql/conf.d/mysql.cnf`). `pnpm db:reset-test` disables every event in the test schema after migrating, because tests pass explicit times and a wall-clock event would race them.
 - `sp__expire_holds_batch` and `sp__expire_hold` are internal: the app account gets errno 1370 if it calls either directly.
 - Error keys: `FORBIDDEN` (wrapper only), `INVALID_TRANSITION`. 1213/1205 on a single hold are skipped by the batch, not raised.
+
+## 8. API layer (spec 002)
+
+The API is a Hono app with base path `/api/v1`. It is built by `createApp(deps)` in
+`src/server/api/app.ts` and mounted by one catch-all Route Handler,
+`src/app/api/[[...route]]/route.ts`, which runs on the Node.js runtime. The API adds no business
+rule:
+- every change goes to a stored procedure through `callProcedure`;
+- reads, and the catalog, reader and account writes, use the restricted app account.
+
+The contract lives in `src/lib/api/contract/`. It has zod input schemas, response interfaces,
+error keys and one `endpoints` table, and the UI imports it directly (spec 002 research R2).
+
+### Request pipeline
+
+```mermaid
+flowchart LR
+  REQ[Request] --> RID[request id<br/>now = clock]
+  RID --> AUTH{access kind}
+  AUTH -->|public / webhook| VAL
+  AUTH -->|token| VER[verify JWT<br/>iss, aud, exp, provider google]
+  VER --> RES[resolveCaller<br/>read-only]
+  RES -->|unknown subject| ENS[ensureAccount<br/>INSERT IGNORE + reader role]
+  ENS --> RES
+  RES --> ACT{inactive?}
+  ACT -->|yes, not /me| E403[403 ACCOUNT_INACTIVE]
+  ACT -->|no| PAR[parse params]
+  PAR --> ACC[access: perm / self-or]
+  ACC --> VAL[parse query and body<br/>zod strict]
+  VAL --> H[handler]
+  H -->|state change| CP[callProcedure<br/>actor = caller, p_now = clock]
+  H -->|read / direct write| Q[queries]
+  H --> OUT[JSON]
+  AUTH -.error.-> ME[mapError]
+  H -.error.-> ME
+  ME --> ERR[error body<br/>key, category, message, detail, requestId]
+```
+
+- The acting account always comes from the verified token (`sub`). The business time always
+  comes from the server's clock. A JSON body that carries `actorUserId`, `now` or any other
+  undeclared field is rejected as `VALIDATION`.
+- `self-or` routes answer `NOT_FOUND` to a reader who asks for another reader's records, the
+  same answer as for a missing id.
+
+### First request of a new user (account provisioning)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User
+    participant SB as Supabase Auth
+    participant API as API (Hono)
+    participant DB as MySQL (app account)
+
+    User->>SB: sign in with Google
+    SB-->>User: access token (ES256, sub, app_metadata.providers)
+    User->>API: GET /api/v1/me (Bearer token)
+    API->>SB: JWKS (cached)
+    API->>API: verify signature, iss, aud, exp, role, not anonymous, provider google
+    API->>DB: resolveCaller(sub) (plain read)
+    alt no account
+        API->>DB: START TRANSACTION
+        API->>DB: INSERT IGNORE app_users (sub, active)
+        opt inserted
+            API->>DB: INSERT user_roles (reader)
+        end
+        API->>DB: INSERT IGNORE readers (user_id = account id, EXTERNAL, active, Google name and email)
+        API->>DB: COMMIT
+        API->>DB: resolveCaller(sub)
+    end
+    API-->>User: 200 {accountId, roles: [reader], permissions: [], reader: null}
+```
+
+A concurrent first request for the same subject waits on `app_users_supabase_uq` and then skips
+the duplicate. Either way, the result is one account with one `reader` role and exactly one
+reader profile, linked by id (`readers.user_id = app_users.id`, `readers_user_uq`); never by
+email. The callback and the hook run the same step, so they also give an older account its
+profile. The profile has no card, so it can borrow nothing until the desk issues one.
+
+### Google sign-in callback (auth redirects)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User
+    participant UI as Web UI (supabase-js)
+    participant SB as Supabase Auth
+    participant G as Google
+    participant API as API (Hono)
+    participant DB as MySQL (app account)
+
+    User->>UI: sign in with Google
+    UI->>UI: store PKCE code verifier (cookie)
+    UI->>SB: signInWithOAuth(google, redirectTo = /api/v1/auth/callback?next=…)
+    SB->>G: OAuth
+    G-->>SB: consent
+    SB-->>User: 302 /api/v1/auth/callback?code=…
+    User->>API: GET /auth/callback?code=… (cookies: code verifier)
+    API->>SB: exchangeCodeForSession(code) via @supabase/ssr
+    alt exchange fails / provider error
+        API-->>User: 302 /auth/error?reason=…
+    else session, provider neither Google nor email
+        API->>SB: signOut(local) (clears cookies)
+        API-->>User: 302 /auth/error?reason=provider_not_allowed
+    else Google session
+        API->>DB: ensureAccount(user.id) (reader role if new)
+        API-->>User: 302 <next> + Set-Cookie session (no-cache headers)
+    end
+```
+
+`GET /auth/confirm?token_hash=&type=&next=` follows the same path. It calls `verifyOtp` instead
+of the code exchange, and it handles email links (confirmation, magic link, recovery). Starting
+a sign-in and signing out stay in the UI.
+
+### Sign-up hook (optional per environment)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User
+    participant SB as Supabase Auth
+    participant API as API (Hono)
+    participant DB as MySQL (app account)
+
+    User->>SB: first Google sign-in
+    SB->>API: POST /api/v1/auth/hooks/before-user-created (Standard Webhooks signature)
+    API->>API: verify signature on the raw body (secret from AUTH_HOOK_SECRET)
+    alt bad signature / payload / provider neither Google nor email
+        API-->>SB: 401 / 400 / 403 {error: {http_code, message}}
+        SB-->>User: sign-up denied
+    else ok
+        API->>DB: ensureAccount (1 attempt, lock wait 2 s)
+        alt lock wait or deadlock
+            API-->>SB: 503 (Supabase retries)
+        else created or existed
+            API-->>SB: 200 {}
+            SB->>SB: insert auth.users
+            SB-->>User: session
+        end
+    end
+```
+
+The hook is enabled only where Supabase can reach the app, because an unreachable hook denies
+every sign-up. Without the hook, the first request creates the account. Users deleted or banned
+in Supabase are deactivated by an admin (`POST /accounts/{id}/status`, spec 002 FR-011a).
+
+### Error categories
+
+| Category | HTTP | Keys |
+| --- | --- | --- |
+| unauthenticated | 401 | `UNAUTHENTICATED` |
+| forbidden | 403 | `FORBIDDEN`, `ACCOUNT_INACTIVE` |
+| not_found | 404 | `NOT_FOUND`, `ROUTE_NOT_FOUND` |
+| validation | 400 | `VALIDATION` |
+| conflict | 409 | every other procedure key, `DUPLICATE` |
+| busy | 503 + `Retry-After` | `BUSY` (1213/1205 after 3 attempts) |
+| unavailable | 503 + `Retry-After` | `AUTH_UNAVAILABLE` |
+| internal | 500 | `INTERNAL` (logged with the request id; nothing leaked) |
+
+The full mapping is in [specs/002-library-api/contracts/errors.md](specs/002-library-api/contracts/errors.md).

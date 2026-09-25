@@ -211,3 +211,32 @@ Built after the Core gate passed (tasks T092–T098): migrations `ext_reservatio
 The test schema disables `ev_expire_holds` after migrating (`scripts/db/reset-test.ts`): tests
 pass explicit times, and a wall-clock expiry would race them. The event's existence and schedule
 are tested; its ENABLED state is checked on the main schema (table above).
+
+## 6. Seed reduced to the real test accounts (2026-09-25, spec 002)
+
+The seed now has one account per role or reader type, all real Supabase test users, and only
+three readers: S01 STUDENT (`account+student`), L01 LECTURER (`account+lecturer`) and E01
+EXTERNAL (`account+external`). Admin and librarian are `account+admin` and
+`account+librarian`. The table in §1 describes the seed at the spec 001 gate. The mapping now is:
+
+| FR-025 scenario | Seed step(s) now |
+| --- | --- |
+| On-time item | S01 `on-time loan` (M001), `on-time return` |
+| Loan with several items; reader at the item limit | S01 `loan with several items` (M015, M019, M026); `loan (5th open item, at the limit)` (M008) |
+| Renewed item; renewal refused at the limit | S01 `renewal (1st)`, `renewal (2nd)`, `renewal refused: limit` (M019) |
+| Overdue item returned late, full payment | S01 `overdue item returned late` (M026, 12,000), `full payment` |
+| Damaged item and an adjustment | S01 `damaged return` (M008, 80,000), `fine adjustment` (−30,000) |
+| Overdue item: renewal and checkout refused | L01 `renewal refused: overdue` (M010), `checkout refused: overdue item` (`OVERDUE_BLOCKED`) |
+| Lost before due; late-and-lost; partial payment | L01 `lost before due` (M029, 950,000), `late-and-lost` (M010: 10,000 + 1,000,000), `partial payment across two fines` (110,000) |
+| Debt block; fine assessed in September and paid in October (US4-14) | E01 `late return (September fine)` (M046, 10,000), `checkout refused: debt`, `US4-14 paid next month` |
+| Policy change (SC-007) and the US2-10 boundary | `close STUDENT P1, create P2`; S01 `US2-10 checkout just before P1 ends` (due 10-14), `US2-10 checkout under P2` (due 10-08) |
+| [Ext] Reservation queue | E01 loans the one-copy M022. L01 then S01 reserve it, and E01's renewal is refused (`reserved`). The return promotes L01, who is soft-blocked (`DEBT_BLOCKED`); the hold expires and passes to S01, who collects it (fulfilled) |
+
+Dropped, because they need more readers than the three test accounts:
+- **Expired card:** `sp_expire_cards` and the `CARD_INVALID` refusal. Expiring a test user's card would stop live testing with it.
+- **Queue head becoming ineligible:** a revoked card leads to `ineligible_at_promotion`.
+- **Everyday circulation volume** for the monthly reports.
+
+These rules are still proven by the automated suites: `tests/db` (US2 cards, US3 reservations),
+`tests/concurrency` and `tests/api`. `pnpm db:seed --reset` ends with a clean invariant suite.
+

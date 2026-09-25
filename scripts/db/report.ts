@@ -8,16 +8,9 @@
 import mysql from 'mysql2/promise';
 import { dbConfig } from '../../src/lib/db/config';
 import { schemaFromArgs } from './grants';
+import { localMonthBounds } from '../../src/lib/time/local-month';
 
-/** UTC bounds of a library-local (UTC+07:00) month: [first day 00:00 local, next month 00:00 local). */
-export function localMonthBounds(month: string): [string, string] {
-  const m = /^(\d{4})-(\d{2})$/.exec(month);
-  if (!m) throw new Error(`--month must be YYYY-MM, got ${month}`);
-  const y = Number(m[1]);
-  const mo = Number(m[2]);
-  const fmt = (d: Date) => d.toISOString().replace('T', ' ').replace('Z', '');
-  return [fmt(new Date(Date.UTC(y, mo - 1, 1, -7))), fmt(new Date(Date.UTC(y, mo, 1, -7)))];
-}
+export { localMonthBounds };
 
 const num = (row: Record<string, unknown>) =>
   Object.fromEntries(Object.entries(row).map(([k, v]) => [k, Number(v)])) as Record<string, number>;

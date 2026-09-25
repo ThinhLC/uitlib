@@ -61,7 +61,8 @@ interface SeedBook {
 }
 
 interface People {
-  accounts: { key: string; supabaseUserId: string; status: 'active' | 'inactive'; roles: string[] }[];
+  /** `email` names the Supabase test user for readers of the file; app_users stores no email. */
+  accounts: { key: string; email?: string; supabaseUserId: string; status: 'active' | 'inactive'; roles: string[] }[];
   readers: {
     key: string;
     readerType: string;
@@ -372,23 +373,23 @@ const STEPS: Step[] = [
   // copies are registered in `run()` at 2026-08-01 09:00
   // cards are issued in `run()` at 2026-08-01 10:00
 
-  // --- on-time loan
-  { at: '2026-08-03 09:00', covers: 'on-time loan', run: (c, n) => checkout(c, n, 'S01', ['M001']) },
-  { at: '2026-08-14 10:00', covers: 'on-time return', run: (c, n) => giveBack(c, n, 'M001') },
+  // One reader per type, each linked to a real Supabase test user (data/seed/people.json):
+  // S01 STUDENT (account+student), L01 LECTURER (account+lecturer), E01 EXTERNAL (account+external).
 
-  // --- one loan with several items; one reader with several loans
-  { at: '2026-08-05 10:00', covers: 'loan with several items', run: (c, n) => checkout(c, n, 'S02', ['M015', 'M019', 'M026']) },
+  // --- S01: on-time loan, a loan with several items, renewals, late return and payment
+  { at: '2026-08-03 09:00', covers: 'on-time loan', run: (c, n) => checkout(c, n, 'S01', ['M001']) },
+  { at: '2026-08-05 10:00', covers: 'loan with several items', run: (c, n) => checkout(c, n, 'S01', ['M015', 'M019', 'M026']) },
   { at: '2026-08-12 15:00', covers: 'item returned on time', run: (c, n) => giveBack(c, n, 'M015') },
+  { at: '2026-08-14 10:00', covers: 'on-time return', run: (c, n) => giveBack(c, n, 'M001') },
   { at: '2026-08-18 09:00', covers: 'renewal (1st)', run: (c, n) => renew(c, n, 'M019') },
   { at: '2026-08-25 16:00', covers: 'overdue item returned late', run: (c, n) => giveBack(c, n, 'M026') },
-  { at: '2026-08-28 10:00', covers: 'full payment', run: (c, n) => pay(c, n, 'S02', 'SEED-PAY-001', [{ fine: 'M026:late' }]) },
+  { at: '2026-08-28 10:00', covers: 'full payment', run: (c, n) => pay(c, n, 'S01', 'SEED-PAY-001', [{ fine: 'M026:late' }]) },
   { at: '2026-08-30 09:00', covers: 'renewal (2nd)', run: (c, n) => renew(c, n, 'M019') },
   { at: '2026-09-05 09:00', covers: 'renewal refused: limit', run: (c, n) => rejected('RENEWAL_REJECTED', renew(c, n, 'M019')) },
   { at: '2026-09-10 11:00', covers: 'renewed item returned', run: (c, n) => giveBack(c, n, 'M019') },
-  { at: '2026-09-15 14:00', covers: 'reader with several loans', run: (c, n) => checkout(c, n, 'S02', ['M027']) },
 
-  // --- damaged return and adjustment
-  { at: '2026-08-06 11:00', covers: 'loan', run: (c, n) => checkout(c, n, 'S03', ['M008']) },
+  // --- S01: damaged return and adjustment (net fine 50000 = the STUDENT debt threshold, not above it)
+  { at: '2026-08-06 11:00', covers: 'loan (5th open item, at the limit)', run: (c, n) => checkout(c, n, 'S01', ['M008']) },
   { at: '2026-08-15 09:30', covers: 'damaged return', run: (c, n) =>
     giveBack(c, n, 'M008', 'damaged', 80_000, 'Rách bìa, ướt nửa cuốn') },
   { at: '2026-08-20 10:00', covers: 'fine adjustment', run: async (ctx, now) => {
@@ -397,66 +398,26 @@ const STEPS: Step[] = [
     return 'damaged fine M008 adjusted by -30000';
   } },
 
-  // --- late-and-lost, then partial payment across two fines
-  { at: '2026-08-01 14:00', covers: 'loan', run: (c, n) => checkout(c, n, 'S04', ['M010']) },
+  // --- L01: overdue item (renewal and checkout refused), lost before due, late-and-lost, partial payment
+  { at: '2026-08-01 14:00', covers: 'loan', run: (c, n) => checkout(c, n, 'L01', ['M010']) },
+  { at: '2026-08-15 09:00', covers: 'lecturer with several items', run: (c, n) => checkout(c, n, 'L01', ['M029', 'M031']) },
+  { at: '2026-09-05 09:00', covers: 'renewal refused: overdue', run: (c, n) => rejected('RENEWAL_REJECTED', renew(c, n, 'M010')) },
+  { at: '2026-09-05 10:00', covers: 'checkout refused: overdue item', run: (c, n) =>
+    rejected('OVERDUE_BLOCKED', checkout(c, n, 'L01', ['M030'])) },
+  { at: '2026-09-05 15:00', covers: 'lost before due', run: (c, n) => lost(c, n, 'M029') },
   { at: '2026-09-10 10:00', covers: 'late-and-lost', run: (c, n) => lost(c, n, 'M010') },
   { at: '2026-09-12 10:00', covers: 'partial payment across two fines', run: (c, n) =>
-    pay(c, n, 'S04', 'SEED-PAY-002', [{ fine: 'M010:late' }, { fine: 'M010:lost', amount: 100_000 }]) },
-
-  // --- lost before due; a lecturer with several items
-  { at: '2026-08-15 09:00', covers: 'loan', run: (c, n) => checkout(c, n, 'L01', ['M029', 'M031']) },
-  { at: '2026-09-05 15:00', covers: 'lost before due', run: (c, n) => lost(c, n, 'M029') },
+    pay(c, n, 'L01', 'SEED-PAY-002', [{ fine: 'M010:late' }, { fine: 'M010:lost', amount: 100_000 }]) },
   { at: '2026-09-12 16:00', covers: 'on-time return', run: (c, n) => giveBack(c, n, 'M031') },
 
-  // --- US4-14: fine assessed in September, paid in October
-  { at: '2026-08-25 10:00', covers: 'loan', run: (c, n) => checkout(c, n, 'S06', ['M004']) },
-  { at: '2026-09-20 09:00', covers: 'late return (September fine)', run: (c, n) => giveBack(c, n, 'M004') },
-  { at: '2026-10-03 10:00', covers: 'US4-14 paid next month', run: (c, n) => pay(c, n, 'S06', 'SEED-PAY-003', [{ fine: 'M004:late' }]) },
-
-  // --- expired card
-  { at: '2026-09-01 09:30', covers: 'loan', run: (c, n) => checkout(c, n, 'E04', ['M044']) },
-  { at: '2026-09-07 17:00', covers: 'on-time return', run: (c, n) => giveBack(c, n, 'M044') },
-  { at: '2026-09-20 00:05', covers: 'expired card (sp_expire_cards cursor)', run: async (ctx, now) => {
-    const { out } = await call(ctx, 'sp_expire_cards', [ctx.staff.admin, now], ['p_count']);
-    return `${String(out.p_count)} card(s) expired`;
-  } },
-  { at: '2026-09-21 10:00', covers: 'checkout refused: expired card', run: (c, n) =>
-    rejected('CARD_INVALID', checkout(c, n, 'E04', ['M045'])) },
-
-  // --- debt block (EXTERNAL: any debt blocks)
+  // --- E01: debt block (EXTERNAL: any debt blocks); US4-14 fine assessed in September, paid in October
   { at: '2026-09-01 10:00', covers: 'loan', run: (c, n) => checkout(c, n, 'E01', ['M046']) },
-  { at: '2026-09-10 10:00', covers: 'late return', run: (c, n) => giveBack(c, n, 'M046') },
+  { at: '2026-09-10 10:00', covers: 'late return (September fine)', run: (c, n) => giveBack(c, n, 'M046') },
   { at: '2026-09-12 11:00', covers: 'checkout refused: debt', run: (c, n) =>
     rejected('DEBT_BLOCKED', checkout(c, n, 'E01', ['M048'])) },
+  { at: '2026-10-03 10:00', covers: 'US4-14 paid next month', run: (c, n) => pay(c, n, 'E01', 'SEED-PAY-003', [{ fine: 'M046:late' }]) },
 
-  // --- item still overdue; renewal refused
-  { at: '2026-09-01 11:00', covers: 'overdue item (still on loan)', run: (c, n) => checkout(c, n, 'S09', ['M023']) },
-  { at: '2026-09-18 09:00', covers: 'renewal refused: overdue', run: (c, n) => rejected('RENEWAL_REJECTED', renew(c, n, 'M023')) },
-
-  // --- everyday circulation (reports)
-  { at: '2026-08-10 09:00', covers: 'loan', run: (c, n) => checkout(c, n, 'S07', ['M002', 'M037']) },
-  { at: '2026-08-20 15:00', covers: 'on-time return', run: (c, n) => giveBack(c, n, 'M002') },
-  { at: '2026-08-21 15:00', covers: 'on-time return (worn)', run: (c, n) => giveBack(c, n, 'M037', 'worn') },
-  { at: '2026-08-16 10:00', covers: 'loan', run: (c, n) => checkout(c, n, 'L03', ['M035', 'M039']) },
-  { at: '2026-08-30 10:00', covers: 'on-time return', run: (c, n) => giveBack(c, n, 'M035') },
-  { at: '2026-08-30 10:01', covers: 'on-time return', run: (c, n) => giveBack(c, n, 'M039') },
-  { at: '2026-08-21 09:00', covers: 'loan', run: (c, n) => checkout(c, n, 'L02', ['M002', 'M041']) },
-  { at: '2026-09-10 16:00', covers: 'on-time return', run: (c, n) => giveBack(c, n, 'M002') },
-  { at: '2026-09-10 16:01', covers: 'on-time return', run: (c, n) => giveBack(c, n, 'M041') },
-  { at: '2026-09-15 09:00', covers: 'reader with several loans', run: (c, n) => checkout(c, n, 'L02', ['M001']) },
-  { at: '2026-08-22 10:00', covers: 'loan', run: (c, n) => checkout(c, n, 'S08', ['M001', 'M012']) },
-  { at: '2026-09-02 10:00', covers: 'on-time return', run: (c, n) => giveBack(c, n, 'M001') },
-  { at: '2026-09-02 10:01', covers: 'on-time return', run: (c, n) => giveBack(c, n, 'M012') },
-  { at: '2026-09-03 13:00', covers: 'loan', run: (c, n) => checkout(c, n, 'S10', ['M003', 'M051']) },
-  { at: '2026-09-12 13:00', covers: 'on-time return', run: (c, n) => giveBack(c, n, 'M003') },
-  { at: '2026-09-12 13:01', covers: 'on-time return', run: (c, n) => giveBack(c, n, 'M051') },
-  { at: '2026-09-05 08:30', covers: 'loan', run: (c, n) => checkout(c, n, 'S11', ['M047', 'M055']) },
-  { at: '2026-09-15 08:30', covers: 'on-time return', run: (c, n) => giveBack(c, n, 'M047') },
-  { at: '2026-09-02 14:00', covers: 'loan (still on loan)', run: (c, n) => checkout(c, n, 'L04', ['M042']) },
-  { at: '2026-09-08 09:00', covers: 'loan', run: (c, n) => checkout(c, n, 'L05', ['M052', 'M056']) },
-  { at: '2026-09-22 09:00', covers: 'on-time return', run: (c, n) => giveBack(c, n, 'M052') },
-
-  // --- policy change and the US2-10 boundary
+  // --- policy change and the US2-10 boundary (S01)
   { at: '2026-09-25 09:00', covers: 'close STUDENT P1, create P2 (SC-007)', run: async (ctx, now) => {
     const p1 = ctx.policies.get('STUDENT:P1')!;
     await call(ctx, 'sp_close_policy_version', [ctx.staff.admin, now, p1, vn(STUDENT_P2_FROM)]);
@@ -467,29 +428,25 @@ const STEPS: Step[] = [
     ctx.policies.set('STUDENT:P2', Number(out.p_policy_id));
     return 'STUDENT P2 from 2026-10-01: 7 days, 5000/day';
   } },
-  { at: '2026-09-30 23:59:59.900', covers: 'US2-10 checkout just before P1 ends', run: (c, n) => checkout(c, n, 'S05', ['M005']) },
-  { at: '2026-10-01 00:00:00.100', covers: 'US2-10 checkout under P2', run: (c, n) => checkout(c, n, 'S12', ['M006']) },
+  { at: '2026-09-30 23:59:59.900', covers: 'US2-10 checkout just before P1 ends', run: (c, n) => checkout(c, n, 'S01', ['M005']) },
+  { at: '2026-10-01 00:00:00.100', covers: 'US2-10 checkout under P2', run: (c, n) => checkout(c, n, 'S01', ['M006']) },
 
-  // --- [Ext] reservation queue: an ineligible head, a soft-blocked holder whose hold expires, a fulfilment
-  { at: '2026-10-02 09:00', covers: 'loan of a one-copy book', run: (c, n) => checkout(c, n, 'L03', ['M022']) },
-  { at: '2026-10-03 09:00', covers: 'Ext: reservation (queue 1st)', run: (c, n) => reserve(c, n, 'E02', 'M022') },
-  { at: '2026-10-03 09:05', covers: 'Ext: reservation (queue 2nd, has an overdue item)', run: (c, n) => reserve(c, n, 'S11', 'M022') },
-  { at: '2026-10-03 09:10', covers: 'Ext: reservation (queue 3rd)', run: (c, n) => reserve(c, n, 'S08', 'M022') },
+  // --- [Ext] reservation queue: a soft-blocked holder whose hold expires, then a fulfilment
+  { at: '2026-10-03 11:00', covers: 'loan of a one-copy book', run: (c, n) => checkout(c, n, 'E01', ['M022']) },
+  { at: '2026-10-03 12:00', covers: 'Ext: reservation (queue 1st, blocked by debt)', run: (c, n) => reserve(c, n, 'L01', 'M022') },
+  { at: '2026-10-03 12:05', covers: 'Ext: reservation (queue 2nd)', run: (c, n) => reserve(c, n, 'S01', 'M022') },
   { at: '2026-10-04 10:00', covers: 'Ext: renewal refused: reserved', run: (c, n) =>
     rejected('RENEWAL_REJECTED', renew(c, n, 'M022')) },
-  { at: '2026-10-04 11:00', covers: 'card revoked (queue head becomes ineligible)', run: async (ctx, now) => {
-    await call(ctx, 'sp_set_card_status', [ctx.staff.lib1, now, ctx.cards.get('E02'), 'revoked']);
-    return 'E02 card revoked';
-  } },
   { at: '2026-10-05 15:00', covers: 'Ext: return promotes the queue', run: async (ctx, now) =>
     `${await giveBack(ctx, now, 'M022')}; ${await queueState(ctx, 'M022')}` },
   { at: '2026-10-06 10:00', covers: 'Ext: soft-blocked holder cannot collect', run: (c, n) =>
-    rejected('OVERDUE_BLOCKED', checkout(c, n, 'S11', ['M022'])) },
-  { at: '2026-10-08 15:00', covers: 'Ext: expired hold passes to the next reader', run: async (ctx, now) => {
+    rejected('DEBT_BLOCKED', checkout(c, n, 'L01', ['M022'])) },
+  { at: '2026-10-07 10:00', covers: 'on-time return (P2 due date)', run: (c, n) => giveBack(c, n, 'M006') },
+  { at: '2026-10-08 16:00', covers: 'Ext: expired hold passes to the next reader', run: async (ctx, now) => {
     const { out } = await call(ctx, 'sp_expire_holds', [ctx.staff.admin, now], ['p_count']);
     return `${String(out.p_count)} hold(s) expired; ${await queueState(ctx, 'M022')}`;
   } },
-  { at: '2026-10-09 09:30', covers: 'Ext: holder collects: reservation fulfilled', run: (c, n) => checkout(c, n, 'S08', ['M022']) },
+  { at: '2026-10-09 09:30', covers: 'Ext: holder collects: reservation fulfilled', run: (c, n) => checkout(c, n, 'S01', ['M022']) },
 ];
 
 const localTime = (at: string) => (at.length === 16 ? `${at}:00.000` : at);
@@ -547,7 +504,8 @@ async function run() {
     const copies = new Map<string, number>();
     const ctx: Ctx = {
       pool,
-      staff: { admin: staffId('admin'), lib1: staffId('librarian1'), lib2: staffId('librarian2') },
+      // One account per role (data/seed/people.json): renewals and payments are also done by the librarian.
+      staff: { admin: staffId('admin'), lib1: staffId('librarian'), lib2: staffId('librarian') },
       reader: (key) => {
         const id = readerIds.get(key);
         if (id === undefined) throw new Error(`scenario: unknown reader ${key}`);
@@ -580,14 +538,12 @@ async function run() {
         }
         return `${copies.size} copies`;
       } },
-      { at: '2026-08-01 10:00', covers: 'cards issued (one set to expire)', run: async (c, now) => {
+      { at: '2026-08-01 10:00', covers: 'cards issued', run: async (c, now) => {
         let n = 0;
         for (const r of people.readers) {
           if (r.status !== 'active') continue;
           const months = D1[r.readerType as keyof typeof D1].cardMonths;
-          const expires = r.key === 'E04'
-            ? vn('2026-09-15 23:59:59.999')
-            : vn(`${2026 + Math.floor((7 + months) / 12)}-${String(((7 + months) % 12) + 1).padStart(2, '0')}-01 00:00`);
+          const expires = vn(`${2026 + Math.floor((7 + months) / 12)}-${String(((7 + months) % 12) + 1).padStart(2, '0')}-01 00:00`);
           const { out } = await call(c, 'sp_issue_card',
             [c.staff.lib1, now, c.reader(r.key), `C2026-${String(++n).padStart(4, '0')}`, expires], ['p_card_id']);
           c.cards.set(r.key, Number(out.p_card_id));

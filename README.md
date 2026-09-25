@@ -6,12 +6,15 @@ design and the ERD**: MySQL 8.4 migrations with tables, constraints, triggers, f
 procedures, a cursor, views, sample data, and the tests that prove the rules hold, including
 under concurrency.
 
-The web app (Next.js) and Supabase auth come later and will call the same stored procedures.
+Spec 002 adds the **API**: `/api/v1`, a Hono app inside Next.js. It uses Supabase Google
+sign-in and calls the same stored procedures. Its typed contract (`src/lib/api/contract`) is
+shared with the UI.
 
 - Architecture, ERD and flow diagrams: [ARCHITECTURE.md](ARCHITECTURE.md)
-- Spec, plan and tasks: [specs/001-library-db-design/](specs/001-library-db-design/)
+- Spec, plan and tasks: [specs/001-library-db-design/](specs/001-library-db-design/),
+  [specs/002-library-api/](specs/002-library-api/)
 - Data dictionary: [docs/data-dictionary.md](docs/data-dictionary.md)
-- Acceptance report: [docs/report/acceptance.md](docs/report/acceptance.md)
+- Acceptance report: [docs/report/acceptance.md](docs/report/acceptance.md); API: [docs/report/api-acceptance.md](docs/report/api-acceptance.md)
 
 ## Tech stack
 
@@ -21,7 +24,7 @@ The web app (Next.js) and Supabase auth come later and will call the same stored
 | Schema and migrations | Drizzle ORM / drizzle-kit 1.0.0-rc.4 (patched, see ARCHITECTURE.md) |
 | Business operations | Stored procedures (`sp_*`), SQL SECURITY DEFINER |
 | Scripts and tests | TypeScript, `tsx`, Vitest, `mysql2` |
-| App (planned) | Next.js 16, Supabase auth |
+| API | Next.js 16 Route Handler + Hono 4, zod 4 contract, Supabase Auth (Google), `jose` |
 
 ## Prerequisites
 
@@ -70,8 +73,39 @@ MySQL reads these values only when the volume is empty. After changing a name or
 | `pnpm erd:relational` | Regenerate the relational ERD (Mermaid) from the migrated schema |
 | `pnpm test:db` | Acceptance, bypass, function and ERD-sync tests |
 | `pnpm test:concurrency` | Concurrency tests CT-1…CT-13 (each case 20 runs) |
+| `pnpm test:api` | API tests: identity, provisioning, sign-up hook, every route, errors |
+| `pnpm dev` | Next.js dev server; the API is at `http://localhost:3000/api/v1` |
 | `pnpm test:bypass` | Bypass tests B-1…B-5, 20 runs |
 | `pnpm lint` / `pnpm typecheck` | ESLint / TypeScript |
+
+## API
+
+1. In `.env.local`, set `NEXT_PUBLIC_SUPABASE_URL=https://<ref>.supabase.co`.
+   - The Supabase project must use JWT Signing Keys (asymmetric).
+   - Enable only the Google provider.
+   Set `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and add `<origin>/api/v1/auth/callback` to Supabase's
+   redirect URLs. The API receives the Google sign-in callback (and email-link confirmations at
+   `/api/v1/auth/confirm`), stores the session cookies and creates the library account.
+2. Optional: set `AUTH_HOOK_SECRET` to enable the Before User Created hook, but only where
+   Supabase can reach the app. See `specs/002-library-api/contracts/signup-hook.md`.
+3. Run `pnpm dev`, then `curl localhost:3000/api/v1/health`.
+
+The contract is `src/lib/api/contract`:
+- zod input schemas, response types and error keys;
+- `endpoints`, one entry per route, with a JSDoc comment giving its access rule and errors.
+
+The endpoint list is `specs/002-library-api/contracts/http-api.md`. From UI code:
+
+```ts
+import { endpoints } from '@/lib/api/contract';
+import { apiFetch, ApiClientError } from '@/lib/api/client';
+
+const result = await apiFetch(endpoints.checkout, { body: { readerId, copyIds } }, { token });
+// Throws ApiClientError: e.key is 'COPY_NOT_AVAILABLE', 'LIMIT_REACHED', …
+```
+
+The first signed-in request creates the library account with the `reader` role. An admin
+assigns staff roles with `PUT /api/v1/accounts/{id}/roles/{role}`.
 
 ## Changing the schema
 
@@ -88,6 +122,10 @@ Migrations never name an account or a schema. Grants are applied by `scripts/db/
 ## Repository layout
 
 ```text
+src/app/api/           Next.js catch-all route that mounts the API
+src/server/api/        Hono app: routes, auth, access, error mapping, queries
+src/lib/api/           API contract (shared with the UI) and apiFetch client
+src/integrations/      Supabase token verifier and sign-up hook
 src/lib/db/            connection config, pool, callProcedure, grants list
 src/lib/db/schema/     Drizzle table definitions (27 tables)
 drizzle/               migrations: generated DDL + custom SQL (triggers, routines, views)
@@ -99,6 +137,7 @@ docs/erd/              conceptual ERD (PlantUML Chen), relational.mmd, mapping, 
 docs/report/           DDL, EXPLAIN plans, performance, backup/restore, acceptance
 tests/db/              acceptance and bypass tests per user story
 tests/concurrency/     CT-1…CT-8, CT-13 and performance
+tests/api/             API tests (in-process, local signed tokens, injected clock)
 specs/                 Spec Kit feature specs
 ```
 
@@ -109,4 +148,4 @@ extension, reservations and holds (queue promotion, hold expiry every 15 minutes
 Still open:
 
 - fetch Google Books metadata (needs an API key), then have the team review it;
-- the Next.js API and Supabase auth (later specs).
+- the web UI (a later spec) and the Google Books import (spec 003).
