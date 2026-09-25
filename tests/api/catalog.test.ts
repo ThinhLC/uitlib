@@ -70,6 +70,12 @@ describe('US3 catalog management', () => {
     expect(patched.body).toMatchObject({ subtitle: 'Nhập môn', identifiers: [{ type: 'OTHER', value: 'X-1' }] });
     expect(patched.body.categories).toHaveLength(2);
 
+    // An empty array clears the set; an omitted array leaves it alone.
+    const cleared = await req(app, 'PATCH', `/books/${id}`, { token, body: { categoryIds: [], identifiers: [] } });
+    expect(cleared.status).toBe(200);
+    expect(cleared.body).toMatchObject({ categories: [], identifiers: [] });
+    expect(cleared.body.authors.map((a: any) => a.id)).toEqual([a3, a1]);
+
     const retired = await req(app, 'PATCH', `/books/${id}`, { token, body: { status: 'retired', subtitle: null } });
     expect(retired.body).toMatchObject({ status: 'retired', subtitle: null });
     expect((await req(app, 'GET', `/books/${id}`, { token })).body.status).toBe('retired');

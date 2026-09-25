@@ -1,4 +1,5 @@
-// The only MySQL errors worth retrying are deadlock (1213) and lock wait timeout (1205). Every other error is a business rejection or a bug, so it should be thrown at once. The retry count is 3 by default, but can be overridden in the options.
+// Only deadlock (1213) and lock wait timeout (1205) are retried. Any other error is a business
+// rejection or a bug and is thrown at once. Three attempts by default; callers may override it.
 const RETRYABLE = new Set([1213, 1205]);
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));

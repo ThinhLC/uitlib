@@ -51,13 +51,13 @@ type Relations = Pick<BookUpdateInput, 'authorIds' | 'categoryIds' | 'identifier
 
 /** Replace the given child sets of a book (`author_order` = array index + 1). */
 async function replaceRelations(conn: PoolConnection, bookId: number, rel: Relations) {
-  if (rel.authorIds && rel.authorIds.length) {
+  if (!isUndefined(rel.authorIds)) {
     await conn.query(`DELETE FROM book_authors WHERE book_id = ?`, [bookId]);
     await conn.query(`INSERT INTO book_authors (book_id, author_id, author_order) VALUES ?`, [
       rel.authorIds.map((a, i) => [bookId, a, i + 1]),
     ]);
   }
-  if (rel.categoryIds && rel.categoryIds.length) {
+  if (!isUndefined(rel.categoryIds)) {
     await conn.query(`DELETE FROM book_categories WHERE book_id = ?`, [bookId]);
     if (rel.categoryIds.length) {
       await conn.query(`INSERT INTO book_categories (book_id, category_id) VALUES ?`, [
@@ -65,7 +65,7 @@ async function replaceRelations(conn: PoolConnection, bookId: number, rel: Relat
       ]);
     }
   }
-  if (rel.identifiers && rel.identifiers.length) {
+  if (!isUndefined(rel.identifiers)) {
     await conn.query(`DELETE FROM book_identifiers WHERE book_id = ?`, [bookId]);
     if (rel.identifiers.length) {
       await conn.query(`INSERT INTO book_identifiers (book_id, identifier_type, identifier_value) VALUES ?`, [
@@ -78,8 +78,8 @@ async function replaceRelations(conn: PoolConnection, bookId: number, rel: Relat
 async function verifyReferences(conn: PoolConnection, input: BookUpdateInput): Promise<number | undefined> {
   const mt = isUndefined(input.materialType) ? undefined : await materialTypeId(conn, input.materialType);
   if (input.publisherId) await requireAll(conn, 'publishers', [input.publisherId], 'publisherId');
-  if (input.authorIds && input.authorIds.length) await requireAll(conn, 'authors', input.authorIds, 'authorIds');
-  if (input.categoryIds && input.categoryIds.length) await requireAll(conn, 'categories', input.categoryIds, 'categoryIds');
+  if (!isUndefined(input.authorIds)) await requireAll(conn, 'authors', input.authorIds, 'authorIds');
+  if (!isUndefined(input.categoryIds)) await requireAll(conn, 'categories', input.categoryIds, 'categoryIds');
   return mt;
 }
 
@@ -137,7 +137,7 @@ export function updateBook(pool: Pool, id: number, input: BookUpdateInput, dbNow
       sets.push(`${COLUMNS[field as keyof typeof COLUMNS]} = ?`);
       params.push(v);
     }
-    if (mt) {
+    if (!isUndefined(mt)) {
       sets.push('material_type_id = ?');
       params.push(mt);
     }
@@ -184,6 +184,7 @@ export function createCategory(pool: Pool, input: CategoryInput): Promise<Catego
   return writing(pool, async (conn) => {
     const parentId = input.parentId ?? null;
     if (parentId) await requireAll(conn, 'categories', [parentId], 'parentId');
+    // The unique index does not compare NULL parents, so top-level names are checked here.
     const row = await one(conn, `SELECT id FROM categories WHERE parent_id <=> ? AND name = ? FOR UPDATE`, [parentId, input.name]);
     if (row) throw new ApiError('DUPLICATE', 'categories_parent_name_uq');
     const [res] = await conn.query<ResultSetHeader>(`INSERT INTO categories (name, parent_id) VALUES (?, ?)`, [
