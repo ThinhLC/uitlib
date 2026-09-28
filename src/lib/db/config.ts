@@ -1,11 +1,5 @@
-import { config as loadEnv } from 'dotenv';
-
-// Connection settings come only from the environment (spec FR-030). Variables already set in the
-// process win over .env.local, so CI or a shell can override any value. A module of its own so
-// importers can load it before src/env.ts validates; src/env.ts itself cannot, it runs in the
-// browser too.
-loadEnv({ path: '.env.local', quiet: true });
-
+// Must stay the first import: it loads .env.local before src/env.ts validates.
+import './load-env';
 import { env } from '@/env';
 
 export type DbRole = 'owner' | 'app';
