@@ -4,11 +4,31 @@
     { "key": "librarian", "email": "account+librarian@gmail.com", "supabaseUserId": "994bf878-9a6a-473b-aa58-2eda15fee308", "status": "active", "roles": ["librarian"] },
     { "key": "student", "email": "account+student@gmail.com", "supabaseUserId": "4861105e-f2d1-438c-8f05-f08fee3cd689", "status": "active", "roles": ["reader"] },
     { "key": "lecturer", "email": "account+lecturer@gmail.com", "supabaseUserId": "bdda69b2-016d-46a7-bf1d-551e077fda42", "status": "active", "roles": ["reader"] },
-    { "key": "external", "email": "account+external@gmail.com", "supabaseUserId": "48ec21b6-4ce1-41e8-b59e-adc396e92658", "status": "active", "roles": ["reader"] }
+    { "key": "external", "email": "account+external@gmail.com", "supabaseUserId": "48ec21b6-4ce1-41e8-b59e-adc396e92658", "status": "active", "roles": ["reader"] },
+    { "key": "librarian2", "email": "thu.tran@example.edu", "supabaseUserId": "00000000-0000-4000-8000-000000000101", "status": "active", "roles": ["librarian", "reader"] },
+    { "key": "librarian_old", "email": "quang.le@example.edu", "supabaseUserId": "00000000-0000-4000-8000-000000000102", "status": "inactive", "roles": ["librarian"] },
+    { "key": "s02", "email": "ngoc.tran@student.example.edu", "supabaseUserId": "00000000-0000-4000-8000-000000000201", "status": "active", "roles": ["reader"] },
+    { "key": "s04", "email": "bao.pham@student.example.edu", "supabaseUserId": "00000000-0000-4000-8000-000000000202", "status": "active", "roles": ["reader"] },
+    { "key": "s06", "email": "huy.dang@student.example.edu", "supabaseUserId": "00000000-0000-4000-8000-000000000203", "status": "active", "roles": ["reader"] },
+    { "key": "l02", "email": "tung.vo@example.edu", "supabaseUserId": "00000000-0000-4000-8000-000000000204", "status": "active", "roles": ["reader"] },
+    { "key": "e02", "email": "long.phan@example.com", "supabaseUserId": "00000000-0000-4000-8000-000000000205", "status": "active", "roles": ["reader"] },
+    { "key": "newcomer", "email": "minh.do@student.example.edu", "supabaseUserId": "00000000-0000-4000-8000-000000000206", "status": "active", "roles": ["reader"] }
   ],
   "readers": [
     { "key": "S01", "readerType": "STUDENT", "fullName": "Nguyễn Văn An", "email": "account+student@gmail.com", "phone": "0900000001", "status": "active", "account": "student" },
     { "key": "L01", "readerType": "LECTURER", "fullName": "Nguyễn Thị Hồng", "email": "account+lecturer@gmail.com", "phone": "0900000002", "status": "active", "account": "lecturer" },
-    { "key": "E01", "readerType": "EXTERNAL", "fullName": "Vũ Hải Nam", "email": "account+external@gmail.com", "phone": "0900000003", "status": "active", "account": "external" }
+    { "key": "E01", "readerType": "EXTERNAL", "fullName": "Vũ Hải Nam", "email": "account+external@gmail.com", "phone": "0900000003", "status": "active", "account": "external" },
+    { "key": "S02", "readerType": "STUDENT", "fullName": "Trần Thị Bích Ngọc", "email": "ngoc.tran@student.example.edu", "phone": "0900000004", "status": "active", "account": "s02" },
+    { "key": "S03", "readerType": "STUDENT", "fullName": "Lê Minh Khôi", "email": null, "phone": "0900000005", "status": "active", "account": null },
+    { "key": "S04", "readerType": "STUDENT", "fullName": "Phạm Quốc Bảo", "email": "bao.pham@student.example.edu", "phone": "0900000006", "status": "suspended", "account": "s04" },
+    { "key": "S05", "readerType": "STUDENT", "fullName": "Hoàng Thu Trang", "email": "trang.hoang@student.example.edu", "phone": null, "status": "inactive", "account": null },
+    { "key": "S06", "readerType": "STUDENT", "fullName": "Đặng Gia Huy", "email": "huy.dang@student.example.edu", "phone": "0900000008", "status": "active", "account": "s06" },
+    { "key": "S07", "readerType": "STUDENT", "fullName": "Bùi Ngọc Lan", "email": "lan.bui@student.example.edu", "phone": "0900000009", "status": "active", "account": null },
+    { "key": "L02", "readerType": "LECTURER", "fullName": "Võ Thanh Tùng", "email": "tung.vo@example.edu", "phone": null, "status": "active", "account": "l02" },
+    { "key": "L03", "readerType": "LECTURER", "fullName": "Ngô Thị Mai", "email": "mai.ngo@example.edu", "phone": "0900000011", "status": "active", "account": null },
+    { "key": "L04", "readerType": "LECTURER", "fullName": "Đỗ Văn Hải", "email": null, "phone": "0900000012", "status": "inactive", "account": null },
+    { "key": "E02", "readerType": "EXTERNAL", "fullName": "Phan Hoàng Long", "email": "long.phan@example.com", "phone": "0900000013", "status": "active", "account": "e02" },
+    { "key": "E03", "readerType": "EXTERNAL", "fullName": "Trịnh Thị Thu", "email": null, "phone": null, "status": "active", "account": null },
+    { "key": "E04", "readerType": "EXTERNAL", "fullName": "Dương Minh Tuấn", "email": "tuan.duong@example.com", "phone": "0900000015", "status": "suspended", "account": null }
   ]
 }
