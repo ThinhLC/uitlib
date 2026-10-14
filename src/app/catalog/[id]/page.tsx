@@ -1,13 +1,28 @@
 'use client';
 
-import { use, useEffect, useState, useMemo } from 'react';
+import { use, useEffect, useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
-import { endpoints, type BookDetail } from '@/lib/api/contract';
+import {
+  endpoints,
+  type BookDetail,
+  type Copy,
+  type Me,
+} from '@/lib/api/contract';
 import { apiFetch, ApiClientError } from '@/lib/api/client';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import {
   ArrowLeft,
   BookOpen,
@@ -15,8 +30,29 @@ import {
   BookmarkCheck,
   AlertCircle,
   Loader2,
+  Plus,
+  Edit,
+  Wrench,
+  Barcode,
+  Layers,
+  Sparkles,
 } from 'lucide-react';
 import type { Session } from '@supabase/supabase-js';
+
+const STATUS_LABELS: Record<string, { label: string; variant: 'default' | 'outline' | 'secondary' | 'destructive' }> = {
+  available: { label: 'Sẵn sàng', variant: 'default' },
+  on_loan: { label: 'Đang mượn', variant: 'secondary' },
+  on_hold: { label: 'Đang giữ chỗ', variant: 'outline' },
+  in_repair: { label: 'Đang sửa chữa', variant: 'destructive' },
+  lost: { label: 'Báo mất', variant: 'destructive' },
+  retired: { label: 'Đã thanh lý', variant: 'outline' },
+};
+
+const CONDITION_LABELS: Record<string, string> = {
+  good: 'Nguyên vẹn',
+  worn: 'Hơi cũ',
+  damaged: 'Hư hỏng',
+};
 
 export default function BookDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -24,26 +60,99 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
 
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const [session, setSession] = useState<Session | null>(null);
+  const [me, setMe] = useState<Me | null>(null);
   const [book, setBook] = useState<BookDetail | null>(null);
+  const [copies, setCopies] = useState<Copy[]>([]);
   const [loading, setLoading] = useState(true);
+  const [copiesLoading, setCopiesLoading] = useState(false);
+
+  // Reservation state
   const [reserving, setReserving] = useState(false);
   const [reserveMessage, setReserveMessage] = useState<{ ok: boolean; text: string } | null>(null);
 
+  // Modal: Đăng ký bản sao mới (registerCopy)
+  const [isRegisterCopyOpen, setIsRegisterCopyOpen] = useState(false);
+  const [newBarcode, setNewBarcode] = useState('');
+  const [newShelfCode, setNewShelfCode] = useState('Kệ A1-01');
+  const [newCondition, setNewCondition] = useState<'good' | 'worn' | 'damaged'>('good');
+  const [registerLoading, setRegisterLoading] = useState(false);
+  const [registerError, setRegisterError] = useState<string | null>(null);
+  const [registerSuccess, setRegisterSuccess] = useState<string | null>(null);
+
+  // Modal: Đổi trạng thái bản sao (changeCopyStatus)
+  const [statusCopy, setStatusCopy] = useState<Copy | null>(null);
+  const [targetStatus, setTargetStatus] = useState<'available' | 'in_repair' | 'retired'>('available');
+  const [targetCondition, setTargetCondition] = useState<'good' | 'worn' | 'damaged'>('good');
+  const [changeLoading, setChangeLoading] = useState(false);
+  const [changeError, setChangeError] = useState<string | null>(null);
+
+  // Modal: Sửa đầu sách (updateBook)
+  const [isEditBookOpen, setIsEditBookOpen] = useState(false);
+  const [editTitle, setEditTitle] = useState('');
+  const [editSubtitle, setEditSubtitle] = useState('');
+  const [editYear, setEditYear] = useState<number>(2026);
+  const [editReplacementCost, setEditReplacementCost] = useState<number>(100000);
+  const [editDescription, setEditDescription] = useState('');
+  const [editLoading, setEditLoading] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, s) => setSession(s));
+    return () => listener.subscription.unsubscribe();
   }, [supabase]);
 
   useEffect(() => {
+    if (!session) {
+      setMe(null);
+      return;
+    }
+    apiFetch(endpoints.me, {}, { token: session.access_token })
+      .then(setMe)
+      .catch(() => setMe(null));
+  }, [session]);
+
+  const isStaff = useMemo(() => {
+    const roles = me?.roles ?? [];
+    return roles.includes('librarian') || roles.includes('admin');
+  }, [me]);
+
+  const loadBookDetail = useCallback(() => {
     if (!bookId) return;
     setLoading(true);
     apiFetch(endpoints.getCatalogBook, { params: { bookId } })
-      .then(setBook)
+      .then((data) => {
+        setBook(data);
+        setEditTitle(data.title);
+        setEditSubtitle(data.subtitle || '');
+        setEditYear(data.publishedYear || 2026);
+        setEditDescription(data.description || '');
+      })
       .catch((err) => {
         console.error('Failed to load book', err);
         setBook(null);
       })
       .finally(() => setLoading(false));
   }, [bookId]);
+
+  const loadCopies = useCallback(() => {
+    if (!bookId || !session || !isStaff) return;
+    setCopiesLoading(true);
+    apiFetch(endpoints.listCopies, { params: { bookId } }, { token: session.access_token })
+      .then((res) => setCopies(res.items))
+      .catch((err) => console.error('Failed to load copies', err))
+      .finally(() => setCopiesLoading(false));
+  }, [bookId, session, isStaff]);
+
+  useEffect(() => {
+    loadBookDetail();
+  }, [loadBookDetail]);
+
+  useEffect(() => {
+    if (isStaff) {
+      loadCopies();
+    }
+  }, [isStaff, loadCopies]);
 
   async function handleReserve() {
     if (!session) {
@@ -65,7 +174,7 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
       );
       setReserveMessage({
         ok: true,
-        text: `Đặt trước thành công! Mã yêu cầu đặt: #${res.id}, vị trí trong hàng đợi: #${res.queuePosition}.`,
+        text: `Đặt trước thành công! Mã yêu cầu đặt: #${res.id}, vị trí trong hàng đợi: #${res.queuePosition ?? 1}.`,
       });
     } catch (err) {
       const msg =
@@ -77,6 +186,101 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
       setReserving(false);
     }
   }
+
+  // Đăng ký bản sao mới (sp_register_copy)
+  const handleRegisterCopy = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!session || !isStaff || !book) return;
+    setRegisterLoading(true);
+    setRegisterError(null);
+    setRegisterSuccess(null);
+    try {
+      const barcodeToUse = newBarcode.trim() || `BC-${book.id}-${Date.now().toString(36).toUpperCase()}`;
+      await apiFetch(
+        endpoints.registerCopy,
+        {
+          params: { bookId: book.id },
+          body: {
+            barcode: barcodeToUse,
+            shelfCode: newShelfCode.trim() || undefined,
+            condition: newCondition,
+            acquiredAt: new Date().toISOString().split('T')[0],
+          },
+        },
+        { token: session.access_token }
+      );
+      setRegisterSuccess(`Đã nhập kho thành công bản sao ${barcodeToUse}!`);
+      setNewBarcode('');
+      setTimeout(() => {
+        setIsRegisterCopyOpen(false);
+        setRegisterSuccess(null);
+        loadCopies();
+        loadBookDetail();
+      }, 1000);
+    } catch (err) {
+      setRegisterError(err instanceof ApiClientError ? err.message : 'Không thể đăng ký bản sao.');
+    } finally {
+      setRegisterLoading(false);
+    }
+  };
+
+  // Đổi trạng thái bản sao (sp_change_copy_status)
+  const handleChangeStatus = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!session || !statusCopy) return;
+    setChangeLoading(true);
+    setChangeError(null);
+    try {
+      await apiFetch(
+        endpoints.changeCopyStatus,
+        {
+          params: { copyId: statusCopy.id },
+          body: {
+            targetStatus,
+            condition: targetCondition,
+          },
+        },
+        { token: session.access_token }
+      );
+      setStatusCopy(null);
+      loadCopies();
+      loadBookDetail();
+    } catch (err) {
+      setChangeError(err instanceof ApiClientError ? err.message : 'Không thể đổi trạng thái.');
+    } finally {
+      setChangeLoading(false);
+    }
+  };
+
+  // Cập nhật thông tin đầu sách (updateBook)
+  const handleUpdateBook = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!session || !isStaff || !book) return;
+    setEditLoading(true);
+    setEditError(null);
+    try {
+      await apiFetch(
+        endpoints.updateBook,
+        {
+          params: { bookId: book.id },
+          body: {
+            title: editTitle.trim(),
+            subtitle: editSubtitle.trim() || undefined,
+            publishedYear: Number(editYear) || undefined,
+            replacementCostVnd: Number(editReplacementCost) || 100000,
+            description: editDescription.trim() || undefined,
+          },
+        },
+        { token: session.access_token }
+      );
+      setIsEditBookOpen(false);
+      loadBookDetail();
+    } catch (err) {
+      setEditError(err instanceof ApiClientError ? err.message : 'Không thể cập nhật sách.');
+    } finally {
+      setEditLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -109,12 +313,81 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
   const materialLabel = book.materialType === 'BOOK_PRINT' ? 'Sách in' : book.materialType;
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-      {/* Back button */}
-      <Link href="/catalog" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground mb-6 font-medium">
-        <ArrowLeft className="h-3.5 w-3.5" />
-        Quay lại danh mục sách
-      </Link>
+    <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">
+      {/* Back button & Staff toolbar */}
+      <div className="flex items-center justify-between">
+        <Link href="/catalog" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground font-medium">
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Quay lại danh mục sách
+        </Link>
+
+        {isStaff && (
+          <div className="flex items-center gap-2">
+            <Dialog open={isEditBookOpen} onOpenChange={setIsEditBookOpen}>
+              <DialogTrigger render={<Button size="sm" variant="outline" className="gap-1.5 text-xs" />}>
+                <Edit className="h-3.5 w-3.5" />
+                Sửa thông tin sách
+              </DialogTrigger>
+              <DialogContent>
+                <form onSubmit={handleUpdateBook}>
+                  <DialogHeader>
+                    <DialogTitle>Chỉnh sửa thông tin đầu sách</DialogTitle>
+                    <DialogDescription>Cập nhật tiêu đề, phụ đề, năm XB và mô tả.</DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-3 py-3 text-xs">
+                    {editError && (
+                      <div className="p-2 rounded bg-destructive/10 text-destructive border border-destructive/20">
+                        {editError}
+                      </div>
+                    )}
+                    <div className="space-y-1">
+                      <label className="font-semibold">Tiêu đề sách</label>
+                      <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} required />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="font-semibold">Phụ đề</label>
+                      <Input value={editSubtitle} onChange={(e) => setEditSubtitle(e.target.value)} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="font-semibold">Năm xuất bản</label>
+                        <Input
+                          type="number"
+                          value={editYear}
+                          onChange={(e) => setEditYear(Number(e.target.value) || 2026)}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="font-semibold">Giá bồi hoàn (VNĐ)</label>
+                        <Input
+                          type="number"
+                          value={editReplacementCost}
+                          onChange={(e) => setEditReplacementCost(Number(e.target.value) || 100000)}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="font-semibold">Mô tả nội dung</label>
+                      <textarea
+                        rows={3}
+                        className="w-full rounded-md border border-input bg-background p-2 text-xs"
+                        value={editDescription}
+                        onChange={(e) => setEditDescription(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button type="button" variant="outline" onClick={() => setIsEditBookOpen(false)}>Hủy</Button>
+                    <Button type="submit" disabled={editLoading}>
+                      {editLoading ? 'Đang lưu...' : 'Lưu thay đổi'}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+        )}
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Left Column: Cover & Quick Action */}
@@ -262,6 +535,227 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
           </div>
         </div>
       </div>
+
+      {/* ===================== PHÂN HỆ QUẢN LÝ BẢN SAO CHO THỦ THƯ ===================== */}
+      {isStaff && (
+        <div className="mt-12 rounded-xl border bg-card p-6 shadow-sm space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b pb-4">
+            <div className="space-y-1">
+              <h2 className="text-lg font-bold flex items-center gap-2">
+                <Barcode className="h-5 w-5 text-primary" />
+                Quản lý các bản sao vật lý trong kho
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                Tổng cộng {copies.length} bản sao · {copies.filter((c) => c.circulationStatus === 'available').length} sẵn sàng trên kệ.
+              </p>
+            </div>
+
+            {/* Nút Đăng ký bản sao mới (sp_register_copy) */}
+            <Dialog open={isRegisterCopyOpen} onOpenChange={setIsRegisterCopyOpen}>
+              <DialogTrigger render={<Button size="sm" className="gap-1.5 text-xs shadow-xs" />}>
+                <Plus className="h-4 w-4" />
+                Nhập bản sao mới
+              </DialogTrigger>
+              <DialogContent>
+                <form onSubmit={handleRegisterCopy}>
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                      <Barcode className="h-5 w-5 text-primary" />
+                      Đăng ký nhập kho bản sao mới
+                    </DialogTitle>
+                    <DialogDescription>
+                      Thủ tục nhập kho thông qua stored procedure <code className="text-primary font-mono">sp_register_copy</code>.
+                      Nếu có người đặt trước, sách sẽ tự động được giữ chỗ (on_hold).
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  <div className="grid gap-3 py-3 text-xs">
+                    {registerSuccess && (
+                      <div className="p-2.5 rounded bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 shrink-0" />
+                        <span>{registerSuccess}</span>
+                      </div>
+                    )}
+                    {registerError && (
+                      <div className="p-2.5 rounded bg-destructive/10 text-destructive border border-destructive/20 flex items-center gap-2">
+                        <AlertCircle className="h-4 w-4 shrink-0" />
+                        <span>{registerError}</span>
+                      </div>
+                    )}
+
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <label className="font-semibold">Mã vạch Barcode <span className="text-destructive">*</span></label>
+                        <button
+                          type="button"
+                          onClick={() => setNewBarcode(`BC-${book.id}-${Date.now().toString(36).toUpperCase()}`)}
+                          className="text-[11px] text-primary hover:underline flex items-center gap-1"
+                        >
+                          <Sparkles className="h-3 w-3" /> Tự sinh mã
+                        </button>
+                      </div>
+                      <Input
+                        placeholder="VD: BC-UIT-998877"
+                        value={newBarcode}
+                        onChange={(e) => setNewBarcode(e.target.value)}
+                        required
+                        className="font-mono"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="font-semibold">Vị trí kệ sách (Shelf Code)</label>
+                        <Input
+                          placeholder="VD: Kệ A1-01"
+                          value={newShelfCode}
+                          onChange={(e) => setNewShelfCode(e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="font-semibold">Tình trạng vật lý khi nhập</label>
+                        <select
+                          className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-xs"
+                          value={newCondition}
+                          onChange={(e) => setNewCondition(e.target.value as any)}
+                        >
+                          <option value="good">Nguyên vẹn (good)</option>
+                          <option value="worn">Hơi cũ (worn)</option>
+                          <option value="damaged">Hư hỏng (damaged - sẽ vào in_repair)</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <DialogFooter>
+                    <Button type="button" variant="outline" onClick={() => setIsRegisterCopyOpen(false)}>Hủy</Button>
+                    <Button type="submit" disabled={registerLoading}>
+                      {registerLoading ? 'Đang nhập kho...' : 'Xác nhận nhập kho'}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          {/* Danh sách các cuốn sách vật lý */}
+          {copiesLoading ? (
+            <div className="py-8 text-center text-xs text-muted-foreground flex items-center justify-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin text-primary" />
+              Đang tải danh sách bản sao...
+            </div>
+          ) : copies.length === 0 ? (
+            <div className="py-8 text-center text-xs text-muted-foreground">
+              Đầu sách này chưa có bản sao vật lý nào trong kho. Hãy bấm "Nhập bản sao mới" để nhập sách.
+            </div>
+          ) : (
+            <div className="divide-y rounded-lg border text-xs overflow-hidden">
+              <div className="grid grid-cols-5 p-3 font-semibold bg-muted/40 text-muted-foreground text-[11px]">
+                <span>MÃ VẠCH (BARCODE)</span>
+                <span>VỊ TRÍ KỆ</span>
+                <span>TÌNH TRẠNG VẬT LÝ</span>
+                <span>TRẠNG THÁI LƯU THÔNG</span>
+                <span className="text-right">THAO TÁC</span>
+              </div>
+              {copies.map((copy) => {
+                const statusMeta = STATUS_LABELS[copy.circulationStatus] || { label: copy.circulationStatus, variant: 'outline' };
+                return (
+                  <div key={copy.id} className="grid grid-cols-5 p-3 items-center">
+                    <span className="font-mono font-bold text-foreground">{copy.barcode}</span>
+                    <span className="text-muted-foreground">{copy.shelfCode || '—'}</span>
+                    <span>
+                      <Badge variant="outline" className="text-[10px]">
+                        {CONDITION_LABELS[copy.physicalCondition] || copy.physicalCondition}
+                      </Badge>
+                    </span>
+                    <span>
+                      <Badge variant={statusMeta.variant} className="text-[10px]">
+                        {statusMeta.label}
+                      </Badge>
+                    </span>
+                    <div className="text-right">
+                      <Button
+                        size="xs"
+                        variant="outline"
+                        onClick={() => {
+                          setStatusCopy(copy);
+                          setTargetStatus(copy.circulationStatus === 'in_repair' ? 'available' : 'in_repair');
+                          setTargetCondition(copy.physicalCondition);
+                          setChangeError(null);
+                        }}
+                        disabled={copy.circulationStatus === 'on_loan' || copy.circulationStatus === 'retired'}
+                        className="text-[11px] h-7 gap-1"
+                        title={copy.circulationStatus === 'on_loan' ? 'Sách đang cho mượn không thể đổi trạng thái bảo trì' : 'Đổi trạng thái bảo trì'}
+                      >
+                        <Wrench className="h-3 w-3" />
+                        Đổi trạng thái
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Modal: Đổi trạng thái bảo trì bản sao (sp_change_copy_status) */}
+      <Dialog open={!!statusCopy} onOpenChange={(open) => !open && setStatusCopy(null)}>
+        <DialogContent>
+          <form onSubmit={handleChangeStatus}>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Wrench className="h-5 w-5 text-primary" />
+                Cập nhật bảo trì bản sao {statusCopy?.barcode}
+              </DialogTitle>
+              <DialogDescription>
+                Thủ tục bảo dưỡng / phục hồi sách qua <code className="text-primary font-mono">sp_change_copy_status</code>.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="grid gap-3 py-3 text-xs">
+              {changeError && (
+                <div className="p-2 rounded bg-destructive/10 text-destructive border border-destructive/20">
+                  {changeError}
+                </div>
+              )}
+
+              <div className="space-y-1">
+                <label className="font-semibold">Trạng thái mục tiêu</label>
+                <select
+                  className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-xs"
+                  value={targetStatus}
+                  onChange={(e) => setTargetStatus(e.target.value as any)}
+                >
+                  <option value="available">Sẵn sàng lưu thông (available - đã sửa xong / tìm thấy)</option>
+                  <option value="in_repair">Đang sửa chữa bảo dưỡng (in_repair)</option>
+                  <option value="retired">Thanh lý loại bỏ (retired)</option>
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-semibold">Tình trạng vật lý sau bảo trì</label>
+                <select
+                  className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-xs"
+                  value={targetCondition}
+                  onChange={(e) => setTargetCondition(e.target.value as any)}
+                >
+                  <option value="good">Nguyên vẹn (good)</option>
+                  <option value="worn">Hơi cũ (worn)</option>
+                  <option value="damaged">Hư hỏng (damaged)</option>
+                </select>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setStatusCopy(null)}>Hủy</Button>
+              <Button type="submit" disabled={changeLoading}>
+                {changeLoading ? 'Đang cập nhật...' : 'Xác nhận thay đổi'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }

@@ -12,6 +12,7 @@ import {
   type LoanItem,
   type Fine,
   type Balance,
+  type Payment,
   type ReferenceType,
   type Me,
 } from '@/lib/api/contract';
@@ -53,6 +54,9 @@ import {
   Edit,
   UserX,
   RotateCcw,
+  Receipt,
+  Banknote,
+  Percent,
 } from 'lucide-react';
 import type { Session } from '@supabase/supabase-js';
 
@@ -101,6 +105,7 @@ export default function ReaderDetailPage({
   const [loans, setLoans] = useState<LoanItem[]>([]);
   const [fines, setFines] = useState<Fine[]>([]);
   const [balance, setBalance] = useState<Balance | null>(null);
+  const [payments, setPayments] = useState<Payment[]>([]);
   const [readerTypes, setReaderTypes] = useState<ReferenceType[]>([]);
 
   const [loading, setLoading] = useState(true);
@@ -140,6 +145,24 @@ export default function ReaderDetailPage({
   const [renewLoadingId, setRenewLoadingId] = useState<number | null>(null);
   const [loanFeedback, setLoanFeedback] = useState<{ ok: boolean; message: string } | null>(null);
 
+  // Modal: Collect Fine Payment
+  const [isPaymentOpen, setIsPaymentOpen] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'bank_transfer'>('cash');
+  const [paymentRefNo, setPaymentRefNo] = useState('');
+  const [paymentAllocations, setPaymentAllocations] = useState<Record<number, number>>({});
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [paymentSuccess, setPaymentSuccess] = useState<string | null>(null);
+
+  // Modal: Adjust Fine
+  const [selectedAdjustFine, setSelectedAdjustFine] = useState<Fine | null>(null);
+  const [adjustType, setAdjustType] = useState<'waive' | 'increase'>('waive');
+  const [adjustAmount, setAdjustAmount] = useState<number>(0);
+  const [adjustReason, setAdjustReason] = useState<string>('');
+  const [adjustLoading, setAdjustLoading] = useState(false);
+  const [adjustError, setAdjustError] = useState<string | null>(null);
+  const [adjustSuccess, setAdjustSuccess] = useState<string | null>(null);
+
   // Auth setup
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -177,12 +200,13 @@ export default function ReaderDetailPage({
     setLoading(true);
     setError(null);
     try {
-      const [rData, cardsData, loansData, balanceData, finesData] = await Promise.all([
+      const [rData, cardsData, loansData, balanceData, finesData, paymentsData] = await Promise.all([
         apiFetch(endpoints.getReader, { params: { readerId } }, { token: session.access_token }),
         apiFetch(endpoints.readerCards, { params: { readerId } }, { token: session.access_token }),
         apiFetch(endpoints.readerLoanItems, { params: { readerId }, query: { pageSize: 50 } }, { token: session.access_token }).catch(() => ({ items: [], total: 0 })),
         apiFetch(endpoints.readerBalance, { params: { readerId } }, { token: session.access_token }).catch(() => null),
         apiFetch(endpoints.readerFines, { params: { readerId }, query: { pageSize: 50 } }, { token: session.access_token }).catch(() => ({ items: [], total: 0 })),
+        apiFetch(endpoints.readerPayments, { params: { readerId }, query: { pageSize: 50 } }, { token: session.access_token }).catch(() => ({ items: [], total: 0 })),
       ]);
 
       setReader(rData);
@@ -190,6 +214,7 @@ export default function ReaderDetailPage({
       setLoans(loansData.items);
       setBalance(balanceData);
       setFines(finesData.items);
+      setPayments(paymentsData.items);
 
       // Pre-fill edit modal
       setEditFullName(rData.fullName);
@@ -385,6 +410,137 @@ export default function ReaderDetailPage({
       });
     } finally {
       setRenewLoadingId(null);
+    }
+  };
+
+  // Open Payment modal with all open fines pre-allocated
+  const openPaymentModal = () => {
+    const openFines = fines.filter((f) => f.remainingVnd > 0);
+    const initialAlloc: Record<number, number> = {};
+    openFines.forEach((f) => {
+      initialAlloc[f.id] = f.remainingVnd;
+    });
+    setPaymentAllocations(initialAlloc);
+    setPaymentMethod('cash');
+    setPaymentRefNo('');
+    setPaymentError(null);
+    setPaymentSuccess(null);
+    setIsPaymentOpen(true);
+  };
+
+  const totalPaymentAmount = useMemo(() => {
+    return Object.values(paymentAllocations).reduce((sum, val) => sum + (Number(val) || 0), 0);
+  }, [paymentAllocations]);
+
+  const handleRecordPayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!session || !reader) return;
+
+    const allocationsToSend = Object.entries(paymentAllocations)
+      .filter(([_, amount]) => Number(amount) > 0)
+      .map(([fineId, amount]) => ({
+        fineId: Number(fineId),
+        amountVnd: Number(amount),
+      }));
+
+    if (allocationsToSend.length === 0 || totalPaymentAmount <= 0) {
+      setPaymentError('Vui lòng phân bổ số tiền thanh toán lớn hơn 0.');
+      return;
+    }
+
+    setPaymentLoading(true);
+    setPaymentError(null);
+    setPaymentSuccess(null);
+
+    try {
+      const requestKey = crypto.randomUUID();
+      const result = await apiFetch(
+        endpoints.recordPayment,
+        {
+          body: {
+            readerId: reader.id,
+            amountVnd: totalPaymentAmount,
+            method: paymentMethod,
+            referenceNo: paymentRefNo.trim() ? paymentRefNo.trim() : null,
+            requestKey,
+            allocations: allocationsToSend,
+          },
+        },
+        { token: session.access_token }
+      );
+
+      setPaymentSuccess(`Thu tiền phạt thành công! Đã tạo biên lai #PAY-${result.paymentId}.`);
+      loadData();
+      setTimeout(() => {
+        setIsPaymentOpen(false);
+        setPaymentSuccess(null);
+      }, 1000);
+    } catch (err) {
+      if (err instanceof ApiClientError) {
+        setPaymentError(err.message || 'Không thể thu tiền phạt.');
+      } else {
+        setPaymentError('Lỗi máy chủ khi ghi nhận thu tiền.');
+      }
+    } finally {
+      setPaymentLoading(false);
+    }
+  };
+
+  // Open Adjust modal for a single fine
+  const openAdjustModal = (fine: Fine) => {
+    setSelectedAdjustFine(fine);
+    setAdjustType('waive');
+    setAdjustAmount(fine.remainingVnd);
+    setAdjustReason('');
+    setAdjustError(null);
+    setAdjustSuccess(null);
+  };
+
+  const handleAdjustFine = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!session || !selectedAdjustFine) return;
+
+    if (adjustAmount <= 0) {
+      setAdjustError('Số tiền điều chỉnh phải lớn hơn 0.');
+      return;
+    }
+    if (!adjustReason.trim()) {
+      setAdjustError('Vui lòng nhập lý do điều chỉnh/miễn giảm.');
+      return;
+    }
+
+    setAdjustLoading(true);
+    setAdjustError(null);
+    setAdjustSuccess(null);
+
+    try {
+      const signedAmount = adjustType === 'waive' ? -Math.abs(adjustAmount) : Math.abs(adjustAmount);
+      await apiFetch(
+        endpoints.adjustFine,
+        {
+          params: { fineId: selectedAdjustFine.id },
+          body: {
+            amountVnd: signedAmount,
+            reason: adjustReason.trim(),
+          },
+        },
+        { token: session.access_token }
+      );
+
+      setAdjustSuccess('Đã cập nhật điều chỉnh khoản phạt thành công!');
+      loadData();
+      setTimeout(() => {
+        setSelectedAdjustFine(null);
+        setAdjustSuccess(null);
+      }, 1000);
+    } catch (err) {
+      if (err instanceof ApiClientError) {
+        setAdjustError(err.message || 'Không thể điều chỉnh khoản phạt.');
+      } else {
+        setAdjustError('Lỗi máy chủ khi điều chỉnh khoản phạt.');
+      }
+    } finally {
+      setAdjustLoading(false);
     }
   };
 
@@ -1095,16 +1251,34 @@ export default function ReaderDetailPage({
         <TabsContent value="fines" className="space-y-4">
           <Card>
             <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
                   <CardTitle className="text-base font-semibold">Công nợ & Tiền phạt</CardTitle>
-                  <CardDescription>Tổng hợp các khoản phạt trả trễ hoặc hư hỏng tài liệu</CardDescription>
+                  <CardDescription>
+                    Quản lý các khoản phạt vi phạm, thu tiền và miễn giảm theo quy chế thư viện
+                  </CardDescription>
                 </div>
-                <div className="text-right">
-                  <span className="text-xs text-muted-foreground">Còn nợ:</span>
-                  <div className={`text-lg font-bold ${totalDebt > 0 ? 'text-destructive' : 'text-emerald-600'}`}>
-                    {totalDebt.toLocaleString('vi-VN')} đ
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <span className="text-xs text-muted-foreground block">Còn nợ:</span>
+                    <div
+                      className={`text-lg font-bold ${
+                        totalDebt > 0 ? 'text-destructive' : 'text-emerald-600'
+                      }`}
+                    >
+                      {totalDebt.toLocaleString('vi-VN')} đ
+                    </div>
                   </div>
+
+                  <Button
+                    size="sm"
+                    className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white"
+                    disabled={totalDebt <= 0 && fines.every((f) => f.remainingVnd <= 0)}
+                    onClick={openPaymentModal}
+                  >
+                    <Banknote className="h-4 w-4" />
+                    Thu tiền phạt
+                  </Button>
                 </div>
               </div>
             </CardHeader>
@@ -1116,21 +1290,91 @@ export default function ReaderDetailPage({
               ) : (
                 <div className="divide-y rounded-md border text-xs">
                   {fines.map((f) => (
-                    <div key={f.id} className="p-3.5 flex items-center justify-between gap-3">
-                      <div>
-                        <div className="font-semibold text-foreground">{f.book.title}</div>
-                        <div className="text-muted-foreground text-[11px] mt-0.5">
-                          Loại phạt: {FINE_TYPE_LABELS[f.type] || f.type} · Ngày:{' '}
-                          {new Date(f.assessedAt).toLocaleDateString('vi-VN')}
+                    <div
+                      key={f.id}
+                      className="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                    >
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-semibold text-sm text-foreground">
+                            {f.book.title}
+                          </span>
+                          <Badge variant="outline" className="text-[10px]">
+                            {FINE_TYPE_LABELS[f.type] || f.type}
+                          </Badge>
+                          <span className="font-mono text-[10px] text-muted-foreground">
+                            #F{f.id}
+                          </span>
                         </div>
+                        <div className="text-muted-foreground text-[11px] flex items-center gap-2 flex-wrap">
+                          <span>
+                            Ghi nhận ngày: {new Date(f.assessedAt).toLocaleDateString('vi-VN')}
+                          </span>
+                          <span>•</span>
+                          <span>
+                            Mức phạt gốc:{' '}
+                            <span className="font-medium text-foreground">
+                              {f.assessedAmountVnd.toLocaleString('vi-VN')} đ
+                            </span>
+                          </span>
+                          {f.adjustmentsVnd !== 0 && (
+                            <>
+                              <span>•</span>
+                              <span>
+                                Miễn giảm/Đ.chỉnh:{' '}
+                                <span
+                                  className={
+                                    f.adjustmentsVnd < 0
+                                      ? 'text-emerald-600 font-medium'
+                                      : 'text-amber-600 font-medium'
+                                  }
+                                >
+                                  {f.adjustmentsVnd > 0 ? '+' : ''}
+                                  {f.adjustmentsVnd.toLocaleString('vi-VN')} đ
+                                </span>
+                              </span>
+                            </>
+                          )}
+                          <span>•</span>
+                          <span>
+                            Đã nộp:{' '}
+                            <span className="text-emerald-600 font-medium">
+                              {f.allocatedVnd.toLocaleString('vi-VN')} đ
+                            </span>
+                          </span>
+                        </div>
+                        {f.reason && (
+                          <div className="text-[10px] text-muted-foreground italic">
+                            Lý do: {f.reason}
+                          </div>
+                        )}
                       </div>
-                      <div className="text-right">
-                        <div className="font-semibold text-destructive">
-                          {f.remainingVnd.toLocaleString('vi-VN')} đ
+
+                      <div className="flex items-center gap-3 self-end sm:self-auto shrink-0">
+                        <div className="text-right">
+                          <div
+                            className={`text-sm font-bold ${
+                              f.remainingVnd > 0 ? 'text-destructive' : 'text-emerald-600'
+                            }`}
+                          >
+                            {f.remainingVnd.toLocaleString('vi-VN')} đ
+                          </div>
+                          <div className="text-[10px] text-muted-foreground">
+                            {f.remainingVnd > 0 ? 'Còn phải nộp' : 'Đã thanh toán đủ'}
+                          </div>
                         </div>
-                        <div className="text-[10px] text-muted-foreground">
-                          Gốc: {f.assessedAmountVnd.toLocaleString('vi-VN')} đ
-                        </div>
+
+                        {f.remainingVnd > 0 && (
+                          <Button
+                            size="xs"
+                            variant="outline"
+                            className="text-xs h-7 gap-1"
+                            onClick={() => openAdjustModal(f)}
+                          >
+                            <Percent className="h-3 w-3" />
+                            Miễn giảm
+                          </Button>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -1138,6 +1382,407 @@ export default function ReaderDetailPage({
               )}
             </CardContent>
           </Card>
+
+          {/* Lịch sử biên lai thu tiền phạt */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base font-semibold flex items-center gap-2">
+                <Receipt className="h-4 w-4 text-primary" />
+                Lịch sử biên lai thu tiền ({payments.length})
+              </CardTitle>
+              <CardDescription>
+                Các giao dịch thanh toán tiền phạt đã thực hiện qua thủ tục stored procedure sp_record_payment.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {payments.length === 0 ? (
+                <div className="py-8 text-center text-xs text-muted-foreground">
+                  Chưa có biên lai thanh toán nào được ghi nhận cho bạn đọc này.
+                </div>
+              ) : (
+                <div className="divide-y rounded-md border text-xs">
+                  {payments.map((p) => (
+                    <div
+                      key={p.id}
+                      className="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                    >
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-bold text-foreground">
+                            Biên lai #PAY-{p.id}
+                          </span>
+                          <Badge
+                            variant={p.method === 'cash' ? 'outline' : 'secondary'}
+                            className="text-[10px]"
+                          >
+                            {p.method === 'cash' ? 'Tiền mặt' : 'Chuyển khoản'}
+                          </Badge>
+                          {p.referenceNo && (
+                            <span className="text-muted-foreground font-mono text-[10px]">
+                              Số tham chiếu: {p.referenceNo}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-muted-foreground text-[11px] flex items-center gap-2 flex-wrap">
+                          <span>
+                            Thời gian: {new Date(p.paidAt).toLocaleString('vi-VN')}
+                          </span>
+                          <span>•</span>
+                          <span>Thủ thư thu: Tài khoản #{p.receivedBy}</span>
+                          <span>•</span>
+                          <span>
+                            Cấn trừ {p.allocations?.length || 0} khoản phạt: [
+                            {p.allocations
+                              ?.map(
+                                (a) =>
+                                  `#F${a.fineId}: ${a.amountVnd.toLocaleString('vi-VN')}đ`
+                              )
+                              .join(', ')}
+                            ]
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="text-right">
+                        <div className="text-sm font-bold text-emerald-600 font-mono">
+                          +{p.amountVnd.toLocaleString('vi-VN')} đ
+                        </div>
+                        <div className="text-[10px] text-muted-foreground">Đã ghi nhận kho bạc</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Dialog Thu tiền phạt */}
+          <Dialog open={isPaymentOpen} onOpenChange={setIsPaymentOpen}>
+            <DialogContent className="sm:max-w-lg">
+              <form onSubmit={handleRecordPayment}>
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <Banknote className="h-5 w-5 text-emerald-600" />
+                    Thu tiền phạt bạn đọc
+                  </DialogTitle>
+                  <DialogDescription>
+                    Ghi nhận thu tiền mặt hoặc chuyển khoản và tự động phân bổ giảm trừ các khoản phạt thông qua thủ tục <code className="font-mono text-primary">sp_record_payment</code>.
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div className="grid gap-4 py-4 text-xs">
+                  {paymentError && (
+                    <div className="p-3 text-xs rounded-md bg-destructive/10 text-destructive border border-destructive/20 flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4 shrink-0" />
+                      {paymentError}
+                    </div>
+                  )}
+                  {paymentSuccess && (
+                    <div className="p-3 text-xs rounded-md bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4 shrink-0" />
+                      {paymentSuccess}
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label className="font-semibold text-foreground">Hình thức thu tiền</label>
+                      <select
+                        className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                        value={paymentMethod}
+                        onChange={(e) => setPaymentMethod(e.target.value as any)}
+                      >
+                        <option value="cash">Tiền mặt (cash)</option>
+                        <option value="bank_transfer">Chuyển khoản (bank_transfer)</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="font-semibold text-foreground">Mã tham chiếu / Biên lai</label>
+                      <Input
+                        placeholder="VD: UNC-001 hoặc mã giao dịch"
+                        value={paymentRefNo}
+                        onChange={(e) => setPaymentRefNo(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 border-t pt-3">
+                    <div className="flex items-center justify-between">
+                      <label className="font-semibold text-foreground">
+                        Phân bổ vào các khoản phạt chưa đóng ({fines.filter((f) => f.remainingVnd > 0).length})
+                      </label>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          className="text-[11px] text-primary hover:underline"
+                          onClick={() => {
+                            const all: Record<number, number> = {};
+                            fines
+                              .filter((f) => f.remainingVnd > 0)
+                              .forEach((f) => {
+                                all[f.id] = f.remainingVnd;
+                              });
+                            setPaymentAllocations(all);
+                          }}
+                        >
+                          Chọn tất cả
+                        </button>
+                        <span>·</span>
+                        <button
+                          type="button"
+                          className="text-[11px] text-muted-foreground hover:underline"
+                          onClick={() => setPaymentAllocations({})}
+                        >
+                          Xóa chọn
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="max-h-48 overflow-y-auto space-y-2 rounded-md border p-2 bg-muted/20">
+                      {fines.filter((f) => f.remainingVnd > 0).length === 0 ? (
+                        <div className="text-center py-4 text-muted-foreground">
+                          Không có khoản phạt nào còn nợ.
+                        </div>
+                      ) : (
+                        fines
+                          .filter((f) => f.remainingVnd > 0)
+                          .map((f) => (
+                            <div
+                              key={f.id}
+                              className="p-2 rounded bg-background border flex items-center justify-between gap-2"
+                            >
+                              <div className="min-w-0 flex-1">
+                                <div className="font-medium truncate">{f.book.title}</div>
+                                <div className="text-[10px] text-muted-foreground">
+                                  #F{f.id} · Còn nợ: {f.remainingVnd.toLocaleString('vi-VN')} đ
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  max={f.remainingVnd}
+                                  step="1000"
+                                  className="w-24 h-7 text-xs text-right"
+                                  value={paymentAllocations[f.id] ?? ''}
+                                  onChange={(e) => {
+                                    const val = Math.min(
+                                      f.remainingVnd,
+                                      Math.max(0, Number(e.target.value) || 0)
+                                    );
+                                    setPaymentAllocations((prev) => ({
+                                      ...prev,
+                                      [f.id]: val,
+                                    }));
+                                  }}
+                                />
+                                <Button
+                                  type="button"
+                                  size="xs"
+                                  variant="ghost"
+                                  className="h-7 px-1.5 text-[10px]"
+                                  onClick={() =>
+                                    setPaymentAllocations((prev) => ({
+                                      ...prev,
+                                      [f.id]: f.remainingVnd,
+                                    }))
+                                  }
+                                >
+                                  Tối đa
+                                </Button>
+                              </div>
+                            </div>
+                          ))
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="rounded-lg bg-muted/60 p-3 flex items-center justify-between border">
+                    <div>
+                      <span className="font-semibold text-foreground">Tổng tiền thanh toán:</span>
+                      <div className="text-[10px] text-muted-foreground">
+                        Sẽ được trừ trực tiếp vào công nợ của bạn đọc
+                      </div>
+                    </div>
+                    <div className="text-base font-bold text-emerald-600 font-mono">
+                      {totalPaymentAmount.toLocaleString('vi-VN')} đ
+                    </div>
+                  </div>
+                </div>
+
+                <DialogFooter className="gap-2 sm:gap-0">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsPaymentOpen(false)}
+                    disabled={paymentLoading}
+                  >
+                    Hủy
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={paymentLoading || totalPaymentAmount <= 0}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                  >
+                    {paymentLoading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
+                        Đang thu tiền...
+                      </>
+                    ) : (
+                      `Xác nhận thu ${totalPaymentAmount.toLocaleString('vi-VN')} đ`
+                    )}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+
+          {/* Dialog Miễn giảm / Điều chỉnh phạt */}
+          <Dialog
+            open={selectedAdjustFine !== null}
+            onOpenChange={(open) => !open && setSelectedAdjustFine(null)}
+          >
+            <DialogContent className="sm:max-w-md">
+              <form onSubmit={handleAdjustFine}>
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <Percent className="h-5 w-5 text-primary" />
+                    Miễn giảm / Điều chỉnh phạt
+                  </DialogTitle>
+                  <DialogDescription>
+                    Điều chỉnh số tiền phạt qua thủ tục <code className="font-mono text-primary">sp_adjust_fine</code> (ghi nhận lý do kiểm toán bắt buộc).
+                  </DialogDescription>
+                </DialogHeader>
+
+                {selectedAdjustFine && (
+                  <div className="grid gap-4 py-4 text-xs">
+                    {adjustError && (
+                      <div className="p-3 text-xs rounded-md bg-destructive/10 text-destructive border border-destructive/20 flex items-center gap-2">
+                        <AlertCircle className="h-4 w-4 shrink-0" />
+                        {adjustError}
+                      </div>
+                    )}
+                    {adjustSuccess && (
+                      <div className="p-3 text-xs rounded-md bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 shrink-0" />
+                        {adjustSuccess}
+                      </div>
+                    )}
+
+                    <div className="rounded-lg bg-muted/60 p-3 space-y-1 border">
+                      <div className="font-medium text-foreground">
+                        {selectedAdjustFine.book.title}
+                      </div>
+                      <div className="text-muted-foreground text-[11px] flex items-center gap-2 flex-wrap">
+                        <span>Khoản phạt: #F{selectedAdjustFine.id}</span>
+                        <span>•</span>
+                        <span>
+                          Còn nợ:{' '}
+                          <span className="font-semibold text-destructive">
+                            {selectedAdjustFine.remainingVnd.toLocaleString('vi-VN')} đ
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="font-semibold text-foreground">Loại điều chỉnh</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAdjustType('waive');
+                            setAdjustAmount(selectedAdjustFine.remainingVnd);
+                          }}
+                          className={`p-2.5 rounded-lg border text-left transition-all ${
+                            adjustType === 'waive'
+                              ? 'border-emerald-600 bg-emerald-50 text-emerald-700 font-semibold dark:bg-emerald-950/30 dark:text-emerald-400'
+                              : 'border-border bg-background'
+                          }`}
+                        >
+                          <div className="font-medium">Miễn giảm phạt</div>
+                          <div className="text-[10px] text-muted-foreground">Giảm bớt tiền nợ (-)</div>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setAdjustType('increase')}
+                          className={`p-2.5 rounded-lg border text-left transition-all ${
+                            adjustType === 'increase'
+                              ? 'border-amber-600 bg-amber-50 text-amber-700 font-semibold dark:bg-amber-950/30 dark:text-amber-400'
+                              : 'border-border bg-background'
+                          }`}
+                        >
+                          <div className="font-medium">Tăng tiền phạt</div>
+                          <div className="text-[10px] text-muted-foreground">Phạt bổ sung (+)</div>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="font-semibold text-foreground">
+                          {adjustType === 'waive' ? 'Số tiền muốn miễn giảm (VNĐ)' : 'Số tiền tăng thêm (VNĐ)'}
+                        </label>
+                        {adjustType === 'waive' && (
+                          <button
+                            type="button"
+                            className="text-[11px] text-primary hover:underline"
+                            onClick={() => setAdjustAmount(selectedAdjustFine.remainingVnd)}
+                          >
+                            Miễn toàn bộ ({selectedAdjustFine.remainingVnd.toLocaleString('vi-VN')} đ)
+                          </button>
+                        )}
+                      </div>
+                      <Input
+                        type="number"
+                        min="1000"
+                        step="1000"
+                        max={adjustType === 'waive' ? selectedAdjustFine.remainingVnd : undefined}
+                        value={adjustAmount || ''}
+                        onChange={(e) => setAdjustAmount(Number(e.target.value) || 0)}
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="font-semibold text-foreground">
+                        Lý do điều chỉnh <span className="text-destructive">*</span>
+                      </label>
+                      <Input
+                        placeholder="VD: Miễn giảm theo chính sách tân sinh viên, hoàn cảnh khó khăn..."
+                        value={adjustReason}
+                        onChange={(e) => setAdjustReason(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <DialogFooter className="gap-2 sm:gap-0">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setSelectedAdjustFine(null)}
+                    disabled={adjustLoading}
+                  >
+                    Hủy
+                  </Button>
+                  <Button type="submit" disabled={adjustLoading || !adjustReason.trim() || adjustAmount <= 0}>
+                    {adjustLoading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
+                        Đang lưu...
+                      </>
+                    ) : (
+                      'Xác nhận điều chỉnh'
+                    )}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
         </TabsContent>
       </Tabs>
     </div>

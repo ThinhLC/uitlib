@@ -1,0 +1,974 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+  <Title>Danh Sách Toàn Bộ API Hệ Thống NexusLib UIT</Title>
+  <Author>NexusLib System</Author>
+  <Created>2026-09-25T08:51:03.926Z</Created>
+ </DocumentProperties>
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal">
+   <Alignment ss:Vertical="Center"/>
+   <Borders/>
+   <Font ss:FontName="Roboto" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="Header">
+   <Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#CBD5E1"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#CBD5E1"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#CBD5E1"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#CBD5E1"/>
+   </Borders>
+   <Font ss:FontName="Roboto" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/>
+   <Interior ss:Color="#1E40AF" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="Cell">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+   </Borders>
+   <Font ss:FontName="Roboto" ss:Size="10" ss:Color="#1E293B"/>
+  </Style>
+  <Style ss:ID="CellCenter">
+   <Alignment ss:Horizontal="Center" ss:Vertical="Top"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+   </Borders>
+   <Font ss:FontName="Roboto" ss:Size="10" ss:Color="#1E293B"/>
+  </Style>
+  <Style ss:ID="CellMethodGET">
+   <Alignment ss:Horizontal="Center" ss:Vertical="Top"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+   </Borders>
+   <Font ss:FontName="Roboto Mono" ss:Size="10" ss:Bold="1" ss:Color="#047857"/>
+   <Interior ss:Color="#ECFDF5" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="CellMethodPOST">
+   <Alignment ss:Horizontal="Center" ss:Vertical="Top"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+   </Borders>
+   <Font ss:FontName="Roboto Mono" ss:Size="10" ss:Bold="1" ss:Color="#1D4ED8"/>
+   <Interior ss:Color="#EFF6FF" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="CellMethodPATCH">
+   <Alignment ss:Horizontal="Center" ss:Vertical="Top"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+   </Borders>
+   <Font ss:FontName="Roboto Mono" ss:Size="10" ss:Bold="1" ss:Color="#B45309"/>
+   <Interior ss:Color="#FFFBEB" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="CellMethodPUT">
+   <Alignment ss:Horizontal="Center" ss:Vertical="Top"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+   </Borders>
+   <Font ss:FontName="Roboto Mono" ss:Size="10" ss:Bold="1" ss:Color="#6D28D9"/>
+   <Interior ss:Color="#F5F3FF" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="CellMethodDELETE">
+   <Alignment ss:Horizontal="Center" ss:Vertical="Top"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+   </Borders>
+   <Font ss:FontName="Roboto Mono" ss:Size="10" ss:Bold="1" ss:Color="#B91C1C"/>
+   <Interior ss:Color="#FEF2F2" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="CellMono">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+   </Borders>
+   <Font ss:FontName="Roboto Mono" ss:Size="9" ss:Color="#0F172A"/>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Danh_Sach_63_API">
+  <Table ss:ExpandedColumnCount="11" x:FullColumns="1" x:FullRows="1">
+   <Column ss:Width="35"/>
+   <Column ss:Width="130"/>
+   <Column ss:Width="110"/>
+   <Column ss:Width="60"/>
+   <Column ss:Width="180"/>
+   <Column ss:Width="130"/>
+   <Column ss:Width="170"/>
+   <Column ss:Width="260"/>
+   <Column ss:Width="190"/>
+   <Column ss:Width="210"/>
+   <Column ss:Width="260"/>
+   <Row ss:Height="28">
+    <Cell ss:StyleID="Header"><Data ss:Type="String">STT</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Phân Hệ Nghiệp Vụ</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Tên API (Contract)</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Method</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Đường Dẫn Endpoint</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Quyền Hạn (Access)</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Stored Procedure / View</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Cách Hoạt Động &amp; Quy Trình</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Bảng CSDL Ảnh Hưởng</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Các Trường (Fields) Ảnh Hưởng</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Dữ Liệu Test Mẫu (Input)</Data></Cell>
+   </Row>
+   
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Xác thực &amp; Phiên làm việc</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">health</Data></Cell>
+    <Cell ss:StyleID="CellMethodGET"><Data ss:Type="String">GET</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/health</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Public</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Không (Liveness probe)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Kiểm tra trạng thái máy chủ (Liveness probe). Trả về {status: &quot;ok&quot;}. Không truy cập CSDL.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Không</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Không</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">curl -X GET http://localhost:3000/api/v1/health</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">2</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Xác thực &amp; Phiên làm việc</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">me</Data></Cell>
+    <Cell ss:StyleID="CellMethodGET"><Data ss:Type="String">GET</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/me</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Đã đăng nhập (Bearer Token)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Transaction Node.js (Ensure User)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Xác thực Supabase JWT. Nếu tài khoản đăng nhập lần đầu, tự động tạo app_users (FR-008a). Truy vấn hồ sơ bạn đọc tương ứng qua readers.user_id, danh sách vai trò (roles) và quyền hạn (permissions).</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">app_users (Insert nếu mới), readers (Read), user_roles (Read), roles (Read), role_permissions (Read), permissions (Read)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">app_users: supabase_user_id, status, created_at</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Header: Authorization: Bearer &lt;supabase_jwt_token&gt;</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">3</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Xác thực &amp; Phiên làm việc</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">signupHook</Data></Cell>
+    <Cell ss:StyleID="CellMethodPOST"><Data ss:Type="String">POST</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/auth/hooks/before-user-created</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Webhook Secret</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Không (Supabase Hook)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Hook được gọi tự động bởi Supabase Auth trước khi tạo người dùng, nhằm xác thực email trường Đại học UIT hoặc kiểm tra ràng buộc đăng ký.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Không</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Không</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Body: {&quot;user&quot;: {&quot;email&quot;: &quot;sinhvien@uit.edu.vn&quot;}}</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">4</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Xác thực &amp; Phiên làm việc</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">authCallback</Data></Cell>
+    <Cell ss:StyleID="CellMethodGET"><Data ss:Type="String">GET</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/auth/callback</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Public (OAuth PKCE)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Transaction Node.js</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Nhận mã xác thực OAuth (Google sign-in) từ Supabase, đổi code lấy JWT session lưu cookie trình duyệt, đảm bảo tài khoản app_users tồn tại, sau đó chuyển hướng về URL đích (next).</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">app_users (Insert nếu chưa có)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">app_users: supabase_user_id, status, created_at</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query: ?code=4/0AY0e...&amp;next=/catalog</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">5</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Xác thực &amp; Phiên làm việc</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">authConfirm</Data></Cell>
+    <Cell ss:StyleID="CellMethodGET"><Data ss:Type="String">GET</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/auth/confirm</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Public (Email OTP)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Không</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Xác nhận liên kết email qua mã token_hash (magiclink/invite), thiết lập phiên làm việc cookie và chuyển hướng về trang next.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Không</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Không</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query: ?token_hash=pkce_sample_hash&amp;type=magiclink&amp;next=/reader</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">6</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Lưu thông mượn trả</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">checkout</Data></Cell>
+    <Cell ss:StyleID="CellMethodPOST"><Data ss:Type="String">POST</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/loans</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thủ thư (loan.checkout)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">sp_checkout(p_reader_id, p_copy_ids_json, p_user_id)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Mượn 1-20 cuốn sách. Kiểm tra tính hợp lệ: Độc giả active, thẻ thư viện active và còn hạn, nợ phạt không vượt ngưỡng debt_block_threshold_vnd, không có sách trễ hạn quá mức, không vượt hạn mức mượn max_active_items. Chuyển trạng thái bản sao sang on_loan, tạo lượt mượn loans và chi tiết loan_items kèm hạn trả due_at theo chính sách.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">loans (Insert), loan_items (Insert), book_copies (Update), readers (Read), library_cards (Read), loan_policies (Read), fines (Read), reservations (Update nếu đang on_hold)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">loans: reader_id, processed_by_user_id, borrowed_at, status=&quot;open&quot;; loan_items: loan_id, copy_id, policy_id, borrowed_at, due_at, status=&quot;on_loan&quot;, applied_loan_days, applied_max_renewals, applied_daily_fee_vnd; book_copies: circulation_status=&quot;on_loan&quot;, updated_at</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Body: {&quot;readerId&quot;: 1, &quot;copyIds&quot;: [101, 102]}</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">7</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Lưu thông mượn trả</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">returnItem</Data></Cell>
+    <Cell ss:StyleID="CellMethodPOST"><Data ss:Type="String">POST</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/loan-items/:loanItemId/return</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thủ thư (loan.return)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">sp_return_item(p_loan_item_id, p_condition, p_damaged_fine_vnd, p_reason, p_user_id)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Nhận trả một bản sao sách. Cập nhật loan_items.status=&quot;returned&quot;, ghi nhận tình trạng vật lý (good, worn, damaged). Tự động phạt trễ hạn (fine_type=&quot;late&quot;) nếu quá hạn, phạt hư hỏng nếu có. Nếu có người đang đặt chờ (waiting), chuyển bản sao thành on_hold, ngược lại thành available. Đóng loan nếu tất cả sách đã trả.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">loan_items (Update), book_copies (Update), fines (Insert nếu phạt), loans (Update), reservations (Update nếu có hàng đợi)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">loan_items: returned_at, return_condition, status=&quot;returned&quot;; book_copies: physical_condition, circulation_status (&quot;available&quot; hoặc &quot;on_hold&quot;); fines: loan_item_id, fine_type, default_amount_vnd, assessed_amount_vnd, reason, assessed_at, assessed_by_user_id</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Path: loanItemId=5; Body: {&quot;condition&quot;: &quot;damaged&quot;, &quot;damagedFineVnd&quot;: 50000, &quot;reason&quot;: &quot;Rách bìa sách&quot;}</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">8</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Lưu thông mượn trả</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">declareLost</Data></Cell>
+    <Cell ss:StyleID="CellMethodPOST"><Data ss:Type="String">POST</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/loan-items/:loanItemId/lost</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thủ thư (loan.return)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">sp_declare_lost(p_loan_item_id, p_lost_fine_vnd, p_reason, p_user_id)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Ghi nhận bạn đọc làm mất sách. Cập nhật loan_items.status=&quot;lost&quot;, book_copies.circulation_status=&quot;lost&quot;. Đánh giá phạt trễ hạn đến ngày báo mất cộng với khoản phạt bồi thường sách mất (mặc định theo replacement_cost_vnd hoặc thủ thư chỉ định).</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">loan_items (Update), book_copies (Update), fines (Insert), loans (Update)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">loan_items: status=&quot;lost&quot;, lost_declared_at; book_copies: circulation_status=&quot;lost&quot;; fines: loan_item_id, fine_type=&quot;lost&quot;, default_amount_vnd, assessed_amount_vnd, reason</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Path: loanItemId=8; Body: {&quot;lostFineVnd&quot;: 150000, &quot;reason&quot;: &quot;Để quên tài liệu trên xe bus&quot;}</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">9</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Lưu thông mượn trả</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">renew</Data></Cell>
+    <Cell ss:StyleID="CellMethodPOST"><Data ss:Type="String">POST</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/loan-items/:loanItemId/renew</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Bạn đọc / Thủ thư (loan.renew)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">sp_renew(p_loan_item_id, p_user_id)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Gia hạn sách thêm 1 chu kỳ mượn. Kiểm tra: sách đang mượn (on_loan), chưa bị quá hạn, renewal_count &lt; applied_max_renewals, và không có người khác đang đặt trước sách này.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">loan_items (Update), loan_renewals (Insert), reservations (Read)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">loan_items: due_at (tăng thêm loan_days), renewal_count (+1); loan_renewals: loan_item_id, old_due_at, new_due_at, renewed_at, performed_by_user_id</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Path: loanItemId=5; Body: {}</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">10</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Lưu thông mượn trả</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">readerLoanItems</Data></Cell>
+    <Cell ss:StyleID="CellMethodGET"><Data ss:Type="String">GET</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/readers/:readerId/loan-items</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Chính chủ hoặc Thủ thư (loan.checkout/loan.return)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query Drizzle (SELECT)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Lấy danh sách các ấn phẩm bạn đọc đang mượn hoặc đã trả. Hỗ trợ lọc theo trạng thái (on_loan, returned, lost), cờ quá hạn (overdue) và phân trang.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">loan_items (Read), loans (Read), book_copies (Read), books (Read), fines (Read)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">loan_items.*, books.title, book_copies.barcode, fines.*</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Path: readerId=1; Query: ?status=on_loan&amp;overdue=false&amp;page=1&amp;pageSize=10</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">11</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Lưu thông mượn trả</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">copyByBarcode</Data></Cell>
+    <Cell ss:StyleID="CellMethodGET"><Data ss:Type="String">GET</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/copies/by-barcode/:barcode</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thủ thư (catalog.write / loan.checkout / loan.return)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query Drizzle (SELECT)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Quét mã vạch ấn phẩm tại quầy lưu thông. Trả về thông tin bản sao, tình trạng vật lý, trạng thái lưu thông và mã lượt mượn đang mở (openLoanItemId) nếu sách đang có người mượn.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">book_copies (Read), books (Read), loan_items (Read)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">book_copies.*, books.title, loan_items.id</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Path: barcode=BC-UIT-100201</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">12</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Lưu thông mượn trả</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">cardByNumber</Data></Cell>
+    <Cell ss:StyleID="CellMethodGET"><Data ss:Type="String">GET</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/cards/by-number/:cardNumber</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thủ thư (card.manage / loan.checkout)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query Drizzle (SELECT)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Quét mã thẻ thư viện tại quầy. Trả về trạng thái thẻ (active, expired, lost), thông tin cá nhân bạn đọc, loại bạn đọc và tài khoản liên kết.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">library_cards (Read), readers (Read), reader_types (Read)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">library_cards.*, readers.*, reader_types.code</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Path: cardNumber=CARD-2026-0001</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">13</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Danh mục &amp; Kho ấn phẩm</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">searchCatalog</Data></Cell>
+    <Cell ss:StyleID="CellMethodGET"><Data ss:Type="String">GET</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/catalog/books</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Public</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query Drizzle (Search index)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Tra cứu danh mục sách công khai. Lọc theo từ khóa tìm kiếm (q), danh mục (categoryId), mã ISBN (identifier), định dạng tài liệu (materialType). Chỉ trả về sách status=&quot;active&quot;, kèm số lượng bản sao sẵn sàng (available) và tổng bản sao (total).</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">books, book_authors, authors, book_categories, categories, book_copies, material_types (Read)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">books.id, title, subtitle, cover_url, published_year; COUNT(book_copies)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query: ?q=Co so du lieu&amp;categoryId=2&amp;materialType=BOOK_PRINT&amp;page=1&amp;pageSize=12</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">14</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Danh mục &amp; Kho ấn phẩm</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">getCatalogBook</Data></Cell>
+    <Cell ss:StyleID="CellMethodGET"><Data ss:Type="String">GET</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/catalog/books/:bookId</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Public</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query Drizzle (SELECT)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Xem chi tiết ấn phẩm công khai: tác giả, nhà xuất bản, mô tả, phân loại, các mã định danh ISBN và tổng số bản sao còn trên kệ.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">books, publishers, authors, categories, book_identifiers, book_copies (Read)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">books.*, publishers.name, authors.name, book_identifiers.*</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Path: bookId=1</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">15</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Danh mục &amp; Kho ấn phẩm</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">listCategories</Data></Cell>
+    <Cell ss:StyleID="CellMethodGET"><Data ss:Type="String">GET</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/catalog/categories</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Public</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query Drizzle (SELECT)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Lấy toàn bộ cây danh mục thể loại tài liệu (bao gồm parentId của danh mục cha).</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">categories (Read)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">categories.id, name, parent_id</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">curl -X GET http://localhost:3000/api/v1/catalog/categories</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">16</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Danh mục &amp; Kho ấn phẩm</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">createBook</Data></Cell>
+    <Cell ss:StyleID="CellMethodPOST"><Data ss:Type="String">POST</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/books</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thủ thư (catalog.write)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Transaction Node.js</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Tạo mới một đầu sách trong CSDL: chèn bản ghi books, liên kết danh sách tác giả (book_authors theo thứ tự author_order), thể loại (book_categories) và mã ISBN (book_identifiers) trong 1 Transaction.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">books (Insert), book_authors (Insert), book_categories (Insert), book_identifiers (Insert)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">books: title, subtitle, description, published_year, language_code, material_type_id, replacement_cost_vnd, status=&quot;active&quot;; book_authors: book_id, author_id, author_order; book_categories: book_id, category_id; book_identifiers: book_id, identifier_type, identifier_value</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Body: {&quot;title&quot;: &quot;Lập Trình Web Hiện Đại&quot;, &quot;materialType&quot;: &quot;BOOK_PRINT&quot;, &quot;authorIds&quot;: [1], &quot;categoryIds&quot;: [2], &quot;replacementCostVnd&quot;: 120000, &quot;identifiers&quot;: [{&quot;type&quot;: &quot;ISBN_13&quot;, &quot;value&quot;: &quot;9786040123456&quot;}]}</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">17</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Danh mục &amp; Kho ấn phẩm</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">getBook</Data></Cell>
+    <Cell ss:StyleID="CellMethodGET"><Data ss:Type="String">GET</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/books/:bookId</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thủ thư (catalog.write)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query Drizzle (SELECT)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Xem chi tiết đầu sách dành cho thủ thư (bao gồm sách đã ngưng lưu hành retired và giá đền bù tài liệu).</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">books, publishers, authors, categories, book_identifiers (Read)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">books.*, replacement_cost_vnd, status</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Path: bookId=1</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">18</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Danh mục &amp; Kho ấn phẩm</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">updateBook</Data></Cell>
+    <Cell ss:StyleID="CellMethodPATCH"><Data ss:Type="String">PATCH</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/books/:bookId</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thủ thư (catalog.write)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Transaction Node.js</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Cập nhật thông tin đầu sách, thay thế toàn bộ tác giả, thể loại hoặc mã ISBN nếu được truyền vào, hoặc chuyển trạng thái active/retired.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">books (Update), book_authors (Replace), book_categories (Replace), book_identifiers (Replace)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">books: title, subtitle, description, published_year, replacement_cost_vnd, status, updated_at</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Path: bookId=1; Body: {&quot;title&quot;: &quot;Lập Trình Web Hiện Đại (Tái Bản)&quot;, &quot;replacementCostVnd&quot;: 140000}</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">19</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Danh mục &amp; Kho ấn phẩm</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">listAuthors</Data></Cell>
+    <Cell ss:StyleID="CellMethodGET"><Data ss:Type="String">GET</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/authors</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thủ thư (catalog.write)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query Drizzle (SELECT)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Danh sách tác giả trong hệ thống, hỗ trợ tìm kiếm theo tiền tố tên (LIKE) và phân trang.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">authors (Read)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">authors.id, name</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query: ?q=Tran&amp;page=1&amp;pageSize=20</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">20</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Danh mục &amp; Kho ấn phẩm</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">createAuthor</Data></Cell>
+    <Cell ss:StyleID="CellMethodPOST"><Data ss:Type="String">POST</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/authors</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thủ thư (catalog.write)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query Drizzle (INSERT)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thêm mới tác giả vào hệ thống danh mục.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">authors (Insert)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">authors.name</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Body: {&quot;name&quot;: &quot;GS. Trần Văn C&quot;}</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">21</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Danh mục &amp; Kho ấn phẩm</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">listPublishers</Data></Cell>
+    <Cell ss:StyleID="CellMethodGET"><Data ss:Type="String">GET</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/publishers</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thủ thư (catalog.write)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query Drizzle (SELECT)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Danh sách các nhà xuất bản, hỗ trợ tìm kiếm tên.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">publishers (Read)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">publishers.id, name</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query: ?q=Giao Duc</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">22</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Danh mục &amp; Kho ấn phẩm</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">createPublisher</Data></Cell>
+    <Cell ss:StyleID="CellMethodPOST"><Data ss:Type="String">POST</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/publishers</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thủ thư (catalog.write)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query Drizzle (INSERT)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thêm mới nhà xuất bản vào hệ thống.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">publishers (Insert)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">publishers.name</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Body: {&quot;name&quot;: &quot;NXB Giáo Dục Việt Nam&quot;}</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">23</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Danh mục &amp; Kho ấn phẩm</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">createCategory</Data></Cell>
+    <Cell ss:StyleID="CellMethodPOST"><Data ss:Type="String">POST</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/categories</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thủ thư (catalog.write)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query Drizzle (INSERT)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Tạo mới một thể loại sách, có thể chọn danh mục cha parentId.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">categories (Insert)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">categories.name, parent_id</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Body: {&quot;name&quot;: &quot;Trí Tuệ Nhân Tạo&quot;, &quot;parentId&quot;: 1}</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">24</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Danh mục &amp; Kho ấn phẩm</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">listCopies</Data></Cell>
+    <Cell ss:StyleID="CellMethodGET"><Data ss:Type="String">GET</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/books/:bookId/copies</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thủ thư (catalog.write / loan.checkout)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query Drizzle (SELECT)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Liệt kê toàn bộ các cuốn sách vật lý (bản sao) của một đầu sách: mã vạch barcode, vị trí kệ shelfCode, tình trạng vật lý và trạng thái lưu thông.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">book_copies (Read)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">book_copies.id, barcode, shelf_code, physical_condition, circulation_status</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Path: bookId=1</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">25</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Danh mục &amp; Kho ấn phẩm</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">registerCopy</Data></Cell>
+    <Cell ss:StyleID="CellMethodPOST"><Data ss:Type="String">POST</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/books/:bookId/copies</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thủ thư (catalog.write)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">sp_register_copy(p_book_id, p_barcode, p_shelf_code, p_acquired_at, p_condition, p_user_id)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Đăng ký nhập kho bản sao mới. Nếu đầu sách đang có bạn đọc chờ trong hàng đợi đặt trước (waiting), bản sao sẽ tự động được gán giữ chỗ (chuyển sang on_hold); ngược lại trạng thái là available.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">book_copies (Insert), reservations (Update nếu khớp giữ chỗ)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">book_copies: book_id, barcode, shelf_code, acquired_at, physical_condition, circulation_status, created_at, updated_at</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Path: bookId=1; Body: {&quot;barcode&quot;: &quot;BC-UIT-998877&quot;, &quot;shelfCode&quot;: &quot;KE-AI-01&quot;, &quot;condition&quot;: &quot;good&quot;}</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">26</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Danh mục &amp; Kho ấn phẩm</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">changeCopyStatus</Data></Cell>
+    <Cell ss:StyleID="CellMethodPOST"><Data ss:Type="String">POST</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/copies/:copyId/status</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thủ thư (catalog.write)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">sp_change_copy_status(p_copy_id, p_target_status, p_condition, p_user_id)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Cập nhật trạng thái bảo trì bản sao: chuyển sang sửa chữa (in_repair), đã sửa xong (available), tìm thấy sách (available) hoặc thanh lý loại bỏ (retired).</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">book_copies (Update)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">book_copies: circulation_status, physical_condition, updated_at</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Path: copyId=15; Body: {&quot;targetStatus&quot;: &quot;in_repair&quot;, &quot;condition&quot;: &quot;damaged&quot;}</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">27</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Bạn đọc, Thẻ &amp; Chính sách</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">listReaders</Data></Cell>
+    <Cell ss:StyleID="CellMethodGET"><Data ss:Type="String">GET</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/readers</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thủ thư (card.manage / loan.checkout)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query Drizzle (SELECT)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Tìm kiếm và lọc danh sách bạn đọc theo từ khóa tên, email, loại bạn đọc (readerType) và trạng thái (status).</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">readers (Read), reader_types (Read), library_cards (Read)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">readers.*, reader_types.code, library_cards.*</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query: ?q=Tran&amp;readerType=UNDERGRADUATE&amp;status=active&amp;page=1&amp;pageSize=20</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">28</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Bạn đọc, Thẻ &amp; Chính sách</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">createReader</Data></Cell>
+    <Cell ss:StyleID="CellMethodPOST"><Data ss:Type="String">POST</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/readers</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thủ thư (card.manage)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query Drizzle (INSERT)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thêm mới hồ sơ bạn đọc vào cơ sở dữ liệu thư viện.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">readers (Insert)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">readers: full_name, email, phone, reader_type_id, status=&quot;active&quot;, created_at</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Body: {&quot;fullName&quot;: &quot;Nguyễn Thị Mai&quot;, &quot;email&quot;: &quot;mai.nt@uit.edu.vn&quot;, &quot;phone&quot;: &quot;0901234567&quot;, &quot;readerType&quot;: &quot;UNDERGRADUATE&quot;}</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">29</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Bạn đọc, Thẻ &amp; Chính sách</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">getReader</Data></Cell>
+    <Cell ss:StyleID="CellMethodGET"><Data ss:Type="String">GET</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/readers/:readerId</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Chính chủ hoặc Thủ thư (card.manage / loan.checkout)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query Drizzle (SELECT)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Xem thông tin chi tiết một bạn đọc bao gồm loại đối tượng, trạng thái tài khoản và thẻ thư viện đang kích hoạt (activeCard).</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">readers (Read), library_cards (Read), reader_types (Read)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">readers.*, library_cards.*</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Path: readerId=1</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">30</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Bạn đọc, Thẻ &amp; Chính sách</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">updateReader</Data></Cell>
+    <Cell ss:StyleID="CellMethodPATCH"><Data ss:Type="String">PATCH</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/readers/:readerId</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thủ thư (card.manage)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query Drizzle (UPDATE)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Cập nhật thông tin cá nhân bạn đọc (họ tên, email, sđt) hoặc thay đổi trạng thái (active, suspended, inactive).</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">readers (Update)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">readers: full_name, email, phone, reader_type_id, status</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Path: readerId=1; Body: {&quot;phone&quot;: &quot;0988776655&quot;, &quot;status&quot;: &quot;active&quot;}</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">31</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Bạn đọc, Thẻ &amp; Chính sách</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">linkAccount</Data></Cell>
+    <Cell ss:StyleID="CellMethodPUT"><Data ss:Type="String">PUT</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/readers/:readerId/account</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thủ thư (card.manage)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query Drizzle (UPDATE)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Liên kết một tài khoản đăng nhập app_users với hồ sơ bạn đọc readers (quan hệ duy nhất 1-1 qua readers_user_uq).</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">readers (Update)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">readers: user_id</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Path: readerId=1; Body: {&quot;accountId&quot;: 10}</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">32</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Bạn đọc, Thẻ &amp; Chính sách</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">unlinkAccount</Data></Cell>
+    <Cell ss:StyleID="CellMethodDELETE"><Data ss:Type="String">DELETE</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/readers/:readerId/account</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thủ thư (card.manage)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query Drizzle (UPDATE)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Hủy liên kết tài khoản đăng nhập khỏi hồ sơ bạn đọc.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">readers (Update)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">readers: user_id = NULL</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Path: readerId=1</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">33</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Bạn đọc, Thẻ &amp; Chính sách</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">readerCards</Data></Cell>
+    <Cell ss:StyleID="CellMethodGET"><Data ss:Type="String">GET</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/readers/:readerId/cards</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Chính chủ hoặc Thủ thư (card.manage)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query Drizzle (SELECT)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Lấy lịch sử toàn bộ các thẻ thư viện từng phát hành cho bạn đọc, thẻ mới nhất xếp trước.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">library_cards (Read)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">library_cards.*</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Path: readerId=1</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">34</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Bạn đọc, Thẻ &amp; Chính sách</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">issueCard</Data></Cell>
+    <Cell ss:StyleID="CellMethodPOST"><Data ss:Type="String">POST</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/readers/:readerId/cards</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thủ thư (card.manage)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">sp_issue_card(p_reader_id, p_card_number, p_expires_at, p_user_id)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Phát hành thẻ thư viện mới. Đảm bảo mỗi bạn đọc chỉ có tối đa 1 thẻ trạng thái active tại một thời điểm (ràng buộc qua chỉ mục library_cards_active_reader_uq).</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">library_cards (Insert)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">library_cards: reader_id, card_number, issued_at, expires_at, status=&quot;active&quot;, created_at</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Path: readerId=1; Body: {&quot;cardNumber&quot;: &quot;CARD-UIT-2026-99&quot;, &quot;expiresAt&quot;: &quot;2027-09-30T23:59:59Z&quot;}</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">35</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Bạn đọc, Thẻ &amp; Chính sách</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">setCardStatus</Data></Cell>
+    <Cell ss:StyleID="CellMethodPOST"><Data ss:Type="String">POST</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/cards/:cardId/status</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thủ thư (card.manage)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">sp_set_card_status(p_card_id, p_status, p_user_id)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Khóa thẻ thư viện: chuyển thẻ active sang expired (hết hạn), lost (báo mất) hoặc revoked (thu hồi vi phạm). Không thể chuyển ngược lại thành active.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">library_cards (Update)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">library_cards: status</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Path: cardId=2; Body: {&quot;status&quot;: &quot;lost&quot;}</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">36</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Bạn đọc, Thẻ &amp; Chính sách</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">readerTypes</Data></Cell>
+    <Cell ss:StyleID="CellMethodGET"><Data ss:Type="String">GET</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/reference/reader-types</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Đã đăng nhập (signed-in)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query Drizzle (SELECT)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Lấy danh mục đối tượng độc giả (UNDERGRADUATE, GRADUATE, FACULTY, RESEARCHER, EXTERNAL).</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">reader_types (Read)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">reader_types.id, code, name</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">curl -X GET http://localhost:3000/api/v1/reference/reader-types</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">37</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Bạn đọc, Thẻ &amp; Chính sách</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">materialTypes</Data></Cell>
+    <Cell ss:StyleID="CellMethodGET"><Data ss:Type="String">GET</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/reference/material-types</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Đã đăng nhập (signed-in)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query Drizzle (SELECT)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Lấy danh mục định dạng tài liệu (BOOK_PRINT, THESIS, JOURNAL, CD_ROM, v.v.).</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">material_types (Read)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">material_types.id, code, name</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">curl -X GET http://localhost:3000/api/v1/reference/material-types</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">38</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Bạn đọc, Thẻ &amp; Chính sách</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">listPolicies</Data></Cell>
+    <Cell ss:StyleID="CellMethodGET"><Data ss:Type="String">GET</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/policies</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thủ thư (policy.manage / loan.checkout)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query Drizzle (SELECT)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Danh sách các phiên bản chính sách mượn sách theo đối tượng và loại ấn phẩm, mới nhất xếp trước.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">loan_policies (Read), reader_types (Read), material_types (Read)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">loan_policies.*</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query: ?readerType=UNDERGRADUATE&amp;materialType=BOOK_PRINT</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">39</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Bạn đọc, Thẻ &amp; Chính sách</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">createPolicy</Data></Cell>
+    <Cell ss:StyleID="CellMethodPOST"><Data ss:Type="String">POST</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/policies</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Quản trị viên (policy.manage)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">sp_create_policy_version(...)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Tạo mới một phiên bản chính sách mượn sách (số lượng tối đa, số ngày mượn, số lần gia hạn, tiền phạt trễ/ngày, ngưỡng nợ khóa thẻ). Kiểm tra tính toàn vẹn thời gian, không cho phép chồng lấn hiệu lực.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">loan_policies (Insert)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">loan_policies: reader_type_id, material_type_id, max_active_items, loan_days, max_renewals, daily_late_fee_vnd, debt_block_threshold_vnd, valid_from, created_by_user_id</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Body: {&quot;readerType&quot;: &quot;FACULTY&quot;, &quot;materialType&quot;: &quot;BOOK_PRINT&quot;, &quot;maxActiveItems&quot;: 10, &quot;loanDays&quot;: 30, &quot;maxRenewals&quot;: 3, &quot;dailyLateFeeVnd&quot;: 5000, &quot;debtBlockThresholdVnd&quot;: 100000, &quot;validFrom&quot;: &quot;2026-10-01T00:00:00Z&quot;}</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">40</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Bạn đọc, Thẻ &amp; Chính sách</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">closePolicy</Data></Cell>
+    <Cell ss:StyleID="CellMethodPOST"><Data ss:Type="String">POST</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/policies/:policyId/close</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Quản trị viên (policy.manage)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">sp_close_policy_version(p_policy_id, p_valid_to, p_user_id)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Đóng hiệu lực của một chính sách mượn sách tại thời điểm validTo.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">loan_policies (Update)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">loan_policies: valid_to</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Path: policyId=2; Body: {&quot;validTo&quot;: &quot;2026-09-30T23:59:59Z&quot;}</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">41</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Bạn đọc, Thẻ &amp; Chính sách</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">expireCards</Data></Cell>
+    <Cell ss:StyleID="CellMethodPOST"><Data ss:Type="String">POST</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/jobs/expire-cards</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thủ thư (card.manage)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">sp_expire_cards(p_user_id)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Tác vụ định kỳ quét và cập nhật trạng thái expired cho toàn bộ các thẻ thư viện có expires_at &lt; NOW().</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">library_cards (Update)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">library_cards: status=&quot;expired&quot;</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Body: {}</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">42</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Tài chính &amp; Tiền phạt</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">readerFines</Data></Cell>
+    <Cell ss:StyleID="CellMethodGET"><Data ss:Type="String">GET</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/readers/:readerId/fines</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Chính chủ hoặc Thủ thư (fine.collect)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query Drizzle (SELECT)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Lấy danh sách các khoản phạt của bạn đọc (trễ hạn, làm hỏng, mất sách). Cho phép lọc open=true để chỉ lấy các khoản còn nợ.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">fines (Read), loan_items (Read), books (Read), fine_adjustments (Read), fine_payment_allocations (Read)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">fines.*, books.title, loan_items.borrowed_at; tính toán remainingVnd</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Path: readerId=1; Query: ?open=true</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">43</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Tài chính &amp; Tiền phạt</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">readerBalance</Data></Cell>
+    <Cell ss:StyleID="CellMethodGET"><Data ss:Type="String">GET</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/readers/:readerId/balance</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Chính chủ hoặc Thủ thư (fine.collect / loan.checkout)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query Drizzle (Aggregate)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Tính toán tổng số nợ phạt hiện tại của bạn đọc (Tổng phạt phát sinh - Miễn giảm điều chỉnh - Đã thanh toán).</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">fines (Read), fine_adjustments (Read), fine_payment_allocations (Read)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Tổng hợp số dư nợ outstandingVnd</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Path: readerId=1</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">44</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Tài chính &amp; Tiền phạt</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">readerPayments</Data></Cell>
+    <Cell ss:StyleID="CellMethodGET"><Data ss:Type="String">GET</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/readers/:readerId/payments</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Chính chủ hoặc Thủ thư (fine.collect)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query Drizzle (SELECT)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Lịch sử các lần đóng tiền phạt của bạn đọc kèm thông tin người thu và danh sách phân bổ cho từng khoản phạt.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">fine_payments (Read), fine_payment_allocations (Read)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">fine_payments.*, fine_payment_allocations.*</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Path: readerId=1</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">45</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Tài chính &amp; Tiền phạt</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">recordPayment</Data></Cell>
+    <Cell ss:StyleID="CellMethodPOST"><Data ss:Type="String">POST</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/payments</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thủ thư thu phí (fine.collect)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">sp_record_payment(...)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thu tiền phạt (tiền mặt / chuyển khoản). Phải phân bổ chính xác số tiền cho từng khoản phạt còn nợ (allocations). Đảm bảo tính Idempotent bằng requestKey (gửi lại cùng key trả kết quả replayed: true thay vì trừ 2 lần).</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">fine_payments (Insert), fine_payment_allocations (Insert)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">fine_payments: reader_id, received_by_user_id, amount_vnd, paid_at, method, reference_no, request_key, created_at; fine_payment_allocations: payment_id, fine_id, amount_vnd</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Body: {&quot;readerId&quot;: 1, &quot;amountVnd&quot;: 30000, &quot;method&quot;: &quot;cash&quot;, &quot;requestKey&quot;: &quot;c3b53f60-5f21-4f2e-b6c8-111122223333&quot;, &quot;allocations&quot;: [{&quot;fineId&quot;: 2, &quot;amountVnd&quot;: 30000}]}</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">46</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Tài chính &amp; Tiền phạt</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">adjustFine</Data></Cell>
+    <Cell ss:StyleID="CellMethodPOST"><Data ss:Type="String">POST</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/fines/:fineId/adjustments</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Quản trị viên (fine.adjust)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">sp_adjust_fine(p_fine_id, p_amount_vnd, p_reason, p_user_id)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Điều chỉnh số tiền phạt (miễn giảm tiền phạt có dấu âm). Yêu cầu bắt buộc phải có lý do điều chỉnh.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">fine_adjustments (Insert)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">fine_adjustments: fine_id, amount_vnd, reason, adjusted_by_user_id, adjusted_at</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Path: fineId=2; Body: {&quot;amountVnd&quot;: -10000, &quot;reason&quot;: &quot;Miễn giảm theo quyết định của Ban Giám hiệu&quot;}</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">47</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Đặt trước &amp; Giữ chỗ</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">reserve</Data></Cell>
+    <Cell ss:StyleID="CellMethodPOST"><Data ss:Type="String">POST</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/reservations</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Bạn đọc / Thủ thư (reservation.manage)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">sp_reserve(p_reader_id, p_book_id, p_user_id)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Đặt trước đầu sách khi toàn bộ bản sao đang được mượn hoặc không sẵn có. Kiểm tra: bạn đọc không nợ quá hạn, chưa mượn cuốn này, và chưa đặt trước cùng đầu sách (reservations_active_uq). Trạng thái ban đầu là waiting.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">reservations (Insert)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">reservations: reader_id, book_id, requested_at, status=&quot;waiting&quot;</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Body: {&quot;readerId&quot;: 1, &quot;bookId&quot;: 3}</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">48</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Đặt trước &amp; Giữ chỗ</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">cancelReservation</Data></Cell>
+    <Cell ss:StyleID="CellMethodPOST"><Data ss:Type="String">POST</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/reservations/:reservationId/cancel</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Bạn đọc / Thủ thư (reservation.manage)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">sp_cancel_reservation(p_reservation_id, p_reason, p_user_id)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Hủy yêu cầu đặt trước sách. Nếu lượt đặt đang ở trạng thái ready (sách đang giữ trên kệ chờ lấy), bản sao sẽ được chuyển giao tiếp cho người tiếp theo trong hàng đợi hoặc chuyển thành available.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">reservations (Update), book_copies (Update nếu đang giữ sách)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">reservations: status=&quot;cancelled&quot;, closed_at, close_reason, closed_by_kind, closed_by_user_id</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Path: reservationId=2; Body: {&quot;reason&quot;: &quot;Đã mua sách ngoài hiệu sách&quot;}</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">49</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Đặt trước &amp; Giữ chỗ</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">readerReservations</Data></Cell>
+    <Cell ss:StyleID="CellMethodGET"><Data ss:Type="String">GET</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/readers/:readerId/reservations</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Chính chủ hoặc Thủ thư (reservation.manage)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query Drizzle (SELECT)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Danh sách các lượt đặt giữ chỗ của bạn đọc, vị trí trong hàng đợi (queuePosition) và thời hạn giữ sách (holdExpiresAt).</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">reservations (Read), books (Read)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">reservations.*, books.title</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Path: readerId=1; Query: ?status=waiting</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">50</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Đặt trước &amp; Giữ chỗ</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">listReservations</Data></Cell>
+    <Cell ss:StyleID="CellMethodGET"><Data ss:Type="String">GET</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/reservations</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thủ thư (reservation.manage)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query Drizzle (SELECT)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Quản lý toàn bộ hàng đợi đặt trước của thư viện, lọc theo trạng thái (waiting, ready, fulfilled, cancelled, expired).</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">reservations (Read), books (Read), readers (Read)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">reservations.*, books.title, readers.full_name</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query: ?status=ready&amp;page=1&amp;pageSize=20</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">51</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Đặt trước &amp; Giữ chỗ</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">expireHolds</Data></Cell>
+    <Cell ss:StyleID="CellMethodPOST"><Data ss:Type="String">POST</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/jobs/expire-holds</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thủ thư (reservation.manage)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">sp_expire_holds(p_user_id)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Tác vụ định kỳ kiểm tra và hết hạn các lượt giữ chỗ quá hạn nhận sách (holdExpiresAt &lt; NOW()), tự động chuyển sách cho người tiếp theo.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">reservations (Update), book_copies (Update)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">reservations: status=&quot;expired&quot;, closed_at, close_reason=&quot;HOLD_EXPIRED&quot;</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Body: {}</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">52</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Báo cáo &amp; Kiểm toán CSDL</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">reportCumulative</Data></Cell>
+    <Cell ss:StyleID="CellMethodGET"><Data ss:Type="String">GET</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/reports/debt/cumulative</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Báo cáo (report.read)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">sp_report_cumulative(p_as_of, p_reader_id)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Báo cáo công nợ tích lũy tại thời điểm asOf. Kiểm toán đẳng thức tài chính: netAssessedVnd = collectedVnd + outstandingVnd.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">fines, fine_adjustments, fine_payments, fine_payment_allocations (Read)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">netAssessedVnd, collectedVnd, outstandingVnd</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query: ?asOf=2026-09-25T15:00:00Z</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">53</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Báo cáo &amp; Kiểm toán CSDL</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">reportRollforward</Data></Cell>
+    <Cell ss:StyleID="CellMethodGET"><Data ss:Type="String">GET</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/reports/debt/rollforward</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Báo cáo (report.read)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">sp_report_rollforward(p_month, p_reader_id)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Báo cáo luân chuyển nợ phạt theo tháng. Kiểm toán chặt chẽ: Nợ cuối kỳ = Nợ đầu kỳ + Phát sinh + Điều chỉnh - Đã thu.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">fines, fine_adjustments, fine_payments, fine_payment_allocations (Read)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">openingOutstandingVnd, assessedInPeriodVnd, adjustedInPeriodVnd, collectedInPeriodVnd, closingOutstandingVnd</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query: ?month=2026-09</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">54</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Báo cáo &amp; Kiểm toán CSDL</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">reportOverdue</Data></Cell>
+    <Cell ss:StyleID="CellMethodGET"><Data ss:Type="String">GET</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/reports/overdue</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Báo cáo (report.read)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">View: v_report_overdue</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Danh sách các ấn phẩm mượn quá hạn, sắp xếp trễ nhiều ngày nhất lên đầu, phục vụ công tác nhắc nhở thu hồi sách.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">loan_items, loans, readers, books, book_copies (Read)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">readerId, fullName, title, barcode, dueAt, daysLate</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query: ?page=1&amp;pageSize=50</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">55</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Báo cáo &amp; Kiểm toán CSDL</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">reportLoansByMonth</Data></Cell>
+    <Cell ss:StyleID="CellMethodGET"><Data ss:Type="String">GET</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/reports/loans-by-month</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Báo cáo (report.read)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">View: v_report_loans_by_month</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thống kê tần suất mượn sách theo từng tháng và theo nhóm đối tượng độc giả.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">loans, loan_items, readers, reader_types (Read)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">monthLocal, readerType, loans, items</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query: ?fromMonth=2026-01&amp;toMonth=2026-12</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">56</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Báo cáo &amp; Kiểm toán CSDL</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">reportPopularBooks</Data></Cell>
+    <Cell ss:StyleID="CellMethodGET"><Data ss:Type="String">GET</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/reports/popular-books</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Báo cáo (report.read)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">View: v_report_popular_books</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thống kê Top N cuốn sách có số lượt mượn nhiều nhất trong toàn hệ thống thư viện.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">loan_items, book_copies, books (Read)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">bookId, title, loanItems</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query: ?limit=10</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">57</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Báo cáo &amp; Kiểm toán CSDL</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">reportCopyStatus</Data></Cell>
+    <Cell ss:StyleID="CellMethodGET"><Data ss:Type="String">GET</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/reports/copy-status</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Báo cáo (report.read)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">View: v_report_copy_status</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Báo cáo hiện trạng các bản sao của từng đầu sách: available, onLoan, onHold, inRepair, lost, retired. Tổng 6 trạng thái bằng total.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">book_copies, books (Read)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">bookId, title, available, onLoan, onHold, inRepair, lost, retired, total</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query: ?page=1&amp;pageSize=20</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">58</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Báo cáo &amp; Kiểm toán CSDL</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">adminHealth</Data></Cell>
+    <Cell ss:StyleID="CellMethodGET"><Data ss:Type="String">GET</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/admin/health</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Báo cáo (report.read)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Views: v_inv_*</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Kiểm tra toàn bộ các view bất biến (Invariants) của CSDL. Nếu có bất kỳ vi phạm nào, trả về danh sách view và các dòng dữ liệu sai lệch.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Toàn bộ các view v_inv_* (Read)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">views: string[], violations: {view, rows}[]</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">curl -X GET http://localhost:3000/api/v1/admin/health</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">59</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Quản trị tài khoản &amp; Vai trò</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">listAccounts</Data></Cell>
+    <Cell ss:StyleID="CellMethodGET"><Data ss:Type="String">GET</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/accounts</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Quản trị viên (role.manage)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query Drizzle (SELECT)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Danh sách các tài khoản người dùng app_users, hỗ trợ lọc theo vai trò (role) và trạng thái (active, inactive).</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">app_users, user_roles, roles, readers (Read)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">app_users.id, status, createdAt, roles, readerId, subject</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query: ?status=active&amp;role=librarian&amp;page=1&amp;pageSize=20</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">60</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Quản trị tài khoản &amp; Vai trò</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">getAccount</Data></Cell>
+    <Cell ss:StyleID="CellMethodGET"><Data ss:Type="String">GET</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/accounts/:accountId</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Quản trị viên (role.manage)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query Drizzle (SELECT)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Xem chi tiết một tài khoản người dùng, danh sách các vai trò đang giữ và mã bạn đọc liên kết.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">app_users, user_roles, roles, readers (Read)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">app_users.*, user_roles.*</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Path: accountId=2</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">61</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Quản trị tài khoản &amp; Vai trò</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">assignRole</Data></Cell>
+    <Cell ss:StyleID="CellMethodPUT"><Data ss:Type="String">PUT</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/accounts/:accountId/roles/:roleCode</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Quản trị viên (role.manage)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query Drizzle (INSERT IGNORE)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Gán vai trò cho tài khoản (admin, librarian, reader). Tính chất Idempotent: trả về 204 nếu tài khoản đã có vai trò.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">user_roles (Insert)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">user_roles: user_id, role_id</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Path: accountId=3, roleCode=librarian</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">62</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Quản trị tài khoản &amp; Vai trò</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">removeRole</Data></Cell>
+    <Cell ss:StyleID="CellMethodDELETE"><Data ss:Type="String">DELETE</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/accounts/:accountId/roles/:roleCode</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Quản trị viên (role.manage)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query Drizzle (DELETE)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Thu hồi vai trò khỏi tài khoản. Ngăn chặn admin tự xóa vai trò admin của chính mình.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">user_roles (Delete)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">user_roles (Xóa bản ghi)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Path: accountId=3, roleCode=librarian</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="1">
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="Number">63</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Quản trị tài khoản &amp; Vai trò</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">setAccountStatus</Data></Cell>
+    <Cell ss:StyleID="CellMethodPOST"><Data ss:Type="String">POST</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">/api/v1/accounts/:accountId/status</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Quản trị viên (role.manage)</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Query Drizzle (UPDATE)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Khóa hoặc kích hoạt tài khoản (active / inactive). Tài khoản inactive không thể gọi bất kỳ API nào ngoại trừ GET /me. Admin không thể tự khóa chính mình.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">app_users (Update)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">app_users: status</Data></Cell>
+    <Cell ss:StyleID="CellMono"><Data ss:Type="String">Path: accountId=3; Body: {&quot;status&quot;: &quot;inactive&quot;}</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <FreezePanes/>
+   <FrozenNoSplit/>
+   <SplitHorizontal>1</SplitHorizontal>
+   <TopRowBottomPane>1</TopRowBottomPane>
+   <ActivePane>2</ActivePane>
+  </WorksheetOptions>
+ </Worksheet>
+</Workbook>
